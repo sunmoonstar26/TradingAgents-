@@ -9,23 +9,29 @@ from typing import Annotated
 import os
 from .config import get_config
 from .utils import safe_ticker_component
+from .finnhub_api import load_ohlcv_finnhub
 
 logger = logging.getLogger(__name__)
 
 
-def yf_retry(func, max_retries=3, base_delay=2.0):
+def yf_retry(func, max_retries=2, base_delay=1.0):
     """Execute a yfinance call with exponential backoff on rate limits.
 
     yfinance raises YFRateLimitError on HTTP 429 responses but does not
     retry them internally. This wrapper adds retry logic specifically
     for rate limits. Other exceptions propagate immediately.
+
+    NOTE: max_retries kept low (2) because Yahoo Finance IP blocks
+    (CAPTCHA level) can't be resolved by retrying — the fallback
+    vendor chain handles full-block scenarios.
     """
+    import random
     for attempt in range(max_retries + 1):
         try:
             return func()
         except YFRateLimitError:
             if attempt < max_retries:
-                delay = base_delay * (2 ** attempt)
+                delay = base_delay * (2 ** attempt) + random.uniform(0, 2)
                 logger.warning(f"Yahoo Finance rate limited, retrying in {delay:.0f}s (attempt {attempt + 1}/{max_retries})")
                 time.sleep(delay)
             else:
@@ -48,9 +54,10 @@ def _clean_dataframe(data: pd.DataFrame) -> pd.DataFrame:
 def load_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
     """Fetch OHLCV data with caching, filtered to prevent look-ahead bias.
 
-    Downloads 15 years of data up to today and caches per symbol. On
-    subsequent calls the cache is reused. Rows after curr_date are
-    filtered out so backtests never see future prices.
+    Routes to Finnhub or yfinance based on config data_vendors.technical_indicators.
+    Downloads up to 5 years (yfinance) or 1 year (Finnhub free tier) and caches
+    per symbol. Rows after curr_date are filtered out so backtests never
+    see future prices.
     """
     # Reject ticker values that would escape the cache directory when
     # interpolated into the cache filename (e.g. ``../../tmp/x``).
@@ -59,7 +66,23 @@ def load_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
     config = get_config()
     curr_date_dt = pd.to_datetime(curr_date)
 
-    # Cache uses a fixed window (15y to today) so one file per symbol
+    # Determine vendor: check tool-level → category-level
+    vendor = config.get("tool_vendors", {}).get(
+        "get_indicators",
+        config.get("data_vendors", {}).get("technical_indicators", "yfinance")
+    )
+    # If configured as fallback chain (e.g. "finnhub,yfinance"), use primary
+    primary_vendor = vendor.split(",")[0].strip()
+
+    if primary_vendor == "finnhub":
+        logger.info(f"Using Finnhub for OHLCV data: {symbol}")
+        try:
+            return load_ohlcv_finnhub(symbol, curr_date)
+        except Exception as e:
+            logger.warning(f"Finnhub OHLCV failed ({e}), falling back to yfinance")
+            # Fall through to yfinance below
+
+    # Cache uses a fixed window (5y to today) so one file per symbol
     today_date = pd.Timestamp.today()
     start_date = today_date - pd.DateOffset(years=5)
     start_str = start_date.strftime("%Y-%m-%d")
@@ -74,6 +97,23 @@ def load_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
     if os.path.exists(data_file):
         data = pd.read_csv(data_file, on_bad_lines="skip", encoding="utf-8")
     else:
+        data = pd.DataFrame()
+
+    # 精确匹配为空时（可能是之前下载失败写入了空文件），回退模糊匹配
+    if data.empty:
+        import glob as _glob
+        fallback_pattern = os.path.join(
+            config["data_cache_dir"], f"{safe_symbol}-YFin-data-*.csv"
+        )
+        fallback_files = sorted(
+            [f for f in _glob.glob(fallback_pattern) if f != data_file],
+            reverse=True,
+        )
+        if fallback_files:
+            data = pd.read_csv(fallback_files[0], on_bad_lines="skip", encoding="utf-8")
+
+    if data.empty:
+        # 仍然为空：尝试在线下载
         data = yf_retry(lambda: yf.download(
             symbol,
             start=start_str,

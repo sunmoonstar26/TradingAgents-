@@ -1,4 +1,7 @@
 from typing import Annotated
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Import from vendor-specific modules
 from .y_finance import (
@@ -11,6 +14,16 @@ from .y_finance import (
     get_insider_transactions as get_yfinance_insider_transactions,
 )
 from .yfinance_news import get_news_yfinance, get_global_news_yfinance
+from .finnhub_api import (
+    get_stock_data_finnhub,
+    get_fundamentals_finnhub,
+    get_balance_sheet_finnhub,
+    get_cashflow_finnhub,
+    get_income_statement_finnhub,
+    get_insider_transactions_finnhub,
+    get_news_finnhub,
+    get_global_news_finnhub,
+)
 from .alpha_vantage import (
     get_stock as get_alpha_vantage_stock,
     get_indicator as get_alpha_vantage_indicator,
@@ -62,6 +75,7 @@ TOOLS_CATEGORIES = {
 
 VENDOR_LIST = [
     "yfinance",
+    "finnhub",
     "alpha_vantage",
 ]
 
@@ -71,41 +85,50 @@ VENDOR_METHODS = {
     "get_stock_data": {
         "alpha_vantage": get_alpha_vantage_stock,
         "yfinance": get_YFin_data_online,
+        "finnhub": get_stock_data_finnhub,
     },
     # technical_indicators
     "get_indicators": {
         "alpha_vantage": get_alpha_vantage_indicator,
         "yfinance": get_stock_stats_indicators_window,
+        "finnhub": get_stock_stats_indicators_window,  # 复用 yfinance 指标逻辑，load_ohlcv 路由到 Finnhub
     },
     # fundamental_data
     "get_fundamentals": {
         "alpha_vantage": get_alpha_vantage_fundamentals,
         "yfinance": get_yfinance_fundamentals,
+        "finnhub": get_fundamentals_finnhub,
     },
     "get_balance_sheet": {
         "alpha_vantage": get_alpha_vantage_balance_sheet,
         "yfinance": get_yfinance_balance_sheet,
+        "finnhub": get_balance_sheet_finnhub,
     },
     "get_cashflow": {
         "alpha_vantage": get_alpha_vantage_cashflow,
         "yfinance": get_yfinance_cashflow,
+        "finnhub": get_cashflow_finnhub,
     },
     "get_income_statement": {
         "alpha_vantage": get_alpha_vantage_income_statement,
         "yfinance": get_yfinance_income_statement,
+        "finnhub": get_income_statement_finnhub,
     },
     # news_data
     "get_news": {
         "alpha_vantage": get_alpha_vantage_news,
         "yfinance": get_news_yfinance,
+        "finnhub": get_news_finnhub,
     },
     "get_global_news": {
         "yfinance": get_global_news_yfinance,
         "alpha_vantage": get_alpha_vantage_global_news,
+        "finnhub": get_global_news_finnhub,
     },
     "get_insider_transactions": {
         "alpha_vantage": get_alpha_vantage_insider_transactions,
         "yfinance": get_yfinance_insider_transactions,
+        "finnhub": get_insider_transactions_finnhub,
     },
 }
 
@@ -158,5 +181,10 @@ def route_to_vendor(method: str, *args, **kwargs):
             return impl_func(*args, **kwargs)
         except AlphaVantageRateLimitError:
             continue  # Only rate limits trigger fallback
+        except Exception as e:
+            # Finnhub free tier throws RuntimeError for unsupported features
+            # (financial statements, insider transactions). Fall back to next vendor.
+            logger.warning(f"Vendor '{vendor}' failed for '{method}': {e}")
+            continue
 
     raise RuntimeError(f"No available vendor for '{method}'")

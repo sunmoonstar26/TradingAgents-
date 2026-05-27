@@ -5,6 +5,7 @@ import pandas as pd
 import yfinance as yf
 import os
 from .stockstats_utils import StockstatsUtils, _clean_dataframe, yf_retry, load_ohlcv, filter_financials_by_date
+from .config import get_config
 
 def get_YFin_data_online(
     symbol: Annotated[str, "ticker symbol of the company"],
@@ -15,11 +16,28 @@ def get_YFin_data_online(
     datetime.strptime(start_date, "%Y-%m-%d")
     datetime.strptime(end_date, "%Y-%m-%d")
 
-    # Create ticker object
-    ticker = yf.Ticker(symbol.upper())
+    sym_upper = symbol.upper()
 
-    # Fetch historical data for the specified date range
-    data = yf_retry(lambda: ticker.history(start=start_date, end=end_date))
+    # ── 复用 load_ohlcv 缓存机制（避免每次分析都触发 yfinance 限流）──
+    try:
+        data = load_ohlcv(sym_upper, end_date)
+    except Exception:
+        # load_ohlcv 缓存 miss 且 yfinance 限流时，回退查找任意历史缓存
+        import glob
+        config = get_config()
+        pattern = os.path.join(config["data_cache_dir"], f"{sym_upper}-YFin-data-*.csv")
+        cache_files = sorted(glob.glob(pattern), reverse=True)
+        if cache_files:
+            data = pd.read_csv(cache_files[0])
+        else:
+            data = pd.DataFrame()
+
+    if not data.empty:
+        # 按请求日期范围过滤
+        if "Date" in data.columns:
+            mask = (data["Date"] >= start_date) & (data["Date"] <= end_date)
+            data = data.loc[mask].copy()
+            data = data.set_index("Date")
 
     # Check if data is empty
     if data.empty:
