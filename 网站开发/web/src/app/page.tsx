@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomRadarEntries } from "@/lib/radar-store";
 import { getCustomMemoEntries, seedMemosFromApi } from "@/lib/memo-store";
 import { getRiskAlerts, seedRiskAlertsFromApi } from "@/lib/risk-alert-store";
+import { seedFeedFromMock } from "@/lib/livefeed-store";
 import { useMemo, useState, useEffect } from "react";
 
 function DashboardSkeleton() {
@@ -67,6 +68,9 @@ export default function DashboardPage() {
   // 风险警报版本号 — 雷达分析完成后 +1 触发重渲染
   const [riskKey, setRiskKey] = useState(0);
 
+  // 信息流版本号
+  const [feedKey, setFeedKey] = useState(0);
+
   // 首次 API 数据到达时，种子化 localStorage（仅当 localStorage 为空）
   useEffect(() => {
     if (data?.data?.memos?.length) {
@@ -74,6 +78,9 @@ export default function DashboardPage() {
     }
     if (data?.data?.riskAlerts?.length) {
       seedRiskAlertsFromApi(data.data.riskAlerts);
+    }
+    if (data?.data?.liveFeed?.length) {
+      seedFeedFromMock(data.data.liveFeed);
     }
   }, [data?.data?.memos, data?.data?.riskAlerts]);
 
@@ -140,7 +147,7 @@ export default function DashboardPage() {
         {/* 2. AI 机会雷达（Hero） */}
         <OpportunityRadar
           data={mergedOpportunities}
-          onSave={() => { setRadarKey((k) => k + 1); setMemoKey((k) => k + 1); setRiskKey((k) => k + 1); }}
+          onSave={() => { setRadarKey((k) => k + 1); setMemoKey((k) => k + 1); setRiskKey((k) => k + 1); setFeedKey((k) => k + 1); }}
         />
 
         {/* 3. 投资备忘录 */}
@@ -150,7 +157,7 @@ export default function DashboardPage() {
         <RiskTerminal data={riskAlerts} />
 
         {/* 4.5. AI 实时信息流 */}
-        <LiveFeed data={d.liveFeed} />
+        <LiveFeed data={d.liveFeed} feedKey={feedKey} />
 
         {/* 页脚 */}
         <div className="text-center pt-4 pb-8">

@@ -9,6 +9,7 @@ import { searchStocks } from "@/data/stocks";
 import { saveCustomRadarEntries, updateRadarEntryDate, syncRadarFull } from "@/lib/radar-store";
 import { syncMemoFromRadar } from "@/lib/memo-store";
 import { upsertRiskAlertsFromInsights } from "@/lib/risk-alert-store";
+import { upsertFeedFromInsights } from "@/lib/livefeed-store";
 
 const signalStyles: Record<string, { bg: string; text: string; dot: string }> = {
   强烈买入: { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },
@@ -206,14 +207,18 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 }
               }
             } catch { /* 同步失败不阻塞 */ }
-            // 拉取 insights 更新风险终端
+            // 拉取 insights 更新风险终端和信息流
             try {
               const insightsRes = await fetch(`/api/stocks/${ticker}/insights`);
               if (insightsRes.ok) {
                 const insightsData = await insightsRes.json();
-                const riskItems = insightsData?.data?.risk?.risk_items;
+                const insights = insightsData?.data;
+                const riskItems = insights?.risk?.risk_items;
                 if (Array.isArray(riskItems) && riskItems.length > 0) {
                   upsertRiskAlertsFromInsights(ticker, riskItems);
+                }
+                if (insights) {
+                  upsertFeedFromInsights(ticker, insights);
                 }
               }
             } catch { /* 不阻塞主流程 */ }
@@ -323,14 +328,18 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     }
                   }
                 } catch {}
-                // 拉取 insights 更新风险终端
+                // 拉取 insights 更新风险终端和信息流
                 try {
                   const insightsRes = await fetch(`/api/stocks/${ticker}/insights`);
                   if (insightsRes.ok) {
                     const insightsData = await insightsRes.json();
-                    const riskItems = insightsData?.data?.risk?.risk_items;
+                    const insights = insightsData?.data;
+                    const riskItems = insights?.risk?.risk_items;
                     if (Array.isArray(riskItems) && riskItems.length > 0) {
                       upsertRiskAlertsFromInsights(ticker, riskItems);
+                    }
+                    if (insights) {
+                      upsertFeedFromInsights(ticker, insights);
                     }
                   }
                 } catch {}
