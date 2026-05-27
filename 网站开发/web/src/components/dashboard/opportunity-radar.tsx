@@ -213,10 +213,26 @@ export function OpportunityRadar({ data, onSave }: Props) {
               if (insightsRes.ok) {
                 const insightsData = await insightsRes.json();
                 const insights = insightsData?.data;
-                // 用 insights 里裁判置信度覆盖 conviction（比文本解析更准确）
+                // 从 insights 计算真实共识：5 位分析师 + 3 位辩论角色 = 8 席
                 const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                let realConsensus: string | undefined;
+                if (insights?.analysts) {
+                  const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
+                  const bullAnalysts = analystVerdicts.filter(v => v?.verdict === "看涨").length;
+                  // 辩论裁判方向（多方胜出算 1，空方胜出算 0）
+                  const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
+                  const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
+                  const bullTotal = bullAnalysts + judgeBull;
+                  const total = analystVerdicts.length + 1; // analysts + 裁判
+                  realConsensus = `${bullTotal}/${total} 看涨`;
+                }
                 if (judgeConfidence && judgeConfidence > 0) {
-                  syncRadarFull(ticker, ticker, { conviction: judgeConfidence });
+                  syncRadarFull(ticker, ticker, {
+                    conviction: judgeConfidence,
+                    ...(realConsensus ? { consensus: realConsensus } : {}),
+                  });
+                } else if (realConsensus) {
+                  syncRadarFull(ticker, ticker, { consensus: realConsensus });
                 }
                 const riskItems = insights?.risk?.risk_items;
                 if (Array.isArray(riskItems) && riskItems.length > 0) {
@@ -339,10 +355,25 @@ export function OpportunityRadar({ data, onSave }: Props) {
                   if (insightsRes.ok) {
                     const insightsData = await insightsRes.json();
                     const insights = insightsData?.data;
-                    // 用 insights 裁判置信度覆盖 conviction
+                    // 从 insights 计算真实共识和置信度
                     const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                    let realConsensus: string | undefined;
+                    if (insights?.analysts) {
+                      const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
+                      const bullAnalysts = analystVerdicts.filter(v => v?.verdict === "看涨").length;
+                      const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
+                      const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
+                      const bullTotal = bullAnalysts + judgeBull;
+                      const total = analystVerdicts.length + 1;
+                      realConsensus = `${bullTotal}/${total} 看涨`;
+                    }
                     if (judgeConfidence && judgeConfidence > 0) {
-                      syncRadarFull(ticker, ticker, { conviction: judgeConfidence });
+                      syncRadarFull(ticker, ticker, {
+                        conviction: judgeConfidence,
+                        ...(realConsensus ? { consensus: realConsensus } : {}),
+                      });
+                    } else if (realConsensus) {
+                      syncRadarFull(ticker, ticker, { consensus: realConsensus });
                     }
                     const riskItems = insights?.risk?.risk_items;
                     if (Array.isArray(riskItems) && riskItems.length > 0) {

@@ -102,11 +102,13 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
   const hasBear = raw.investment_debate_state?.bear_history?.length > 50;
   const hasRisk = raw.risk_debate_state?.judge_decision?.length > 50;
 
-  const consensusParts = [];
-  if (raw.signal.toLowerCase() === "buy") consensusParts.push("8/8 看涨");
-  else if (raw.signal.toLowerCase() === "overweight") consensusParts.push("6/8 看涨");
-  else if (raw.signal.toLowerCase() === "hold") consensusParts.push("4/8 看涨");
-  else consensusParts.push("3/8 看涨");
+  // 共识：按信号给初始默认值，分析完成后由 insights 覆盖更准确的值
+  const consensus =
+    raw.signal.toLowerCase() === "buy"       ? "6/8 看涨" :
+    raw.signal.toLowerCase() === "overweight" ? "5/8 看涨" :
+    raw.signal.toLowerCase() === "hold"       ? "4/8 看涨" :
+    raw.signal.toLowerCase() === "underweight"? "3/8 看涨" :
+    "2/8 看涨";
 
   // 置信度：从明确的"置信度 XX%"关键词提取，避免误匹配仓位/价格中的百分比
   // 优先级：显式置信度关键词 > 信号强度映射 > fallback 65
@@ -132,7 +134,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
     committeeDecision: {
       signal,
       conviction,
-      consensus: consensusParts[0],
+      consensus,
       recommendedExposure: signal === "强烈买入" ? "15-20%" : signal === "增持" ? "10-15%" : "5-10%",
       timeHorizon: "中期（3-6 个月）",
       rationale:
