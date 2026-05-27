@@ -207,12 +207,17 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 }
               }
             } catch { /* 同步失败不阻塞 */ }
-            // 拉取 insights 更新风险终端和信息流
+            // 拉取 insights 更新置信度/风险终端/信息流
             try {
               const insightsRes = await fetch(`/api/stocks/${ticker}/insights`);
               if (insightsRes.ok) {
                 const insightsData = await insightsRes.json();
                 const insights = insightsData?.data;
+                // 用 insights 里裁判置信度覆盖 conviction（比文本解析更准确）
+                const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                if (judgeConfidence && judgeConfidence > 0) {
+                  syncRadarFull(ticker, ticker, { conviction: judgeConfidence });
+                }
                 const riskItems = insights?.risk?.risk_items;
                 if (Array.isArray(riskItems) && riskItems.length > 0) {
                   upsertRiskAlertsFromInsights(ticker, riskItems);
@@ -334,6 +339,11 @@ export function OpportunityRadar({ data, onSave }: Props) {
                   if (insightsRes.ok) {
                     const insightsData = await insightsRes.json();
                     const insights = insightsData?.data;
+                    // 用 insights 裁判置信度覆盖 conviction
+                    const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                    if (judgeConfidence && judgeConfidence > 0) {
+                      syncRadarFull(ticker, ticker, { conviction: judgeConfidence });
+                    }
                     const riskItems = insights?.risk?.risk_items;
                     if (Array.isArray(riskItems) && riskItems.length > 0) {
                       upsertRiskAlertsFromInsights(ticker, riskItems);
