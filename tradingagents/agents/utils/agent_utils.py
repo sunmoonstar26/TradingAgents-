@@ -21,19 +21,31 @@ from tradingagents.agents.utils.news_data_tools import (
 
 
 def get_language_instruction() -> str:
-    """Return a prompt instruction for the configured output language.
-
-    Returns empty string when English (default), so no extra tokens are used.
-    Applied to every agent whose output reaches the saved report —
-    analysts, researchers, debaters, research manager, trader, and
-    portfolio manager — so a non-English run produces a fully localized
-    report rather than a mix of languages.
-    """
+    """Return a prompt instruction for the configured output language."""
     from tradingagents.dataflows.config import get_config
     lang = get_config().get("output_language", "English")
     if lang.strip().lower() == "english":
         return ""
-    return f" Write your entire response in {lang}."
+
+    # 对中文明确要求简体，避免 DeepSeek 等模型输出繁体
+    if "chinese" in lang.strip().lower():
+        return (
+            "\n\n**CRITICAL LANGUAGE REQUIREMENT — SIMPLIFIED CHINESE (简体中文) ONLY:**\n"
+            "You MUST write your ENTIRE response in Simplified Chinese (简体中文).\n"
+            "All headers, analysis content, data labels, table text, "
+            "conclusions, and commentary must be in Simplified Chinese.\n"
+            "Do NOT use Traditional Chinese (繁體中文). Do NOT include any English in your output.\n"
+            "Use mainland China standard simplified characters throughout.\n"
+            "这是强制要求：必须全部使用简体中文（大陆标准）回复，禁止使用繁体字。"
+        )
+    return (
+        f"\n\n**CRITICAL LANGUAGE REQUIREMENT — {lang} ONLY:**\n"
+        f"You MUST write your ENTIRE response in {lang}.\n"
+        f"All headers, analysis content, data labels, table text, "
+        f"conclusions, and commentary must be in {lang}.\n"
+        f"Do NOT include any English in your output.\n"
+        f"这是强制要求，必须全部使用{lang}回复。"
+    )
 
 
 def build_instrument_context(ticker: str, asset_type: str = "stock") -> str:
