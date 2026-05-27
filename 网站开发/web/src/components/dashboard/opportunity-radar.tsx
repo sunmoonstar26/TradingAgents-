@@ -213,8 +213,9 @@ export function OpportunityRadar({ data, onSave }: Props) {
               if (insightsRes.ok) {
                 const insightsData = await insightsRes.json();
                 const insights = insightsData?.data;
-                // 从 insights 计算真实共识：5 位分析师 + 3 位辩论角色 = 8 席
+                // 从 insights 计算真实共识、置信度、建议仓位
                 const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                const suggestedExposure: string | undefined = insights?.trading?.suggested_exposure;
                 let realConsensus: string | undefined;
                 if (insights?.analysts) {
                   const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
@@ -226,13 +227,12 @@ export function OpportunityRadar({ data, onSave }: Props) {
                   const total = analystVerdicts.length + 1; // analysts + 裁判
                   realConsensus = `${bullTotal}/${total} 看涨`;
                 }
-                if (judgeConfidence && judgeConfidence > 0) {
-                  syncRadarFull(ticker, ticker, {
-                    conviction: judgeConfidence,
-                    ...(realConsensus ? { consensus: realConsensus } : {}),
-                  });
-                } else if (realConsensus) {
-                  syncRadarFull(ticker, ticker, { consensus: realConsensus });
+                const overrides: { conviction?: number; consensus?: string; exposure?: string } = {};
+                if (judgeConfidence && judgeConfidence > 0) overrides.conviction = judgeConfidence;
+                if (realConsensus) overrides.consensus = realConsensus;
+                if (suggestedExposure) overrides.exposure = suggestedExposure;
+                if (Object.keys(overrides).length > 0) {
+                  syncRadarFull(ticker, ticker, overrides);
                 }
                 const riskItems = insights?.risk?.risk_items;
                 if (Array.isArray(riskItems) && riskItems.length > 0) {
@@ -355,8 +355,9 @@ export function OpportunityRadar({ data, onSave }: Props) {
                   if (insightsRes.ok) {
                     const insightsData = await insightsRes.json();
                     const insights = insightsData?.data;
-                    // 从 insights 计算真实共识和置信度
+                    // 从 insights 计算真实共识、置信度、建议仓位
                     const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                    const suggestedExposure: string | undefined = insights?.trading?.suggested_exposure;
                     let realConsensus: string | undefined;
                     if (insights?.analysts) {
                       const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
@@ -367,13 +368,12 @@ export function OpportunityRadar({ data, onSave }: Props) {
                       const total = analystVerdicts.length + 1;
                       realConsensus = `${bullTotal}/${total} 看涨`;
                     }
-                    if (judgeConfidence && judgeConfidence > 0) {
-                      syncRadarFull(ticker, ticker, {
-                        conviction: judgeConfidence,
-                        ...(realConsensus ? { consensus: realConsensus } : {}),
-                      });
-                    } else if (realConsensus) {
-                      syncRadarFull(ticker, ticker, { consensus: realConsensus });
+                    const overrides: { conviction?: number; consensus?: string; exposure?: string } = {};
+                    if (judgeConfidence && judgeConfidence > 0) overrides.conviction = judgeConfidence;
+                    if (realConsensus) overrides.consensus = realConsensus;
+                    if (suggestedExposure) overrides.exposure = suggestedExposure;
+                    if (Object.keys(overrides).length > 0) {
+                      syncRadarFull(ticker, ticker, overrides);
                     }
                     const riskItems = insights?.risk?.risk_items;
                     if (Array.isArray(riskItems) && riskItems.length > 0) {
