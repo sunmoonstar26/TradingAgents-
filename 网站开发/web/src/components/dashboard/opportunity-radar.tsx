@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { OpportunityEntry, StockEntry } from "@/types";
-import { Check, X, Pencil, Trash2, ChevronUp, ChevronDown, Plus, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { searchStocks } from "@/data/stocks";
 import { saveCustomRadarEntries, updateRadarEntryDate, syncRadarFull } from "@/lib/radar-store";
 
@@ -51,22 +51,6 @@ function ConsensusDots({ consensus }: { consensus: string | undefined | null }) 
       ))}
       <span className="ml-1.5 text-[var(--text-primary)]">{yes}/{total} {label}</span>
     </span>
-  );
-}
-
-function AgentAlignmentIcons({ alignment }: { alignment: OpportunityEntry["agentAlignment"] }) {
-  const agents = [
-    { key: "fundamental", val: alignment.fundamental }, { key: "technical", val: alignment.technical },
-    { key: "sentiment", val: alignment.sentiment }, { key: "macro", val: alignment.macro }, { key: "risk", val: alignment.risk },
-  ] as const;
-  return (
-    <div className="flex items-center gap-2.5">
-      {agents.map((a) => (
-        <span key={a.key} className={`inline-flex items-center justify-center w-5 ${a.val ? "text-[var(--green)]" : "text-[var(--red)]/50"}`}>
-          {a.val ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
-        </span>
-      ))}
-    </div>
   );
 }
 
@@ -373,11 +357,6 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">风险</th>
                 <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">共识</th>
                 <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">建议仓位</th>
-                <th className="text-center px-0 py-3.5 font-medium text-[10px] text-[var(--text-secondary)] w-10">基</th>
-                <th className="text-center px-0 py-3.5 font-medium text-[10px] text-[var(--text-secondary)]/60 w-10">技</th>
-                <th className="text-center px-0 py-3.5 font-medium text-[10px] text-[var(--text-secondary)]/60 w-10">情</th>
-                <th className="text-center px-0 py-3.5 font-medium text-[10px] text-[var(--text-secondary)]/60 w-10">宏</th>
-                <th className="text-center px-0 py-3.5 font-medium text-[10px] text-[var(--text-secondary)]/60 w-10">险</th>
                 <th className="text-right px-5 py-3.5 font-medium text-[var(--text-secondary)]">更新</th>
               </tr>
             </thead>
@@ -427,11 +406,6 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     <td className="px-5 py-3.5"><span className={`text-[11px] font-medium ${riskColors[item.risk]}`}>{item.risk}</span></td>
                     <td className="px-5 py-3.5"><ConsensusDots consensus={item.consensus} /></td>
                     <td className="px-5 py-3.5 font-mono font-semibold text-[var(--blue)]">{item.exposure}</td>
-                    <td className="text-center py-3.5">{item.agentAlignment.fundamental ? <Check className="w-3.5 h-3.5 text-[var(--green)] mx-auto" /> : <X className="w-3.5 h-3.5 text-[var(--red)]/50 mx-auto" />}</td>
-                    <td className="text-center py-3.5">{item.agentAlignment.technical ? <Check className="w-3.5 h-3.5 text-[var(--green)] mx-auto" /> : <X className="w-3.5 h-3.5 text-[var(--red)]/50 mx-auto" />}</td>
-                    <td className="text-center py-3.5">{item.agentAlignment.sentiment ? <Check className="w-3.5 h-3.5 text-[var(--green)] mx-auto" /> : <X className="w-3.5 h-3.5 text-[var(--red)]/50 mx-auto" />}</td>
-                    <td className="text-center py-3.5">{item.agentAlignment.macro ? <Check className="w-3.5 h-3.5 text-[var(--green)] mx-auto" /> : <X className="w-3.5 h-3.5 text-[var(--red)]/50 mx-auto" />}</td>
-                    <td className="text-center py-3.5">{item.agentAlignment.risk ? <Check className="w-3.5 h-3.5 text-[var(--green)] mx-auto" /> : <X className="w-3.5 h-3.5 text-[var(--red)]/50 mx-auto" />}</td>
                     <td className="px-5 py-3.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         {updateState?.status === "completed" ? (
@@ -537,7 +511,6 @@ export function OpportunityRadar({ data, onSave }: Props) {
                   )}
                 </div>
               </div>
-              <div className="mt-2 scale-90 origin-left"><AgentAlignmentIcons alignment={item.agentAlignment} /></div>
             </motion.div>
           );
         })}
