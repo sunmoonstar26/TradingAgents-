@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.tradingagents.fetch-market</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/donny2026/Downloads/TradingAgents 项目/.venv/bin/python3</string>
+    <string>/Users/donny2026/Downloads/TradingAgents 项目/网站开发/web/scripts/fetch_market.py</string>
+  </array>
+
+  <!-- 每天 08:30 AM 运行 -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>8</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+
+  <!-- 若错过（机器关机），开机后立即补跑 -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/donny2026/Downloads/TradingAgents 项目/logs/fetch_market.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/donny2026/Downloads/TradingAgents 项目/logs/fetch_market_err.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/donny2026/Downloads/TradingAgents 项目/网站开发/web</string>
+</dict>
+</plist>

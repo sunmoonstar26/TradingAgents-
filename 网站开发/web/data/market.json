@@ -1,0 +1,93 @@
+{
+  "updatedAt": "2026-05-27T03:45:49.239839Z",
+  "fetchDate": "2026-05-27",
+  "errors": [],
+  "indicators": {
+    "us": {
+      "label": "标普 500",
+      "ticker": "^GSPC",
+      "value": "7,519.12",
+      "change": 0.61,
+      "status": "up",
+      "date": "2026-05-26"
+    },
+    "hk": {
+      "label": "恒生指数",
+      "ticker": "^HSI",
+      "value": "25,399",
+      "change": -0.78,
+      "status": "down",
+      "date": "2026-05-27"
+    },
+    "cn": {
+      "label": "沪深 300",
+      "ticker": "000300.SS",
+      "value": "4,912.07",
+      "change": -0.72,
+      "status": "down",
+      "date": "2026-05-27"
+    },
+    "vix": {
+      "label": "VIX",
+      "ticker": "^VIX",
+      "value": "17.01",
+      "change": 2.53,
+      "status": "neutral",
+      "date": "2026-05-26"
+    },
+    "ai": {
+      "label": "AI 板块",
+      "ticker": "SMH",
+      "value": "602.14",
+      "change": 4.48,
+      "status": "up",
+      "date": "2026-05-26"
+    },
+    "nasdaq": {
+      "label": "纳斯达克",
+      "ticker": "^IXIC",
+      "value": "26,656",
+      "change": 1.19,
+      "status": "up",
+      "date": "2026-05-26"
+    }
+  },
+  "marketState": {
+    "usMarket": {
+      "label": "美股",
+      "value": "7,519.12",
+      "change": 0.61,
+      "status": "up"
+    },
+    "hkMarket": {
+      "label": "港股",
+      "value": "25,399",
+      "change": -0.78,
+      "status": "down"
+    },
+    "cnMarket": {
+      "label": "A 股",
+      "value": "4,912.07",
+      "change": -0.72,
+      "status": "down"
+    },
+    "vix": {
+      "label": "VIX",
+      "value": "17.01",
+      "change": 2.53,
+      "status": "neutral"
+    },
+    "aiSectorMomentum": {
+      "label": "AI 板块动量",
+      "value": "强",
+      "change": 4.48,
+      "status": "up"
+    },
+    "marketRiskLevel": {
+      "label": "市场风险",
+      "value": "中低",
+      "change": null,
+      "status": "warning"
+    }
+  }
+}

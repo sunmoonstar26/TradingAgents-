@@ -1,0 +1,268 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ===== TradingAgents AI Hedge Fund Operating System ===== */
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel2);
+  --color-border-custom: var(--border-custom);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-green: var(--green);
+  --color-red: var(--red);
+  --color-amber: var(--amber);
+  --color-blue: var(--blue);
+  --color-cyan: var(--cyan);
+
+  --color-background: var(--bg);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--panel);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--panel2);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--blue);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--panel2);
+  --color-secondary-foreground: var(--text-secondary);
+  --color-muted: var(--panel);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--panel2);
+  --color-accent-foreground: var(--text-primary);
+  --color-destructive: var(--red);
+  --color-border: var(--border-custom);
+  --color-input: var(--border-custom);
+  --color-ring: var(--blue);
+
+  --radius: 0.75rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+:root {
+  --bg: #070B12;
+  --panel: #0F172A;
+  --panel2: #111827;
+  --border-custom: rgba(255, 255, 255, 0.06);
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --green: #22C55E;
+  --red: #EF4444;
+  --amber: #F59E0B;
+  --blue: #3B82F6;
+  --cyan: #06B6D4;
+  --purple: #A855F7;
+
+  /* Card: three-level hierarchy */
+  --card-bg: rgba(15, 23, 42, 0.72);
+  --card-border: 1px solid rgba(255, 255, 255, 0.06);
+  --card-radius: 20px;
+
+  /* Hero card */
+  --hero-bg: rgba(15, 23, 42, 0.85);
+  --hero-border: 1px solid rgba(255, 255, 255, 0.08);
+  --hero-radius: 24px;
+  --hero-padding: 32px;
+
+  /* Section spacing */
+  --section-gap: 40px;
+}
+
+@layer base {
+  * {
+    border-color: var(--border-custom);
+    outline-color: rgba(59, 130, 246, 0.5);
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-inter), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+}
+
+/* ===== Card Hierarchy ===== */
+
+/* Hero Card — 首页机会雷达 / 二级页投委会决策 */
+@utility card-hero {
+  background: var(--hero-bg);
+  border: var(--hero-border);
+  border-radius: var(--hero-radius);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: var(--hero-padding);
+}
+
+/* Standard Card — 二级面板 */
+@utility card-terminal {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 24px;
+}
+
+/* Utility Card — 低优先级信息 */
+@utility card-utility {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* ===== Pulse Animations ===== */
+
+@utility pulse-green {
+  animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@utility pulse-red {
+  animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@utility pulse-amber {
+  animation: pulse-amber 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@utility pulse-blue {
+  animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@utility pulse-green {
+  animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes pulse-amber {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes pulse-blue {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(59,130,246,0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 2px rgba(59,130,246,0.2); }
+}
+
+/* ===== Radar Scan Bar Animation ===== */
+@keyframes scan-bar {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+@utility scan-bar-active {
+  animation: scan-bar 2s ease-in-out infinite;
+}
+
+/* ===== Red Glow (Critical Risk) ===== */
+@utility glow-red {
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2), inset 0 0 30px rgba(239, 68, 68, 0.05);
+}
+
+/* ===== Conviction Bar (Terminal Style) ===== */
+@utility conviction-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+/* ===== Battle Meter ===== */
+@utility battle-meter {
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* ===== Live Feed / Rail ===== */
+@utility feed-entry {
+  border-left: 2px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 12px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  transition: border-color 0.2s, background 0.2s;
+  &:hover {
+    border-left-color: var(--blue);
+    background: rgba(59, 130, 246, 0.06);
+  }
+}
+
+/* ===== Agent Personality Borders ===== */
+@utility agent-fundamental {
+  border-left: 2px solid #3B82F6;
+}
+@utility agent-technical {
+  border-left: 2px solid #22C55E;
+}
+@utility agent-sentiment {
+  border-left: 2px solid #F59E0B;
+}
+@utility agent-risk {
+  border-left: 2px solid #EF4444;
+}
+@utility agent-news {
+  border-left: 2px solid #06B6D4;
+}
+@utility agent-macro {
+  border-left: 2px solid #A855F7;
+}
+
+/* ===== Section Heading ===== */
+@utility section-heading {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Data font fallback */
+.font-mono, .data-value {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
