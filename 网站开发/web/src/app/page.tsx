@@ -7,7 +7,6 @@ import { AIResearchConsole } from "@/components/dashboard/research-console";
 import { OpportunityRadar } from "@/components/dashboard/opportunity-radar";
 import { ConvictionIdeas } from "@/components/dashboard/conviction-ideas";
 import { RiskTerminal } from "@/components/dashboard/risk-terminal";
-import { SectorHeatmap } from "@/components/dashboard/sector-heatmap";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -152,9 +151,6 @@ export default function DashboardPage() {
 
         {/* 4.5. AI 实时信息流 */}
         <LiveFeed data={d.liveFeed} />
-
-        {/* 5. 板块资金流向 */}
-        <SectorHeatmap data={d.sectorFlow} />
 
         {/* 页脚 */}
         <div className="text-center pt-4 pb-8">
