@@ -13,6 +13,7 @@ import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "@/typ
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomRadarEntries } from "@/lib/radar-store";
 import { getCustomMemoEntries, seedMemosFromApi } from "@/lib/memo-store";
+import { getRiskAlerts, seedRiskAlertsFromApi } from "@/lib/risk-alert-store";
 import { useMemo, useState, useEffect } from "react";
 
 function DashboardSkeleton() {
@@ -64,12 +65,18 @@ export default function DashboardPage() {
   // 备忘录编辑版本号
   const [memoKey, setMemoKey] = useState(0);
 
+  // 风险警报版本号 — 雷达分析完成后 +1 触发重渲染
+  const [riskKey, setRiskKey] = useState(0);
+
   // 首次 API 数据到达时，种子化 localStorage（仅当 localStorage 为空）
   useEffect(() => {
     if (data?.data?.memos?.length) {
       seedMemosFromApi(data.data.memos);
     }
-  }, [data?.data?.memos]);
+    if (data?.data?.riskAlerts?.length) {
+      seedRiskAlertsFromApi(data.data.riskAlerts);
+    }
+  }, [data?.data?.memos, data?.data?.riskAlerts]);
 
   // Hooks 必须在条件返回前调用，保证顺序一致
   const mergedOpportunities = useMemo(() => {
@@ -89,6 +96,13 @@ export default function DashboardPage() {
     return apiMemos;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.data?.memos, memoKey]);
+
+  const riskAlerts = useMemo(() => {
+    const stored = getRiskAlerts();
+    if (stored.length > 0) return stored;
+    return data?.data?.riskAlerts ?? [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.data?.riskAlerts, riskKey]);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data?.data) {
@@ -127,14 +141,14 @@ export default function DashboardPage() {
         {/* 2. AI 机会雷达（Hero） */}
         <OpportunityRadar
           data={mergedOpportunities}
-          onSave={() => setRadarKey((k) => k + 1)}
+          onSave={() => { setRadarKey((k) => k + 1); setMemoKey((k) => k + 1); setRiskKey((k) => k + 1); }}
         />
 
         {/* 3. 投资备忘录 */}
         <ConvictionIdeas data={mergedMemos} onSave={() => setMemoKey((k) => k + 1)} />
 
         {/* 4. 风险终端 */}
-        <RiskTerminal data={d.riskAlerts} />
+        <RiskTerminal data={riskAlerts} />
 
         {/* 4.5. AI 实时信息流 */}
         <LiveFeed data={d.liveFeed} />

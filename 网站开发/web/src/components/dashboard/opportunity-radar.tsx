@@ -7,6 +7,8 @@ import { OpportunityEntry, StockEntry } from "@/types";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { searchStocks } from "@/data/stocks";
 import { saveCustomRadarEntries, updateRadarEntryDate, syncRadarFull } from "@/lib/radar-store";
+import { syncMemoFromRadar } from "@/lib/memo-store";
+import { upsertRiskAlertsFromInsights } from "@/lib/risk-alert-store";
 
 const signalStyles: Record<string, { bg: string; text: string; dot: string }> = {
   强烈买入: { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },
@@ -189,9 +191,32 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     agentAlignment,
                     updatedAt: new Date().toISOString(),
                   });
+                  // 同步更新备忘录中对应股票的分析字段
+                  syncMemoFromRadar({
+                    ticker,
+                    name: d.name || ticker,
+                    signal: d.committeeDecision?.signal,
+                    conviction: d.committeeDecision?.conviction ?? 50,
+                    risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? "低" as const : "中" as const,
+                    consensus: d.committeeDecision?.consensus ?? "",
+                    exposure: d.committeeDecision?.recommendedExposure ?? "",
+                    agentAlignment,
+                    updatedAt: new Date().toISOString(),
+                  });
                 }
               }
             } catch { /* 同步失败不阻塞 */ }
+            // 拉取 insights 更新风险终端
+            try {
+              const insightsRes = await fetch(`/api/stocks/${ticker}/insights`);
+              if (insightsRes.ok) {
+                const insightsData = await insightsRes.json();
+                const riskItems = insightsData?.data?.risk?.risk_items;
+                if (Array.isArray(riskItems) && riskItems.length > 0) {
+                  upsertRiskAlertsFromInsights(ticker, riskItems);
+                }
+              }
+            } catch { /* 不阻塞主流程 */ }
             onSave?.();
             setUpdateStates((prev) => ({ ...prev, [ticker]: { ...prev[ticker], status: "completed", completedCount: done } }));
             setTimeout(() => {
@@ -283,6 +308,29 @@ export function OpportunityRadar({ data, onSave }: Props) {
                         agentAlignment,
                         updatedAt: new Date().toISOString(),
                       });
+                      // 同步更新备忘录中对应股票的分析字段
+                      syncMemoFromRadar({
+                        ticker,
+                        name: d.name || ticker,
+                        signal: d.committeeDecision?.signal,
+                        conviction: d.committeeDecision?.conviction ?? 50,
+                        risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? "低" as const : "中" as const,
+                        consensus: d.committeeDecision?.consensus ?? "",
+                        exposure: d.committeeDecision?.recommendedExposure ?? "",
+                        agentAlignment,
+                        updatedAt: new Date().toISOString(),
+                      });
+                    }
+                  }
+                } catch {}
+                // 拉取 insights 更新风险终端
+                try {
+                  const insightsRes = await fetch(`/api/stocks/${ticker}/insights`);
+                  if (insightsRes.ok) {
+                    const insightsData = await insightsRes.json();
+                    const riskItems = insightsData?.data?.risk?.risk_items;
+                    if (Array.isArray(riskItems) && riskItems.length > 0) {
+                      upsertRiskAlertsFromInsights(ticker, riskItems);
                     }
                   }
                 } catch {}
