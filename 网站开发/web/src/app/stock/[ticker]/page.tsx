@@ -16,7 +16,7 @@ import { LiveRail } from "@/components/stock/live-rail";
 import { AnalyzingState } from "@/components/stock/analyzing-state";
 import { StockDetail, AnalysisStartResponse, StockInsights } from "@/types";
 import { findStock } from "@/data/stocks";
-import { syncRadarFull } from "@/lib/radar-store";
+import { syncRadarFull, parseConsensus } from "@/lib/radar-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Zap, Loader2, ArrowLeft, Cpu } from "lucide-react";
 
@@ -218,7 +218,7 @@ export default function StockDetailPage() {
         signal: d.committeeDecision.signal,
         conviction: d.committeeDecision.conviction,
         risk: d.committeeDecision.conviction >= 60 ? "低" : "中",
-        consensus: d.committeeDecision.consensus,
+        consensus: parseConsensus(d.committeeDecision.consensus),
         exposure: d.committeeDecision.recommendedExposure,
         agentAlignment,
         updatedAt: d.updatedAt,

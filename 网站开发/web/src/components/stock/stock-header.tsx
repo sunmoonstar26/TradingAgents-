@@ -24,7 +24,7 @@ function buildRadarEntry(ticker: string, name: string): OpportunityEntry {
     signal: "持有",
     conviction: 50,
     risk: "中",
-    consensus: "待扫描",
+    consensus: { bullish: 0, neutral: 0, bearish: 0 },
     exposure: "低配",
     agentAlignment: {
       fundamental: false,

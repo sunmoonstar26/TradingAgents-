@@ -31,13 +31,19 @@ export interface SystemStatus {
 
 // ── 首页机会雷达 ──
 
+export interface ConsensusBreakdown {
+  bullish: number;
+  neutral: number;
+  bearish: number;
+}
+
 export interface OpportunityEntry {
   ticker: string;
   name: string;
   signal: Signal;
   conviction: number;
   risk: "低" | "中" | "高";
-  consensus: string;
+  consensus: ConsensusBreakdown;
   exposure: string;
   // 新增：智能体对齐
   agentAlignment: AgentAlignment;
