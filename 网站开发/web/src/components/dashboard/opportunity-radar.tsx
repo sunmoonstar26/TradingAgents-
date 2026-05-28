@@ -62,7 +62,7 @@ function ConsensusDots({ consensus }: { consensus: ConsensusBreakdown | undefine
           style={{ width: `${(bearish / total) * 100}%` }}
         />
       </div>
-      <span className="font-mono text-[10px] text-[var(--text-secondary)]/60 whitespace-nowrap font-bold">
+      <span className="font-mono text-xs text-[var(--text-secondary)]/60 whitespace-nowrap font-bold">
         <span className="text-[var(--green)]">{bullish}↑</span>
         {neutral > 0 && <span className="text-[var(--text-secondary)]/40"> {neutral}—</span>}
         {bearish > 0 && <span className="text-[var(--red)]/60"> {bearish}↓</span>}
