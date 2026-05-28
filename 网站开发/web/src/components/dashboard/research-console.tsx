@@ -55,10 +55,24 @@ export function AIResearchConsole() {
     if (value.trim()) {
       const results = searchStocks(value);
       setSuggestions(results);
-      setShowSuggestions(results.length > 0);
-      // 纯 ticker 格式输入时自动推断市场
-      if (isValidTickerFormat(value.trim()) && results.length === 0) {
-        setMarket(inferMarket(value.trim()));
+      // keyword 完全匹配时自动选中第一条（如输入 "salesforce" 直接锁定 CRM）
+      const q = value.trim().toLowerCase();
+      const autoMatch = results.find(
+        (s) =>
+          s.ticker.toLowerCase() === q ||
+          s.name.toLowerCase() === q ||
+          s.keywords.some((k) => k === q)
+      );
+      if (autoMatch) {
+        setSelectedStock(autoMatch);
+        setMarket(autoMatch.market);
+        setShowSuggestions(false);
+      } else {
+        setShowSuggestions(results.length > 0);
+        // 纯 ticker 格式输入时自动推断市场
+        if (isValidTickerFormat(value.trim()) && results.length === 0) {
+          setMarket(inferMarket(value.trim()));
+        }
       }
     } else {
       setSuggestions([]);
