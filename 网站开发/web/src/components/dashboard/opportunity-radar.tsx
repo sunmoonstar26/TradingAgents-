@@ -40,27 +40,72 @@ function formatDate(iso?: string): string {
   return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+/**
+ * 共识显示组件。
+ * 支持两种格式：
+ *   新格式 "3↑ 2— 1↓" — 三色进度条（看涨/中性/看跌）
+ *   旧格式 "4/8 看涨"  — 向前兼容，渲染圆点
+ */
 function ConsensusDots({ consensus }: { consensus: string | undefined | null }) {
   if (!consensus) return <span className="font-mono text-[var(--text-secondary)]/60">—</span>;
-  const match = consensus.match(/(\d+)\/(\d+)/);
-  if (!match) return <span className="font-mono text-[var(--text-primary)]">{consensus}</span>;
-  const yes = parseInt(match[1], 10);
-  const total = parseInt(match[2], 10);
-  const label = consensus.replace(/\d+\/\d+/, "").trim();
-  return (
-    <span className="conviction-bar">
-      {Array.from({ length: total }).map((_, i) => (
-        <span key={i} className={i < yes ? "text-[var(--green)]" : "text-[var(--text-secondary)]/30"}>●</span>
-      ))}
-      <span className="ml-1.5 text-[var(--text-primary)]">{yes}/{total} {label}</span>
-    </span>
-  );
+
+  // 新格式：包含 ↑ ↓ 符号
+  const newFmt = consensus.match(/(\d+)↑\s*(\d+)—\s*(\d+)↓/);
+  if (newFmt) {
+    const bull = parseInt(newFmt[1], 10);
+    const neutral = parseInt(newFmt[2], 10);
+    const bear = parseInt(newFmt[3], 10);
+    const total = bull + neutral + bear;
+    if (total === 0) return <span className="font-mono text-[var(--text-secondary)]/60">—</span>;
+    return (
+      <div className="flex items-center gap-1.5">
+        {/* 三色进度条 */}
+        <div className="flex h-1.5 rounded-full overflow-hidden w-16 bg-[var(--border-custom)]">
+          <div
+            className="h-full bg-[var(--green)]"
+            style={{ width: `${(bull / total) * 100}%` }}
+          />
+          <div
+            className="h-full bg-[var(--text-secondary)]/25"
+            style={{ width: `${(neutral / total) * 100}%` }}
+          />
+          <div
+            className="h-full bg-[var(--red)]/60"
+            style={{ width: `${(bear / total) * 100}%` }}
+          />
+        </div>
+        {/* 计数标签 */}
+        <span className="font-mono text-[10px] text-[var(--text-secondary)]/60 whitespace-nowrap">
+          <span className="text-[var(--green)]">{bull}↑</span>
+          {neutral > 0 && <span className="text-[var(--text-secondary)]/40"> {neutral}—</span>}
+          {bear > 0 && <span className="text-[var(--red)]/60"> {bear}↓</span>}
+        </span>
+      </div>
+    );
+  }
+
+  // 旧格式：X/Y 看涨
+  const oldFmt = consensus.match(/(\d+)\/(\d+)/);
+  if (oldFmt) {
+    const yes = parseInt(oldFmt[1], 10);
+    const total = parseInt(oldFmt[2], 10);
+    return (
+      <span className="conviction-bar">
+        {Array.from({ length: total }).map((_, i) => (
+          <span key={i} className={i < yes ? "text-[var(--green)]" : "text-[var(--text-secondary)]/30"}>●</span>
+        ))}
+        <span className="ml-1.5 text-[var(--text-primary)]">{yes}/{total}</span>
+      </span>
+    );
+  }
+
+  return <span className="font-mono text-[var(--text-secondary)]/60">{consensus}</span>;
 }
 
 function makeEntry(s: StockEntry): OpportunityEntry {
   return {
     ticker: s.ticker, name: s.name, signal: "持有", conviction: 50, risk: "中",
-    consensus: "4/8 看涨", exposure: "低配",
+    consensus: "0↑ 0— 0↓", exposure: "待分析",
     agentAlignment: { fundamental: true, technical: true, sentiment: false, macro: true, risk: false },
     updatedAt: new Date().toISOString(),
   };
@@ -219,13 +264,15 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 let realConsensus: string | undefined;
                 if (insights?.analysts) {
                   const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
-                  const bullAnalysts = analystVerdicts.filter(v => v?.verdict === "看涨").length;
-                  // 辩论裁判方向（多方胜出算 1，空方胜出算 0）
+                  const bull = analystVerdicts.filter(v => v?.verdict === "看涨").length;
+                  const bear = analystVerdicts.filter(v => v?.verdict === "看跌").length;
+                  const neutral = analystVerdicts.length - bull - bear;
+                  // 裁判方向
                   const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
                   const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
-                  const bullTotal = bullAnalysts + judgeBull;
-                  const total = analystVerdicts.length + 1; // analysts + 裁判
-                  realConsensus = `${bullTotal}/${total} 看涨`;
+                  const judgeBear = judgeVerdict.includes("空方") ? 1 : 0;
+                  const judgeNeutral = 1 - judgeBull - judgeBear;
+                  realConsensus = `${bull + judgeBull}↑ ${neutral + judgeNeutral}— ${bear + judgeBear}↓`;
                 }
                 const overrides: { conviction?: number; consensus?: string; exposure?: string } = {};
                 if (judgeConfidence && judgeConfidence > 0) overrides.conviction = judgeConfidence;
@@ -361,12 +408,14 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     let realConsensus: string | undefined;
                     if (insights?.analysts) {
                       const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
-                      const bullAnalysts = analystVerdicts.filter(v => v?.verdict === "看涨").length;
+                      const bull = analystVerdicts.filter(v => v?.verdict === "看涨").length;
+                      const bear = analystVerdicts.filter(v => v?.verdict === "看跌").length;
+                      const neutral = analystVerdicts.length - bull - bear;
                       const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
                       const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
-                      const bullTotal = bullAnalysts + judgeBull;
-                      const total = analystVerdicts.length + 1;
-                      realConsensus = `${bullTotal}/${total} 看涨`;
+                      const judgeBear = judgeVerdict.includes("空方") ? 1 : 0;
+                      const judgeNeutral = 1 - judgeBull - judgeBear;
+                      realConsensus = `${bull + judgeBull}↑ ${neutral + judgeNeutral}— ${bear + judgeBear}↓`;
                     }
                     const overrides: { conviction?: number; consensus?: string; exposure?: string } = {};
                     if (judgeConfidence && judgeConfidence > 0) overrides.conviction = judgeConfidence;
