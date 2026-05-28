@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
-import { Cpu, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Cpu, Loader2, AlertTriangle, ArrowLeft, FileText } from "lucide-react";
 import { findStock } from "@/data/stocks";
 
 interface SessionStatusResponse {
@@ -28,28 +28,41 @@ const AGENT_LABELS: Record<string, string> = {
   macro: "宏观",
   news: "新闻",
   risk: "风控",
-  report: "综合报告",
 };
+
+// report 单独展示，不参与 6 个智能体的进度计算
+const AGENT_KEYS = ["fundamental", "technical", "sentiment", "macro", "news", "risk"];
 
 interface Props {
   ticker: string;
   sessionId: string;
-  /** 完成后要 invalidate 的 react-query keys（默认 ["stock", ticker]）*/
   invalidateKeys?: readonly unknown[][];
-  /** 子页面里使用时，让骨架更紧凑 */
   compact?: boolean;
 }
 
-/**
- * 分析进行中的占位面板。
- * 轮询 /api/analysis/{sessionId}，状态变 completed 时自动 invalidate 调用方的 query
- * 让上层组件 refetch 真实数据 → 切回正常 UI。
- */
+/** 不定长动画进度条（indeterminate）— 用于耗时不确定的阶段 */
+function IndeterminateBar() {
+  return (
+    <div className="w-full h-1.5 rounded-full bg-[var(--panel2)] overflow-hidden relative">
+      <motion.div
+        className="absolute h-full w-1/3 rounded-full bg-[var(--blue)]"
+        animate={{ x: ["0%", "300%"] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        style={{ left: "-33%" }}
+      />
+    </div>
+  );
+}
+
 export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: Props) {
   const qc = useQueryClient();
   const finishedRef = useRef(false);
   const stockInfo = findStock(ticker);
   const displayName = stockInfo?.name ?? ticker;
+
+  // 记录 report 开始运行的时间，用于显示已用时
+  const reportStartRef = useRef<number | null>(null);
+  const [reportElapsed, setReportElapsed] = useState(0);
 
   const { data } = useQuery<SessionStatusResponse>({
     queryKey: ["analysis-session", sessionId],
@@ -61,24 +74,45 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
 
   const session = data?.data;
   const status = session?.status;
+  const progress = session?.progress ?? {};
+
+  const reportStatus = progress["report"] ?? "waiting";
+  const isReportRunning = reportStatus === "running";
+  const isReportDone = reportStatus === "completed";
+
+  // 记录 report 开始时间
+  useEffect(() => {
+    if (isReportRunning && reportStartRef.current === null) {
+      reportStartRef.current = Date.now();
+    }
+  }, [isReportRunning]);
+
+  // 每秒更新已用时
+  useEffect(() => {
+    if (!isReportRunning) return;
+    const id = setInterval(() => {
+      if (reportStartRef.current) {
+        setReportElapsed(Math.floor((Date.now() - reportStartRef.current) / 1000));
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isReportRunning]);
 
   useEffect(() => {
     if (finishedRef.current) return;
     if (status !== "completed" && status !== "failed") return;
     finishedRef.current = true;
-
     const keys = invalidateKeys ?? [["stock", ticker]];
-    keys.forEach((key) => {
-      qc.invalidateQueries({ queryKey: key });
-    });
+    keys.forEach((key) => qc.invalidateQueries({ queryKey: key }));
   }, [status, qc, ticker, invalidateKeys]);
 
-  const progress = session?.progress ?? {};
-  const completedCount = Object.values(progress).filter((v) => v === "completed").length;
-  const total = Object.keys(progress).length || 7;
+  // 只统计前 6 个智能体
+  const completedCount = AGENT_KEYS.filter((k) => progress[k] === "completed").length;
+  const total = AGENT_KEYS.length;
   const pct = Math.round((completedCount / total) * 100);
 
   const isFailed = status === "failed";
+  const allAgentsDone = completedCount >= total;
 
   return (
     <div className="min-h-screen">
@@ -119,7 +153,7 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
               {ticker} <span className="text-[var(--text-secondary)] font-normal">{displayName}</span>
             </h1>
             <p className="text-sm text-[var(--text-secondary)] mb-1">
-              {isFailed ? "本次分析失败" : "AI 投资委员会正在重新分析"}
+              {isFailed ? "本次分析失败" : "AI 投资委员会正在分析"}
             </p>
             <p className="text-[10px] font-mono text-[var(--text-secondary)]/50">
               {isFailed
@@ -130,21 +164,45 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
 
           {!isFailed && (
             <>
-              <div className="w-full h-1.5 rounded-full bg-[var(--panel2)] overflow-hidden mb-3">
-                <motion.div
-                  className="h-full bg-[var(--blue)]"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${pct}%` }}
-                  transition={{ duration: 0.5 }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] mb-4">
-                <span className="flex items-center gap-1.5">
-                  <Loader2 className="w-3 h-3 animate-spin text-[var(--blue)]" />
-                  {session?.current_step || "排队中"}
-                </span>
-                <span>{completedCount}/{total}</span>
-              </div>
+              {/* ── 阶段一：6 个智能体进度条 ── */}
+              {!allAgentsDone ? (
+                <>
+                  <div className="w-full h-1.5 rounded-full bg-[var(--panel2)] overflow-hidden mb-3">
+                    <motion.div
+                      className="h-full bg-[var(--blue)]"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] mb-4">
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="w-3 h-3 animate-spin text-[var(--blue)]" />
+                      {session?.current_step || "智能体分析中"}
+                    </span>
+                    <span>{completedCount}/{total} 智能体</span>
+                  </div>
+                </>
+              ) : (
+                /* ── 阶段二：综合报告（indeterminate）── */
+                <>
+                  <IndeterminateBar />
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] mb-4 mt-3">
+                    <span className="flex items-center gap-1.5">
+                      <FileText className="w-3 h-3 text-[var(--blue)]" />
+                      {isReportDone ? "综合报告已生成" : "正在生成综合报告..."}
+                    </span>
+                    {isReportRunning && reportElapsed > 0 && (
+                      <span className="text-[var(--text-secondary)]/40">
+                        已用时 {reportElapsed}s · 通常需 1-3 分钟
+                      </span>
+                    )}
+                    {!isReportRunning && !isReportDone && (
+                      <span className="text-[var(--text-secondary)]/40">等待生成...</span>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
 
@@ -157,7 +215,7 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
           {!isFailed && !compact && (
             <div className="card-terminal p-4">
               <ul className="space-y-2 text-[11px] font-mono">
-                {Object.entries(AGENT_LABELS).map(([key, label]) => {
+                {AGENT_KEYS.map((key) => {
                   const s = progress[key] ?? "waiting";
                   const color =
                     s === "completed"
@@ -170,10 +228,28 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
                   return (
                     <li key={key} className={`flex items-center gap-2 ${color}`}>
                       <span className="w-3 inline-block">{symbol}</span>
-                      <span>{label}</span>
+                      <span>{AGENT_LABELS[key]}</span>
                     </li>
                   );
                 })}
+                {/* 综合报告单独一行 */}
+                <li className={`flex items-center gap-2 pt-1 border-t border-[var(--border-custom)]/30 ${
+                  isReportDone
+                    ? "text-[var(--green)]"
+                    : isReportRunning
+                    ? "text-[var(--blue)]"
+                    : "text-[var(--text-secondary)]/40"
+                }`}>
+                  <span className="w-3 inline-block">
+                    {isReportDone ? "✓" : isReportRunning ? "▸" : "·"}
+                  </span>
+                  <span>综合报告</span>
+                  {isReportRunning && (
+                    <span className="ml-auto text-[9px] text-[var(--text-secondary)]/30">
+                      耗时较长，请耐心等待
+                    </span>
+                  )}
+                </li>
               </ul>
             </div>
           )}
