@@ -498,12 +498,13 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 return (
                   <motion.tr
                     key={item.ticker}
-                    className={`border-b border-[var(--border-custom)]/40 transition-all ${editing ? "" : "cursor-pointer"} relative ${isActive && !editing ? "bg-[var(--blue)]/8" : editing ? "" : "hover:bg-[var(--blue)]/6"}`}
+                    className={`border-b border-[var(--border-custom)]/40 transition-colors ${editing ? "" : "cursor-pointer"} relative ${isActive && !editing ? "bg-[var(--blue)]/8" : editing ? "" : ""}`}
                     onClick={() => !editing && router.push(`/stock/${item.ticker}`)}
                     onMouseEnter={() => setActiveRow(item.ticker)}
                     onMouseLeave={() => setActiveRow(null)}
                     initial={{ opacity: 0, x: -4 }}
                     animate={{ opacity: 1, x: 0 }}
+                    whileHover={!editing ? { x: 4, backgroundColor: "rgba(0,120,255,0.05)" } : {}}
                     transition={{ duration: 0.3, delay: idx * 0.04 }}
                   >
                     {editing && (
