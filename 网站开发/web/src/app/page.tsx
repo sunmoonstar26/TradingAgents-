@@ -73,6 +73,15 @@ export default function DashboardPage() {
   // 信息流版本号
   const [feedKey, setFeedKey] = useState(0);
 
+  // 监听 syncRadarFull 广播，分析完成后自动刷新雷达列表
+  useEffect(() => {
+    function onRadarChange() {
+      setRadarKey((k) => k + 1);
+    }
+    window.addEventListener("ta_radar_change", onRadarChange);
+    return () => window.removeEventListener("ta_radar_change", onRadarChange);
+  }, []);
+
   // 首次 API 数据到达时，种子化 localStorage（仅当 localStorage 为空）
   useEffect(() => {
     if (data?.data?.memos?.length) {

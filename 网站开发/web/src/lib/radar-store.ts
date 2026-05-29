@@ -121,6 +121,8 @@ export function syncRadarFull(
   if (fields.updatedAt) entry.updatedAt = fields.updatedAt;
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+  // 通知所有监听方（首页雷达）刷新
+  window.dispatchEvent(new Event("ta_radar_change"));
 }
 
 export function updateRadarEntryDate(ticker: string, date: string): void {
