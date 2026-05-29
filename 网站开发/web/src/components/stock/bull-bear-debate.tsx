@@ -289,16 +289,34 @@ export function BullBearDebate({
   bullThesis, moderatorVerdict, bearThesis,
   battleBar, conflictMatrix, ticker, debateInsights,
 }: Props) {
-  const bullPct = Math.round(
-    (battleBar.bullScore / (battleBar.bullScore + battleBar.bearScore)) * 100
-  );
-  const bearPct = 100 - bullPct;
-
   const judgeInsight = debateInsights?.["裁判"];
   const bullInsight = debateInsights?.["多方"];
   const bearInsight = debateInsights?.["空方"];
 
-  // 合并冲突数据：优先 judge key_topics，其次 bull/bear 各自的，最后 fallback to conflictMatrix
+  // 进度条比例：优先用裁判 verdict 推导，避免与 ta-mapper 硬编码值矛盾
+  let bullPct: number;
+  let bearPct: number;
+  if (judgeInsight?.verdict) {
+    const v = judgeInsight.verdict;
+    if (v.includes("多方")) {
+      // 多方胜出：用 battleBar 原始值（多方 > 空方）
+      const raw = Math.round((battleBar.bullScore / (battleBar.bullScore + battleBar.bearScore)) * 100);
+      bullPct = Math.max(raw, 51); // 确保多方 > 50%
+      bearPct = 100 - bullPct;
+    } else if (v.includes("空方")) {
+      // 空方胜出：翻转，确保空方 > 50%
+      const raw = Math.round((battleBar.bullScore / (battleBar.bullScore + battleBar.bearScore)) * 100);
+      bearPct = Math.max(raw, 51);
+      bullPct = 100 - bearPct;
+    } else {
+      // 势均力敌
+      bullPct = 50;
+      bearPct = 50;
+    }
+  } else {
+    bullPct = Math.round((battleBar.bullScore / (battleBar.bullScore + battleBar.bearScore)) * 100);
+    bearPct = 100 - bullPct;
+  }
   const rawTopics = judgeInsight?.key_topics?.length
     ? judgeInsight.key_topics
     : bullInsight?.key_topics?.length
