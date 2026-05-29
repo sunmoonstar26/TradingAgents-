@@ -33,6 +33,7 @@ function buildRadarEntry(ticker: string, name: string): OpportunityEntry {
       macro: false,
       risk: false,
     },
+    updatedAt: new Date().toISOString(),
   };
 }
 

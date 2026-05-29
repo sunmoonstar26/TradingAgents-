@@ -201,30 +201,65 @@ export default function StockDetailPage() {
   // 分析数据加载后，同步雷达条目全部指标
   useEffect(() => {
     const d = data?.data;
-    if (d) {
-      // 从 agentAnalyses 构建 agentAlignment
-      const agentAlignment = {
-        fundamental: false, technical: false, sentiment: false, macro: false, risk: false,
-      };
-      (d.agentAnalyses || []).forEach((a) => {
-        const bullish = ["强烈买入", "买入", "增持"].includes(a.signal);
-        if (a.personality === "fundamental") agentAlignment.fundamental = bullish;
-        if (a.personality === "technical") agentAlignment.technical = bullish;
-        if (a.personality === "sentiment") agentAlignment.sentiment = bullish;
-        if (a.personality === "macro") agentAlignment.macro = bullish;
-        if (a.personality === "risk") agentAlignment.risk = bullish;
-      });
-      syncRadarFull(d.ticker, d.name, {
-        signal: d.committeeDecision.signal,
-        conviction: d.committeeDecision.conviction,
-        risk: d.committeeDecision.conviction >= 60 ? "低" : "中",
-        consensus: parseConsensus(d.committeeDecision.consensus),
-        exposure: d.committeeDecision.recommendedExposure,
-        agentAlignment,
-        updatedAt: d.updatedAt,
-      });
-    }
+    if (!d) return;
+
+    const agentAlignment = {
+      fundamental: false, technical: false, sentiment: false, macro: false, risk: false,
+    };
+    (d.agentAnalyses || []).forEach((a) => {
+      const bullish = ["强烈买入", "买入", "增持"].includes(a.signal);
+      if (a.personality === "fundamental") agentAlignment.fundamental = bullish;
+      if (a.personality === "technical") agentAlignment.technical = bullish;
+      if (a.personality === "sentiment") agentAlignment.sentiment = bullish;
+      if (a.personality === "macro") agentAlignment.macro = bullish;
+      if (a.personality === "risk") agentAlignment.risk = bullish;
+    });
+
+    syncRadarFull(d.ticker, d.name, {
+      signal: d.committeeDecision.signal,
+      conviction: d.committeeDecision.conviction,
+      risk: d.committeeDecision.conviction >= 60 ? "低" : "中",
+      consensus: parseConsensus(d.committeeDecision.consensus),
+      exposure: d.committeeDecision.recommendedExposure,
+      agentAlignment,
+      updatedAt: d.updatedAt || new Date().toISOString(),
+    });
   }, [data?.data]);
+
+  // insights 加载后，用更精确的共识数据覆盖雷达
+  useEffect(() => {
+    const d = data?.data;
+    const insights = insightsData?.data;
+    if (!d || !insights) return;
+
+    const overrides: Parameters<typeof syncRadarFull>[2] = {
+      updatedAt: d.updatedAt || new Date().toISOString(),
+    };
+
+    const judgeConfidence: number | undefined = insights.debate?.["裁判"]?.confidence;
+    if (judgeConfidence && judgeConfidence > 0) overrides.conviction = judgeConfidence;
+
+    const suggestedExposure: string | undefined = insights.trading?.suggested_exposure;
+    if (suggestedExposure) overrides.exposure = suggestedExposure;
+
+    if (insights.analysts) {
+      const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
+      const bull = analystVerdicts.filter(v => v?.verdict === "看涨").length;
+      const bear = analystVerdicts.filter(v => v?.verdict === "看跌").length;
+      const neutral = analystVerdicts.length - bull - bear;
+      const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
+      const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
+      const judgeBear = judgeVerdict.includes("空方") ? 1 : 0;
+      const judgeNeutral = 1 - judgeBull - judgeBear;
+      overrides.consensus = {
+        bullish: bull + judgeBull,
+        neutral: neutral + judgeNeutral,
+        bearish: bear + judgeBear,
+      };
+    }
+
+    syncRadarFull(d.ticker, d.name, overrides);
+  }, [data?.data, insightsData?.data]);
 
   if (isLoading) return <StockDetailSkeleton />;
 
