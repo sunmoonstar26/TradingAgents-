@@ -82,6 +82,15 @@ export default function DashboardPage() {
     return () => window.removeEventListener("ta_radar_change", onRadarChange);
   }, []);
 
+  // 监听 upsertFeedFromInsights 广播，分析完成后自动刷新信息流
+  useEffect(() => {
+    function onFeedChange() {
+      setFeedKey((k) => k + 1);
+    }
+    window.addEventListener("ta_feed_change", onFeedChange);
+    return () => window.removeEventListener("ta_feed_change", onFeedChange);
+  }, []);
+
   // 首次 API 数据到达时，种子化 localStorage（仅当 localStorage 为空）
   useEffect(() => {
     if (data?.data?.memos?.length) {

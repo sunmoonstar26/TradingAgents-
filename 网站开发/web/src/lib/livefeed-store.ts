@@ -99,6 +99,9 @@ export function upsertFeedFromInsights(
   const existing = getLiveFeed().filter((f) => f.ticker !== ticker);
   const merged = [...newItems, ...existing].slice(0, MAX_ENTRIES);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("ta_feed_change"));
+  }
 }
 
 /** 将 mock LiveFeedEntry[] 转换并作为初始种子（仅当 localStorage 为空时） */

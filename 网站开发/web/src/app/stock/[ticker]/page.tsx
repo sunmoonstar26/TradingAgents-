@@ -17,6 +17,7 @@ import { AnalyzingState } from "@/components/stock/analyzing-state";
 import { StockDetail, AnalysisStartResponse, StockInsights } from "@/types";
 import { findStock } from "@/data/stocks";
 import { syncRadarFull, parseConsensus } from "@/lib/radar-store";
+import { upsertFeedFromInsights } from "@/lib/livefeed-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Zap, Loader2, ArrowLeft, Cpu } from "lucide-react";
 
@@ -259,6 +260,8 @@ export default function StockDetailPage() {
     }
 
     syncRadarFull(d.ticker, d.name, overrides);
+    // 同步信息流（广播 ta_feed_change，首页 LiveFeed 自动刷新）
+    upsertFeedFromInsights(d.ticker, insights);
   }, [data?.data, insightsData?.data]);
 
   if (isLoading) return <StockDetailSkeleton />;
