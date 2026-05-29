@@ -9,6 +9,7 @@ import { ConvictionIdeas } from "@/components/dashboard/conviction-ideas";
 import { RiskTerminal } from "@/components/dashboard/risk-terminal";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 import { PrivateZone } from "@/components/auth/PrivateZone";
+import { FeaturedResearch } from "@/components/dashboard/featured-research";
 import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomRadarEntries } from "@/lib/radar-store";
@@ -158,6 +159,9 @@ export default function DashboardPage() {
 
         {/* 4. 风险终端 */}
         <RiskTerminal data={riskAlerts} />
+
+        {/* 5. 热门研究内容（公开区域） */}
+        <FeaturedResearch />
 
         {/* 4.5. AI 实时信息流 */}
         <LiveFeed data={d.liveFeed} feedKey={feedKey} />
