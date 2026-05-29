@@ -62,7 +62,7 @@ export function Header() {
             /* ── 已登录 ── */
             <>
               <Link
-                href="/"
+                href="/workspace"
                 className="hidden sm:inline text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 我的工作台
