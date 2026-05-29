@@ -8,6 +8,7 @@ import { OpportunityRadar } from "@/components/dashboard/opportunity-radar";
 import { ConvictionIdeas } from "@/components/dashboard/conviction-ideas";
 import { RiskTerminal } from "@/components/dashboard/risk-terminal";
 import { LiveFeed } from "@/components/dashboard/live-feed";
+import { PrivateZone } from "@/components/auth/PrivateZone";
 import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomRadarEntries } from "@/lib/radar-store";
@@ -141,8 +142,10 @@ export default function DashboardPage() {
         {/* 1. 全球市场状态 */}
         <GlobalMarketState data={marketIndicators} fetchDate={marketData?.fetchDate} />
 
-        {/* 1.5. AI 研究控制台 */}
-        <AIResearchConsole />
+        {/* 1.5. AI 研究控制台（私版区域） */}
+        <PrivateZone label="AI 研究控制台">
+          <AIResearchConsole />
+        </PrivateZone>
 
         {/* 2. AI 机会雷达（Hero） */}
         <OpportunityRadar
