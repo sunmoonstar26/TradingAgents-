@@ -35,5 +35,22 @@ export function useMockAuth() {
     setUser(null);
   }, []);
 
-  return { user, ready, login, logout, isLoggedIn: !!user };
+  /** 扣除 Credits，返回扣除后余额；余额不足返回 -1 不扣除 */
+  const deductCredit = useCallback((amount = 1): number => {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return -1;
+    try {
+      const u = JSON.parse(raw) as MockUser;
+      if (u.credits < amount) return -1;
+      const updated = { ...u, credits: u.credits - amount };
+      localStorage.setItem(KEY, JSON.stringify(updated));
+      setUser(updated);
+      return updated.credits;
+    } catch {
+      return -1;
+    }
+  }, []);
+
+  return { user, ready, login, logout, isLoggedIn: !!user, deductCredit };
 }
+

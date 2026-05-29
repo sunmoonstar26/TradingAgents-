@@ -24,7 +24,7 @@ const BOOT_STEPS = [
 
 export function AIResearchConsole() {
   const router = useRouter();
-  const { isLoggedIn, ready } = useMockAuth();
+  const { isLoggedIn, ready, user, deductCredit } = useMockAuth();
   const [query, setQuery] = useState("");
   const [selectedStock, setSelectedStock] = useState<StockEntry | null>(null);
   const [market, setMarket] = useState<Market>("US");
@@ -32,6 +32,7 @@ export function AIResearchConsole() {
   const [suggestions, setSuggestions] = useState<StockEntry[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showNoCredits, setShowNoCredits] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [showMarketMenu, setShowMarketMenu] = useState(false);
@@ -104,15 +105,24 @@ export function AIResearchConsole() {
       setShowLoginModal(true);
       return;
     }
+    // Credits 不足拦截
+    const cost = mode === "deep" ? 3 : 1;
+    if (!user || user.credits < cost) {
+      setShowNoCredits(true);
+      setTimeout(() => setShowNoCredits(false), 4000);
+      return;
+    }
     // 如果建议列表有高亮项，先选中它
     if (showSuggestions && highlightIndex >= 0 && suggestions[highlightIndex]) {
       handleSelect(suggestions[highlightIndex]);
       return;
     }
     const rawInput = query.trim();
-    // 支持直接输入 ticker（未在 stockMap 收录的也可以分析）
     const ticker = selectedStock?.ticker || rawInput.split(/[\s·\-]/)[0].trim().toUpperCase();
     if (!ticker) return;
+
+    // 扣除 Credits
+    deductCredit(cost);
 
     setIsStarting(true);
     setBootStep(0);
@@ -138,10 +148,12 @@ export function AIResearchConsole() {
     } catch {
       router.push(`/analysis/sess_${ticker.toLowerCase()}_${Date.now()}`);
     }
-  }, [selectedStock, query, market, mode, router, showSuggestions, highlightIndex, suggestions, handleSelect]);
+  }, [selectedStock, query, market, mode, router, showSuggestions, highlightIndex, suggestions, handleSelect, isLoggedIn, user, deductCredit]);
 
   // canLaunch：有选中股票 或 输入是合法 ticker 格式
   const canLaunch = !!(selectedStock || isValidTickerFormat(query.trim()));
+  const cost = mode === "deep" ? 3 : 1;
+  const hasEnoughCredits = !isLoggedIn || !user || user.credits >= cost;
 
   return (
     <motion.section
@@ -337,22 +349,60 @@ export function AIResearchConsole() {
             </div>
 
             {/* CTA */}
-            <motion.button
-              onClick={handleLaunch}
-              disabled={!canLaunch || isStarting}
-              whileHover={canLaunch && !isStarting ? { scale: 1.02 } : {}}
-              whileTap={canLaunch && !isStarting ? { scale: 0.98 } : {}}
-              className={`shrink-0 flex items-center justify-center gap-2 rounded-lg font-semibold text-xs tracking-wide transition-all ${
-                canLaunch && !isStarting
-                  ? "bg-[var(--blue)] text-white hover:bg-[var(--blue)]/90 shadow-lg shadow-[var(--blue)]/25 cursor-pointer"
-                  : "bg-white/[0.03] text-white/15 cursor-not-allowed"
-              }`}
-              style={{ height: 48, paddingLeft: 24, paddingRight: 24, minWidth: 160 }}
-            >
-              <Zap className="w-3.5 h-3.5" />
-              启动 AI 分析
-            </motion.button>
+            <div className="shrink-0 flex flex-col items-end gap-1">
+              <motion.button
+                onClick={handleLaunch}
+                disabled={!canLaunch || isStarting}
+                whileHover={canLaunch && !isStarting ? { scale: 1.02 } : {}}
+                whileTap={canLaunch && !isStarting ? { scale: 0.98 } : {}}
+                className={`flex items-center justify-center gap-2 rounded-lg font-semibold text-xs tracking-wide transition-all ${
+                  canLaunch && !isStarting
+                    ? !hasEnoughCredits
+                      ? "bg-[var(--amber)]/80 text-white cursor-pointer"
+                      : "bg-[var(--blue)] text-white hover:bg-[var(--blue)]/90 shadow-lg shadow-[var(--blue)]/25 cursor-pointer"
+                    : "bg-white/[0.03] text-white/15 cursor-not-allowed"
+                }`}
+                style={{ height: 48, paddingLeft: 24, paddingRight: 24, minWidth: 160 }}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                {!hasEnoughCredits ? "Credits 不足" : "启动 AI 分析"}
+              </motion.button>
+              {/* Credits 余额提示 */}
+              {isLoggedIn && user && (
+                <span className="text-[9px] font-mono text-white/20 flex items-center gap-1">
+                  <Zap className="w-2.5 h-2.5" style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }} />
+                  <span style={{ color: !hasEnoughCredits ? "#f59e0b" : undefined }}>
+                    {user.credits} Credits · 本次 -{cost}
+                  </span>
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* Credits 不足提示条 */}
+          <AnimatePresence>
+            {showNoCredits && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="mt-2 flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-mono"
+                style={{
+                  background: "rgba(245,158,11,0.08)",
+                  border: "1px solid rgba(245,158,11,0.2)",
+                }}
+              >
+                <span style={{ color: "#f59e0b" }}>Credits 不足，无法启动分析</span>
+                <button
+                  onClick={() => router.push("/billing")}
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all"
+                  style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b" }}
+                >
+                  立即充值 →
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* 热门快捷入口 */}
           <div className="flex items-center gap-1.5 mt-3 flex-wrap">
