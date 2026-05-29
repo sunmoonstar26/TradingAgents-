@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { searchStocks, isValidTickerFormat, inferMarket } from "@/data/stocks";
 import { AnalysisMode, AnalysisStartResponse, Market, StockEntry } from "@/types";
-import { Search, Sparkles, Zap, ChevronDown } from "lucide-react";
+import { Search, Zap, ChevronDown } from "lucide-react";
+import { useMockAuth } from "@/lib/mock-auth";
+import { LoginUnlockModal } from "@/components/auth/LoginUnlockModal";
 
 const MARKET_LABELS: Record<Market, string> = { US: "美股", HK: "港股", CN: "A股" };
 const MODE_LABELS: Record<AnalysisMode, string> = { standard: "标准分析", deep: "深度研究" };
@@ -22,12 +24,15 @@ const BOOT_STEPS = [
 
 export function AIResearchConsole() {
   const router = useRouter();
+  const { isLoggedIn, ready } = useMockAuth();
   const [query, setQuery] = useState("");
   const [selectedStock, setSelectedStock] = useState<StockEntry | null>(null);
   const [market, setMarket] = useState<Market>("US");
   const [mode, setMode] = useState<AnalysisMode>("standard");
   const [suggestions, setSuggestions] = useState<StockEntry[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [showMarketMenu, setShowMarketMenu] = useState(false);
   const [showModeMenu, setShowModeMenu] = useState(false);
@@ -94,6 +99,11 @@ export function AIResearchConsole() {
   }, [handleSelect]);
 
   const handleLaunch = useCallback(async () => {
+    // 未登录拦截
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
     // 如果建议列表有高亮项，先选中它
     if (showSuggestions && highlightIndex >= 0 && suggestions[highlightIndex]) {
       handleSelect(suggestions[highlightIndex]);
@@ -177,14 +187,26 @@ export function AIResearchConsole() {
             {/* 搜索框 */}
             <div className="flex-1 relative min-w-0">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/15" />
+              {/* scan-line 动画 */}
+              {isFocused && (
+                <motion.div
+                  className="absolute left-0 right-0 h-px pointer-events-none z-10"
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(0,200,255,0.35), transparent)" }}
+                  initial={{ top: "0%", opacity: 0 }}
+                  animate={{ top: ["10%", "90%", "10%"], opacity: [0, 0.8, 0] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
               <input
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => handleInput(e.target.value)}
                 onFocus={() => {
+                  setIsFocused(true);
                   if (suggestions.length > 0) setShowSuggestions(true);
                 }}
+                onBlur={() => setIsFocused(false)}
                 onKeyDown={(e) => {
                   if (e.key === "ArrowDown") {
                     e.preventDefault();
@@ -434,6 +456,8 @@ export function AIResearchConsole() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <LoginUnlockModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </motion.section>
   );
 }

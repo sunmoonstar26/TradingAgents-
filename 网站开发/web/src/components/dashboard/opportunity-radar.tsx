@@ -445,7 +445,13 @@ export function OpportunityRadar({ data, onSave }: Props) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">AI 机会雷达</h2>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">全市场多智能体扫描</p>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 flex items-center gap-1.5">
+            全市场多智能体扫描
+            <span className="flex items-center gap-1 text-[var(--blue)]/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--blue)] pulse-blue inline-block" />
+              每 30 秒更新
+            </span>
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title="编辑">
@@ -510,7 +516,9 @@ export function OpportunityRadar({ data, onSave }: Props) {
                       </td>
                     )}
                     <td className={`px-5 py-3.5 font-mono font-semibold text-[var(--text-primary)] relative ${editing ? "pl-3" : "pl-6"}`}>
-                      {isActive && !editing && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--blue)] scan-bar-active rounded-r" />}
+                      {!editing && (
+                        <div className={`absolute left-0 top-1 bottom-1 w-0.5 rounded-r ${style.dot}`} />
+                      )}
                       {item.ticker}
                       <span className="ml-2 text-[var(--text-secondary)] font-normal font-sans">{item.name}</span>
                     </td>
