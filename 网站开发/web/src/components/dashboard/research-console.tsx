@@ -369,12 +369,18 @@ export function AIResearchConsole() {
               </motion.button>
               {/* Credits 余额提示 */}
               {isLoggedIn && user && (
-                <span className="text-[9px] font-mono text-white/20 flex items-center gap-1">
-                  <Zap className="w-2.5 h-2.5" style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }} />
-                  <span style={{ color: !hasEnoughCredits ? "#f59e0b" : undefined }}>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
+                  style={{
+                    background: !hasEnoughCredits ? "rgba(245,158,11,0.12)" : "rgba(0,200,255,0.08)",
+                    border: `1px solid ${!hasEnoughCredits ? "rgba(245,158,11,0.25)" : "rgba(0,200,255,0.2)"}`,
+                  }}
+                >
+                  <Zap className="w-2.5 h-2.5 shrink-0" style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }} />
+                  <span className="text-[10px] font-mono font-medium"
+                    style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }}>
                     {user.credits} Credits · 本次 -{cost}
                   </span>
-                </span>
+                </div>
               )}
             </div>
           </div>
