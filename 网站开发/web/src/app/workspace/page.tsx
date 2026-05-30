@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { ArrowLeft, Zap, Star, Clock, TrendingUp, Shield, AlertTriangle, Lock, BarChart2, Cpu } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 import { getCustomRadarEntries } from "@/lib/radar-store";
 import { OpportunityEntry } from "@/types";
 
@@ -27,7 +27,7 @@ const RECENT_ANALYSES = [
 
 export default function WorkspacePage() {
   const router = useRouter();
-  const { user, isLoggedIn, ready } = useMockAuth();
+  const { user, isLoggedIn, ready } = useAuth();
   const [radarEntries, setRadarEntries] = useState<OpportunityEntry[]>([]);
 
   useEffect(() => {

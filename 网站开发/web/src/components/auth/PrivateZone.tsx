@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, Zap } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 import { LoginUnlockModal } from "@/components/auth/LoginUnlockModal";
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
  * ready 前不渲染任何内容（避免 SSR 不匹配）。
  */
 export function PrivateZone({ children, label = "AI 研究控制台" }: Props) {
-  const { isLoggedIn, ready } = useMockAuth();
+  const { isLoggedIn, ready } = useAuth();
   const [showModal, setShowModal] = useState(false);
 
   if (!ready) return null;

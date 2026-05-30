@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 import { Zap } from "lucide-react";
 
 const TIME_FMT: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
@@ -10,7 +10,7 @@ const TIME_FMT: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit
 /** 顶部导航栏 — AI 对冲基金操作系统风格 */
 export function Header() {
   const [time, setTime] = useState("");
-  const { user, ready, logout } = useMockAuth();
+  const { user, ready, logout } = useAuth();
 
   useEffect(() => {
     const tick = () => setTime(new Date().toLocaleTimeString("zh-CN", TIME_FMT));

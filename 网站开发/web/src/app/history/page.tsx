@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { ArrowLeft, TrendingUp, Shield, AlertTriangle, Cpu, Clock, ArrowRight, Lock } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 
 interface HistoryEntry {
   id: string;
@@ -73,7 +73,7 @@ const signalConfig: Record<string, { color: string; bg: string; icon: typeof Tre
 
 export default function HistoryPage() {
   const router = useRouter();
-  const { isLoggedIn, ready } = useMockAuth();
+  const { isLoggedIn, ready } = useAuth();
 
   return (
     <div className="min-h-screen">

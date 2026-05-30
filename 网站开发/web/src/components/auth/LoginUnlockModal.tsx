@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { X, Zap, CheckCircle2 } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
 
 const FEATURES = [
   "多 Agent 实时辩论",
@@ -19,12 +19,10 @@ interface Props {
 }
 
 export function LoginUnlockModal({ open, onClose }: Props) {
-  const { login } = useMockAuth();
+  const router = useRouter();
 
-  const handleMockLogin = () => {
-    login({ name: "投资者", credits: 5 });
-    onClose();
-  };
+  const goRegister = () => { onClose(); router.push("/register"); };
+  const goLogin = () => { onClose(); router.push("/login"); };
 
   return (
     <AnimatePresence>
@@ -105,7 +103,7 @@ export function LoginUnlockModal({ open, onClose }: Props) {
               {/* 按钮组 */}
               <div className="space-y-2.5">
                 <button
-                  onClick={handleMockLogin}
+                  onClick={goRegister}
                   className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all"
                   style={{
                     background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))",
@@ -116,7 +114,7 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                   免费注册 · 获取 5 Credits
                 </button>
                 <button
-                  onClick={handleMockLogin}
+                  onClick={goLogin}
                   className="w-full py-2.5 rounded-xl text-xs font-mono text-white/40 hover:text-white/60 hover:bg-white/[0.03] transition-all border border-white/[0.06]"
                 >
                   已有账号，直接登录

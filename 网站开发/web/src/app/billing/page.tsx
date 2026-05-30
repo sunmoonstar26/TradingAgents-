@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Zap, ArrowLeft, TrendingUp, BarChart2, Shield, Cpu } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 
 const PLANS = [
   { name: "基础版", credits: 20, price: "¥29", desc: "适合个人投资者", highlight: false },
@@ -22,7 +22,7 @@ const MOCK_HISTORY = [
 
 export default function BillingPage() {
   const router = useRouter();
-  const { user, isLoggedIn } = useMockAuth();
+  const { user, isLoggedIn } = useAuth();
 
   const maxCredits = 20;
   const pct = user ? Math.min((user.credits / maxCredits) * 100, 100) : 0;

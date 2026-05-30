@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { searchStocks, isValidTickerFormat, inferMarket } from "@/data/stocks";
 import { AnalysisMode, AnalysisStartResponse, Market, StockEntry } from "@/types";
 import { Search, Zap, ChevronDown } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 import { LoginUnlockModal } from "@/components/auth/LoginUnlockModal";
 
 const MARKET_LABELS: Record<Market, string> = { US: "美股", HK: "港股", CN: "A股" };
@@ -24,7 +24,7 @@ const BOOT_STEPS = [
 
 export function AIResearchConsole() {
   const router = useRouter();
-  const { isLoggedIn, ready, user, deductCredit } = useMockAuth();
+  const { isLoggedIn, ready, user, deductCredit } = useAuth();
   const [query, setQuery] = useState("");
   const [selectedStock, setSelectedStock] = useState<StockEntry | null>(null);
   const [market, setMarket] = useState<Market>("US");

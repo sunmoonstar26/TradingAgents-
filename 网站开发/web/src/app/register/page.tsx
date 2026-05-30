@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { Zap, CheckCircle2, ArrowRight } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 
 const FEATURES = [
   "多 Agent 实时辩论",
@@ -16,19 +16,30 @@ const FEATURES = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login, isLoggedIn } = useMockAuth();
+  const { register, isLoggedIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
   if (isLoggedIn) {
     router.replace("/");
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login({ name: email.split("@")[0] || "投资者", credits: 5 });
-    router.push("/");
+    setError("");
+    setLoading(true);
+    try {
+      await register(email, password);
+      setDone(true); // Supabase 默认需要邮件验证
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "注册失败，请重试");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,15 +114,24 @@ export default function RegisterPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full h-11 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all mt-2"
+                  disabled={loading}
+                  className="w-full h-11 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all mt-2 disabled:opacity-60"
                   style={{
                     background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))",
                     boxShadow: "0 0 20px rgba(0,200,255,0.2)",
                   }}
                 >
-                  注册并获取 5 Credits
-                  <ArrowRight className="w-4 h-4" />
+                  {loading ? "注册中..." : "注册并获取 5 Credits"}
+                  {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
+                {error && (
+                  <p className="text-[11px] text-[var(--red)] font-mono text-center pt-1">{error}</p>
+                )}
+                {done && (
+                  <p className="text-[11px] font-mono text-center pt-1" style={{ color: "#00c8ff" }}>
+                    ✓ 注册成功！请检查邮箱完成验证后登录
+                  </p>
+                )}
               </form>
 
               <div className="mt-5 pt-5 border-t border-white/[0.06] text-center">

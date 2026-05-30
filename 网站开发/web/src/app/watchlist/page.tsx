@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { ArrowLeft, Star, TrendingUp, Shield, AlertTriangle, Trash2, Plus, Lock } from "lucide-react";
-import { useMockAuth } from "@/lib/mock-auth";
+import { useAuth } from "@/lib/auth";
 import { getCustomRadarEntries, removeFromRadar } from "@/lib/radar-store";
 import { OpportunityEntry } from "@/types";
 
@@ -30,7 +30,7 @@ function formatDate(iso?: string): string {
 
 export default function WatchlistPage() {
   const router = useRouter();
-  const { isLoggedIn, ready } = useMockAuth();
+  const { isLoggedIn, ready } = useAuth();
   const [entries, setEntries] = useState<OpportunityEntry[]>([]);
   const [removing, setRemoving] = useState<string | null>(null);
 
