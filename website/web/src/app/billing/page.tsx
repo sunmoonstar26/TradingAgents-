@@ -7,9 +7,16 @@ import { Zap, ArrowLeft, TrendingUp, BarChart2, Shield, Cpu } from "lucide-react
 import { useAuth } from "../../lib/auth";
 
 const PLANS = [
-  { name: "基础版", credits: 20, price: "¥29", desc: "适合个人投资者", highlight: false },
-  { name: "专业版", credits: 100, price: "¥99", desc: "适合活跃交易者", highlight: true },
-  { name: "机构版", credits: 500, price: "¥399", desc: "适合专业机构", highlight: false },
+  {
+    name: "基础版", credits: 20, price: "$5", desc: "适合个人投资者", highlight: false,
+    productId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_BASIC,
+    buyUrl: "https://creem.io/product/" + "prod_3UHbOb0vFwiJxV5InIN94D",
+  },
+  {
+    name: "专业版", credits: 100, price: "$10", desc: "适合活跃交易者", highlight: true,
+    productId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PRO,
+    buyUrl: "https://creem.io/product/" + "prod_3XIVWJ0ALhzo0ntLavqJge",
+  },
 ];
 
 const MOCK_HISTORY = [
@@ -188,8 +195,11 @@ export default function BillingPage() {
                   {plan.credits} Credits
                 </div>
               </div>
-              <button
-                className="mt-auto w-full py-2 rounded-lg text-xs font-semibold transition-all"
+              <a
+                href={plan.buyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-auto w-full py-2 rounded-lg text-xs font-semibold transition-all text-center block"
                 style={plan.highlight ? {
                   background: "linear-gradient(135deg, rgba(0,140,255,0.85), rgba(0,200,255,0.75))",
                   color: "#fff",
@@ -201,13 +211,13 @@ export default function BillingPage() {
                 }}
               >
                 购买
-              </button>
+              </a>
             </motion.div>
           ))}
         </div>
 
         <p className="text-center text-[10px] text-[var(--text-secondary)]/40 font-mono mt-8">
-          当前为演示版本 · 支付功能即将上线
+          支付由 Creem 处理 · 购买后 Credits 自动到账
         </p>
       </main>
     </div>
