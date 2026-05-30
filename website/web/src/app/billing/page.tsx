@@ -9,12 +9,10 @@ import { useAuth } from "../../lib/auth";
 const PLANS = [
   {
     name: "基础版", credits: 20, price: "$5", desc: "适合个人投资者", highlight: false,
-    productId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_BASIC,
     buyUrl: "https://creem.io/product/" + "prod_3UHbOb0vFwiJxV5InIN94D",
   },
   {
     name: "专业版", credits: 100, price: "$10", desc: "适合活跃交易者", highlight: true,
-    productId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PRO,
     buyUrl: "https://creem.io/product/" + "prod_3XIVWJ0ALhzo0ntLavqJge",
   },
 ];
