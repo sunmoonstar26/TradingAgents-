@@ -218,3 +218,13 @@ __marimo__/
 # Cache
 **/data_cache/
 .env.local
+
+# TradingAgents runtime files
+cache/
+logs/
+reports/
+*.DS_Store
+.DS_Store
+website/.next/
+website/node_modules/
+website/data/analysis_results/
