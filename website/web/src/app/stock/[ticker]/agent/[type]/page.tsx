@@ -2,10 +2,10 @@
 
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { Header } from "@/components/layout/header";
-import { MarkdownContent } from "@/components/ui/MarkdownContent";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AnalyzingState } from "@/components/stock/analyzing-state";
+import { Header } from "../../../../../components/layout/header";
+import { MarkdownContent } from "../../../../../components/ui/MarkdownContent";
+import { Skeleton } from "../../../../../components/ui/skeleton";
+import { AnalyzingState } from "../../../../../components/stock/analyzing-state";
 import { ArrowLeft, Brain, TrendingUp, MessageCircle, ShieldAlert, Newspaper, Globe, Activity, TrendingDown } from "lucide-react";
 
 // Agent 类型配置

@@ -1,21 +1,21 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/layout/header";
-import { GlobalMarketState } from "@/components/dashboard/global-market-state";
-import { AIResearchConsole } from "@/components/dashboard/research-console";
-import { OpportunityRadar } from "@/components/dashboard/opportunity-radar";
-import { ConvictionIdeas } from "@/components/dashboard/conviction-ideas";
-import { RiskTerminal } from "@/components/dashboard/risk-terminal";
-import { LiveFeed } from "@/components/dashboard/live-feed";
-import { PrivateZone } from "@/components/auth/PrivateZone";
-import { FeaturedResearch } from "@/components/dashboard/featured-research";
-import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getCustomRadarEntries } from "@/lib/radar-store";
-import { getCustomMemoEntries, seedMemosFromApi } from "@/lib/memo-store";
-import { getRiskAlerts, seedRiskAlertsFromApi } from "@/lib/risk-alert-store";
-import { seedFeedFromMock } from "@/lib/livefeed-store";
+import { Header } from "../components/layout/header";
+import { GlobalMarketState } from "../components/dashboard/global-market-state";
+import { AIResearchConsole } from "../components/dashboard/research-console";
+import { OpportunityRadar } from "../components/dashboard/opportunity-radar";
+import { ConvictionIdeas } from "../components/dashboard/conviction-ideas";
+import { RiskTerminal } from "../components/dashboard/risk-terminal";
+import { LiveFeed } from "../components/dashboard/live-feed";
+import { PrivateZone } from "../components/auth/PrivateZone";
+import { FeaturedResearch } from "../components/dashboard/featured-research";
+import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "../types";
+import { Skeleton } from "../components/ui/skeleton";
+import { getCustomRadarEntries } from "../lib/radar-store";
+import { getCustomMemoEntries, seedMemosFromApi } from "../lib/memo-store";
+import { getRiskAlerts, seedRiskAlertsFromApi } from "../lib/risk-alert-store";
+import { seedFeedFromMock } from "../lib/livefeed-store";
 import { useMemo, useState, useEffect } from "react";
 
 function DashboardSkeleton() {

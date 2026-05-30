@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { RiskExposure, RiskInsight } from "@/types";
+import { RiskExposure, RiskInsight } from "../../types";
 import { Shield, AlertTriangle, ChevronRight, FileText } from "lucide-react";
-import { stripAllMarkdown } from "@/components/ui/MarkdownContent";
+import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 
 interface Props {
   data: RiskExposure[];

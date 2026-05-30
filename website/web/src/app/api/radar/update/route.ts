@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSession, startRealAnalysis } from "@/lib/analysis-store";
+import { createSession, startRealAnalysis } from "../../../../lib/analysis-store";
 
 /** POST /api/radar/update — 触发单只股票的 AI 分析刷新 */
 export async function POST(req: NextRequest) {

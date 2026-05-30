@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LiveFeedEntry } from "@/types";
-import { getLiveFeed, seedFeedFromMock, FeedItem } from "@/lib/livefeed-store";
+import { LiveFeedEntry } from "../../types";
+import { getLiveFeed, seedFeedFromMock, FeedItem } from "../../lib/livefeed-store";
 
 interface Props {
   data: LiveFeedEntry[];

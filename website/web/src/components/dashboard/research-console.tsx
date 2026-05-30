@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { searchStocks, isValidTickerFormat, inferMarket } from "@/data/stocks";
-import { AnalysisMode, AnalysisStartResponse, Market, StockEntry } from "@/types";
+import { searchStocks, isValidTickerFormat, inferMarket } from "../../data/stocks";
+import { AnalysisMode, AnalysisStartResponse, Market, StockEntry } from "../../types";
 import { Search, Zap, ChevronDown } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import { LoginUnlockModal } from "@/components/auth/LoginUnlockModal";
+import { useAuth } from "../../lib/auth";
+import { LoginUnlockModal } from "../../components/auth/LoginUnlockModal";
 
 const MARKET_LABELS: Record<Market, string> = { US: "美股", HK: "港股", CN: "A股" };
 const MODE_LABELS: Record<AnalysisMode, string> = { standard: "标准分析", deep: "深度研究" };

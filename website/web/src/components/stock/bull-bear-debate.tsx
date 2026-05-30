@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { DebatePoint, ConflictRow, DebateInsight } from "@/types";
+import { DebatePoint, ConflictRow, DebateInsight } from "../../types";
 import { TrendingUp, TrendingDown, Scale, Swords, ChevronRight, AlertTriangle, Zap } from "lucide-react";
-import { stripAllMarkdown } from "@/components/ui/MarkdownContent";
+import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 
 interface Props {
   bullThesis: DebatePoint[];

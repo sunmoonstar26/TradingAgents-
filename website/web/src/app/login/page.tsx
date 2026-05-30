@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
+import { Header } from "../../components/layout/header";
 import { Zap, ArrowRight } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();

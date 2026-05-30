@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { GlobalMarketState } from "@/types";
+import { GlobalMarketState } from "../../../types";
 
 const MARKET_FILE = join(process.cwd(), "data", "market.json");
 

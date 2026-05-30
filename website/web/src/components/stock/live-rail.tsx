@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { Terminal, Radio } from "lucide-react";
-import { LiveFeedEntry } from "@/types";
+import { LiveFeedEntry } from "../../types";
 
 interface Props {
   data: LiveFeedEntry[];

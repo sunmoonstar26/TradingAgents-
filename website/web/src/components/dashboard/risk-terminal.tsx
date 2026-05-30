@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { RiskAlert } from "@/types";
+import { RiskAlert } from "../../types";
 import { AlertTriangle, ShieldAlert, AlertCircle } from "lucide-react";
 
 const levelConfig: Record<string, { icon: typeof AlertTriangle; border: string; bg: string; text: string }> = {

@@ -2,8 +2,8 @@
 
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { useState, useCallback } from "react";
-import { addToRadar, isInRadar } from "@/lib/radar-store";
-import { OpportunityEntry } from "@/types";
+import { addToRadar, isInRadar } from "../../lib/radar-store";
+import { OpportunityEntry } from "../../types";
 
 interface Props {
   ticker: string;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { PositionAllocation, TradingInsight } from "@/types";
+import { PositionAllocation, TradingInsight } from "../../types";
 import { Target, TrendingUp, TrendingDown, Shield, ChevronRight, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 
 interface Props {

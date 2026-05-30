@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/analysis-store";
+import { getSession } from "../../../../lib/analysis-store";
 
 export async function GET(
   _req: NextRequest,

@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LearningMemory, MemoryInsight } from "@/types";
+import { LearningMemory, MemoryInsight } from "../../types";
 import { Brain, Lightbulb, AlertTriangle, RefreshCw, TrendingUp } from "lucide-react";
-import { stripAllMarkdown } from "@/components/ui/MarkdownContent";
+import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 
 interface Props {
   data: LearningMemory[];

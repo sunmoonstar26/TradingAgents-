@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
+import { Header } from "../../components/layout/header";
 import { Zap, CheckCircle2, ArrowRight } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "../../lib/auth";
 
 const FEATURES = [
   "多 Agent 实时辩论",

@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
+import { Header } from "../../components/layout/header";
 import { Cpu, Loader2, AlertTriangle, ArrowLeft, FileText } from "lucide-react";
-import { findStock } from "@/data/stocks";
+import { findStock } from "../../data/stocks";
 
 interface SessionStatusResponse {
   success: boolean;

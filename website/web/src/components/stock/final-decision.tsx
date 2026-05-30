@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Signal, ReasonCapsule } from "@/types";
+import { Signal, ReasonCapsule } from "../../types";
 import { Shield, TrendingUp, AlertTriangle, Zap, ChevronDown, ChevronUp } from "lucide-react";
-import { stripAllMarkdown } from "@/components/ui/MarkdownContent";
+import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 import { useState } from "react";
 
 const signalConfig: Record<string, { bg: string; text: string; icon: typeof TrendingUp; glow: string }> = {

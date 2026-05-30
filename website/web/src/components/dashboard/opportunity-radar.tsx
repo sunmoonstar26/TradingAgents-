@@ -3,13 +3,13 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { OpportunityEntry, StockEntry, ConsensusBreakdown } from "@/types";
+import { OpportunityEntry, StockEntry, ConsensusBreakdown } from "../../types";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
-import { searchStocks } from "@/data/stocks";
-import { saveCustomRadarEntries, updateRadarEntryDate, syncRadarFull, parseConsensus } from "@/lib/radar-store";
-import { syncMemoFromRadar } from "@/lib/memo-store";
-import { upsertRiskAlertsFromInsights } from "@/lib/risk-alert-store";
-import { upsertFeedFromInsights } from "@/lib/livefeed-store";
+import { searchStocks } from "../../data/stocks";
+import { saveCustomRadarEntries, updateRadarEntryDate, syncRadarFull, parseConsensus } from "../../lib/radar-store";
+import { syncMemoFromRadar } from "../../lib/memo-store";
+import { upsertRiskAlertsFromInsights } from "../../lib/risk-alert-store";
+import { upsertFeedFromInsights } from "../../lib/livefeed-store";
 
 const signalStyles: Record<string, { bg: string; text: string; dot: string }> = {
   强烈买入: { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },

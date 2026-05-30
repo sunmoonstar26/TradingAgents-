@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { AgentAnalysis, AnalystInsight, KeyInsight, StockInsights } from "@/types";
+import { AgentAnalysis, AnalystInsight, KeyInsight, StockInsights } from "../../types";
 import {
   Brain, TrendingUp, MessageCircle, ShieldAlert, Newspaper, Globe,
   FileText, ChevronRight, Zap, CheckCircle2, AlertTriangle,
 } from "lucide-react";
-import { stripAllMarkdown } from "@/components/ui/MarkdownContent";
+import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 
 const personalityConfig: Record<string, { borderClass: string; icon: typeof Brain; iconColor: string; label: string; mapKey: string }> = {
   fundamental: { borderClass: "agent-fundamental", icon: Brain, iconColor: "text-[var(--blue)]", label: "基本面", mapKey: "fundamentals" },

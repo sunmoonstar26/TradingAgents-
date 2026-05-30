@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSession, startRealAnalysis } from "@/lib/analysis-store";
-import { AnalysisStartRequest } from "@/types";
+import { createSession, startRealAnalysis } from "../../../../lib/analysis-store";
+import { AnalysisStartRequest } from "../../../../types";
 
 export async function POST(req: NextRequest) {
   try {

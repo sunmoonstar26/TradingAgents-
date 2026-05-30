@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "../../../components/layout/header";
+import { Skeleton } from "../../../components/ui/skeleton";
 import { ArrowLeft, Loader2, CheckCircle2, Cpu } from "lucide-react";
 
 const AGENT_LABELS: Record<string, string> = {

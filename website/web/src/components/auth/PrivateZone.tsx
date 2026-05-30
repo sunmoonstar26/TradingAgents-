@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, Zap } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import { LoginUnlockModal } from "@/components/auth/LoginUnlockModal";
+import { useAuth } from "../../lib/auth";
+import { LoginUnlockModal } from "../../components/auth/LoginUnlockModal";
 
 interface Props {
   children: React.ReactNode;

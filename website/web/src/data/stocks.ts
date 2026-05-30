@@ -1,4 +1,4 @@
-import { StockEntry, Market } from "@/types";
+import { StockEntry, Market } from "../types";
 
 // 本地股票映射表 — 用于自动补全，无需外部 API
 export const stockMap: StockEntry[] = [

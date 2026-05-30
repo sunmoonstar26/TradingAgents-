@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { SectorFlow } from "@/types";
+import { SectorFlow } from "../../types";
 
 function MomentumBar({ value }: { value: number }) {
   const color =

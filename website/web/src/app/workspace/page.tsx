@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
+import { Header } from "../../components/layout/header";
 import { ArrowLeft, Zap, Star, Clock, TrendingUp, Shield, AlertTriangle, Lock, BarChart2, Cpu } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import { getCustomRadarEntries } from "@/lib/radar-store";
-import { OpportunityEntry } from "@/types";
+import { useAuth } from "../../lib/auth";
+import { getCustomRadarEntries } from "../../lib/radar-store";
+import { OpportunityEntry } from "../../types";
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
   强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },

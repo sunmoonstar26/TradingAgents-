@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "@/components/layout/header";
+import { Header } from "../../components/layout/header";
 import { ArrowLeft, TrendingUp, Shield, AlertTriangle, Cpu, Clock, ArrowRight, Lock } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "../../lib/auth";
 
 interface HistoryEntry {
   id: string;

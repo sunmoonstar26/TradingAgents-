@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStockDetail } from "@/lib/mock-stock";
-import { getActiveSessionByTicker } from "@/lib/analysis-store";
+import { getStockDetail } from "../../../../lib/mock-stock";
+import { getActiveSessionByTicker } from "../../../../lib/analysis-store";
 
 export async function GET(
   _request: NextRequest,

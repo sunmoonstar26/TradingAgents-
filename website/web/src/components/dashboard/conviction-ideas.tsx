@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { InvestmentMemo, StockEntry } from "@/types";
+import { InvestmentMemo, StockEntry } from "../../types";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, Zap, AlertTriangle, TrendingUp } from "lucide-react";
-import { searchStocks } from "@/data/stocks";
-import { saveCustomMemoEntries } from "@/lib/memo-store";
+import { searchStocks } from "../../data/stocks";
+import { saveCustomMemoEntries } from "../../lib/memo-store";
 
 const signalStyles: Record<string, string> = {
   强烈买入: "text-[var(--green)] bg-[var(--green)]/10",

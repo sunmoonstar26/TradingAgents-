@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MarketIndicator } from "@/types";
+import { MarketIndicator } from "../../types";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 function StatusBadge({ status }: { status: MarketIndicator["status"] }) {
