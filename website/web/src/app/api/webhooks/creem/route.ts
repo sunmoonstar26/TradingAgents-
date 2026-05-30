@@ -1,24 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { createClient } from "@supabase/supabase-js";
 
-// Supabase service role client（服务端专用，有完整权限）
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+/** 直接调用 Supabase REST API（不依赖 SDK admin 方法） */
+async function supabaseAdmin(path: string, options: RequestInit = {}) {
+  const res = await fetch(`${SUPABASE_URL}${path}`, {
+    ...options,
+    headers: {
+      apikey: SERVICE_KEY,
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+      ...(options.headers || {}),
+    },
+  });
+  return res;
 }
 
 /** 验证 Creem Webhook 签名 */
 function verifySignature(payload: string, signature: string, secret: string): boolean {
   try {
-    const expected = crypto
-      .createHmac("sha256", secret)
-      .update(payload)
-      .digest("hex");
-    // Creem 签名格式可能是 "sha256=xxx" 或直接是 hex
+    const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
     const sig = signature.startsWith("sha256=") ? signature.slice(7) : signature;
     return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig));
   } catch {
@@ -26,11 +30,11 @@ function verifySignature(payload: string, signature: string, secret: string): bo
   }
 }
 
-/** Credits 套餐映射：product_id → credits 数量 */
+/** product_id → credits 数量 */
 function getCreditsForProduct(productId: string): number {
   const map: Record<string, number> = {
-    [process.env.CREEM_PRODUCT_ID_BASIC!]: 20,   // $5 → 20 Credits
-    [process.env.CREEM_PRODUCT_ID_PRO!]: 100,    // $10 → 100 Credits
+    [process.env.CREEM_PRODUCT_ID_BASIC!]: 20,
+    [process.env.CREEM_PRODUCT_ID_PRO!]: 100,
   };
   return map[productId] ?? 0;
 }
@@ -38,103 +42,83 @@ function getCreditsForProduct(productId: string): number {
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
 
-  // 验证签名
+  // 验证签名（有 secret 才验证）
+  const secret = process.env.CREEM_WEBHOOK_SECRET ?? "";
   const signature =
     req.headers.get("creem-signature") ||
     req.headers.get("x-creem-signature") ||
     req.headers.get("webhook-signature") || "";
 
-  const secret = process.env.CREEM_WEBHOOK_SECRET!;
-
-  if (secret && signature) {
-    if (!verifySignature(rawBody, signature, secret)) {
-      console.error("[Creem Webhook] 签名验证失败");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  if (secret && signature && !verifySignature(rawBody, signature, secret)) {
+    console.error("[Webhook] 签名验证失败");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  let event: {
-    eventType?: string;
-    event?: string;
-    object?: {
-      customer?: { email?: string };
-      product_id?: string;
-      product?: { id?: string };
-      metadata?: Record<string, string>;
-    };
-    data?: {
-      customer?: { email?: string };
-      product_id?: string;
-      product?: { id?: string };
-    };
-  };
-
+  let event: Record<string, unknown>;
   try {
     event = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // 兼容 Creem 不同的事件格式
-  const eventType = event.eventType || event.event || "";
-  const obj = event.object || event.data || {};
-  const customerEmail = obj.customer?.email;
-  const productId = obj.product_id || obj.product?.id;
+  const eventType = (event.eventType || event.event || "") as string;
+  const obj = (event.object || event.data || {}) as Record<string, unknown>;
+  const customer = (obj.customer || {}) as Record<string, unknown>;
+  const customerEmail = customer.email as string | undefined;
+  const productId = (obj.product_id || (obj.product as Record<string, unknown>)?.id) as string | undefined;
 
-  console.log("[Creem Webhook] 收到事件:", eventType, "| 产品:", productId, "| 邮箱:", customerEmail);
+  console.log("[Webhook] 事件:", eventType, "| 产品:", productId, "| 邮箱:", customerEmail);
 
   if (eventType !== "checkout.completed" && eventType !== "payment.succeeded") {
     return NextResponse.json({ received: true });
   }
 
   if (!customerEmail || !productId) {
-    console.error("[Creem Webhook] 缺少 email 或 product_id", { customerEmail, productId });
-    return NextResponse.json({ error: "Missing customer email or product_id" }, { status: 400 });
+    console.error("[Webhook] 缺少 email 或 product_id");
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
   const creditsToAdd = getCreditsForProduct(productId);
   if (creditsToAdd === 0) {
-    console.warn("[Creem Webhook] 未知产品 ID:", productId);
+    console.warn("[Webhook] 未知产品:", productId);
     return NextResponse.json({ received: true });
   }
 
-  // 用 service role 查找用户并增加 Credits
-  const supabase = getServiceClient();
+  // 1. 通过 email 查找用户 ID
+  const usersRes = await supabaseAdmin(
+    `/auth/v1/admin/users?email=${encodeURIComponent(customerEmail)}`,
+    { method: "GET" }
+  );
+  const usersData = await usersRes.json();
+  const users = usersData.users || (Array.isArray(usersData) ? usersData : []);
+  const user = users.find((u: { email: string }) => u.email === customerEmail);
 
-  // 通过 email 找到用户 ID
-  const { data: users, error: userError } = await supabase.auth.admin.listUsers();
-  if (userError) {
-    console.error("[Creem Webhook] 查询用户失败:", userError.message);
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-
-  const user = users.users.find((u) => u.email === customerEmail);
   if (!user) {
-    console.warn("[Creem Webhook] 找不到用户:", customerEmail);
-    // 用户不存在时仍返回 200，避免 Creem 重试
+    console.warn("[Webhook] 找不到用户:", customerEmail);
     return NextResponse.json({ received: true });
   }
 
-  // 读取当前 Credits
-  const { data: current } = await supabase
-    .from("user_credits")
-    .select("credits")
-    .eq("id", user.id)
-    .single();
-
-  const currentCredits = current?.credits ?? 0;
+  // 2. 读取当前 credits
+  const creditsRes = await supabaseAdmin(`/rest/v1/user_credits?id=eq.${user.id}`);
+  const creditsData = await creditsRes.json();
+  const currentCredits = (creditsData[0]?.credits as number) ?? 0;
   const newCredits = currentCredits + creditsToAdd;
 
-  // 更新 Credits
-  const { error: updateError } = await supabase
-    .from("user_credits")
-    .upsert({ id: user.id, credits: newCredits, updated_at: new Date().toISOString() });
+  // 3. 更新 credits
+  const updateRes = await supabaseAdmin(
+    `/rest/v1/user_credits?id=eq.${user.id}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ credits: newCredits, updated_at: new Date().toISOString() }),
+    }
+  );
 
-  if (updateError) {
-    console.error("[Creem Webhook] 更新 Credits 失败:", updateError.message);
-    return NextResponse.json({ error: "Failed to update credits" }, { status: 500 });
+  if (!updateRes.ok) {
+    const err = await updateRes.text();
+    console.error("[Webhook] 更新失败:", err);
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 
-  console.log(`[Creem Webhook] ✓ ${customerEmail} +${creditsToAdd} Credits → 共 ${newCredits}`);
-  return NextResponse.json({ received: true, credits_added: creditsToAdd });
+  console.log(`[Webhook] ✓ ${customerEmail} +${creditsToAdd} → 共 ${newCredits} Credits`);
+  return NextResponse.json({ received: true, credits_added: creditsToAdd, total: newCredits });
 }
