@@ -89,12 +89,20 @@ export async function POST(req: NextRequest) {
     `/auth/v1/admin/users?email=${encodeURIComponent(customerEmail)}`,
     { method: "GET" }
   );
+
+  if (!usersRes.ok) {
+    const errText = await usersRes.text();
+    console.error("[Webhook] 查用户失败 HTTP", usersRes.status, errText.slice(0, 200));
+    // 返回 500 让 Creem 重试
+    return NextResponse.json({ error: "Failed to lookup user" }, { status: 500 });
+  }
+
   const usersData = await usersRes.json();
   const users = usersData.users || (Array.isArray(usersData) ? usersData : []);
   const user = users.find((u: { email: string }) => u.email === customerEmail);
 
   if (!user) {
-    console.warn("[Webhook] 找不到用户:", customerEmail);
+    console.warn("[Webhook] 找不到用户:", customerEmail, "| 总用户数:", users.length);
     return NextResponse.json({ received: true });
   }
 
