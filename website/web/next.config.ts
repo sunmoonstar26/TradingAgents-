@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      enabled: false,
+  turbopack: {
+    resolveAlias: {
+      "@": "./src",
     },
   },
   webpack(config) {
