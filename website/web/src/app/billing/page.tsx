@@ -8,12 +8,34 @@ import { useAuth } from "../../lib/auth";
 
 const PLANS = [
   {
-    name: "基础版", credits: 20, price: "$5", desc: "适合个人投资者", highlight: false,
-    buyUrl: "https://creem.io/product/" + "prod_3UHbOb0vFwiJxV5InIN94D",
+    label: "入门",
+    price: "$5",
+    credits: 5,
+    perCredit: "$1.00",
+    discount: null,
+    desc: "首次体验，按需购买",
+    highlight: false,
+    buyUrl: "https://creem.io/product/prod_3UHbOb0vFwiJxV5InIN94D",
   },
   {
-    name: "专业版", credits: 100, price: "$10", desc: "适合活跃交易者", highlight: true,
-    buyUrl: "https://creem.io/product/" + "prod_3XIVWJ0ALhzo0ntLavqJge",
+    label: "超值",
+    price: "$15",
+    credits: 20,
+    perCredit: "$0.75",
+    discount: "25% OFF",
+    desc: "最受欢迎，性价比最高",
+    highlight: true,
+    buyUrl: "https://creem.io/product/prod_3XIVWJ0ALhzo0ntLavqJge",
+  },
+  {
+    label: "囤货",
+    price: "$30",
+    credits: 50,
+    perCredit: "$0.60",
+    discount: "40% OFF",
+    desc: "重度用户首选，折扣最大",
+    highlight: false,
+    buyUrl: "https://creem.io/product/prod_3XIVWJ0ALhzo0ntLavqJge",
   },
 ];
 
@@ -155,67 +177,93 @@ export default function BillingPage() {
           </div>
         )}
 
-        {/* 套餐卡片 */}
-        <h2 className="text-xs font-semibold text-[var(--text-secondary)] font-mono mb-4 tracking-wider">选择套餐</h2>
+        {/* 在线充值 */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-semibold text-[var(--text-secondary)] font-mono tracking-wider uppercase">在线充值</h2>
+          <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">1 Credit = 1 次 AI 分析</span>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {PLANS.map((plan, i) => (
             <motion.div
-              key={plan.name}
+              key={plan.label}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="card-terminal p-5 flex flex-col relative"
+              className="card-terminal p-5 flex flex-col relative overflow-hidden"
               style={plan.highlight ? {
-                border: "1px solid rgba(0,200,255,0.25)",
-                boxShadow: "0 0 24px rgba(0,200,255,0.08)",
+                border: "1px solid rgba(0,200,255,0.3)",
+                boxShadow: "0 0 28px rgba(0,200,255,0.1)",
               } : {}}
             >
+              {/* 推荐光线 */}
               {plan.highlight && (
-                <>
-                  <div
-                    className="absolute -top-px left-1/2 -translate-x-1/2 w-2/3 h-px"
-                    style={{ background: "linear-gradient(90deg, transparent, rgba(0,200,255,0.5), transparent)" }}
-                  />
-                  <span
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold"
-                    style={{ background: "rgba(0,200,255,0.15)", color: "#00c8ff", border: "1px solid rgba(0,200,255,0.25)" }}
-                  >
-                    推荐
-                  </span>
-                </>
+                <div
+                  className="absolute -top-px left-1/2 -translate-x-1/2 w-3/4 h-px"
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(0,200,255,0.6), transparent)" }}
+                />
               )}
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-0.5">{plan.name}</h3>
-              <p className="text-[11px] text-[var(--text-secondary)] font-mono mb-4">{plan.desc}</p>
-              <div className="flex items-baseline gap-1.5 mb-4">
-                <span className="text-2xl font-bold font-mono text-[var(--text-primary)]">{plan.price}</span>
-                <div className="flex items-center gap-1 text-[11px] font-mono" style={{ color: "#00c8ff" }}>
-                  <Zap className="w-3 h-3" />
-                  {plan.credits} Credits
-                </div>
+
+              {/* 标签行 */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-mono font-semibold text-[var(--text-secondary)]/60 uppercase tracking-widest">
+                  {plan.label}
+                </span>
+                {plan.discount ? (
+                  <span
+                    className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(0,200,255,0.12)", color: "#00c8ff", border: "1px solid rgba(0,200,255,0.25)" }}
+                  >
+                    {plan.discount}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">标准价</span>
+                )}
               </div>
+
+              {/* 价格 + Credits */}
+              <div className="mb-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold font-mono text-[var(--text-primary)]">{plan.price}</span>
+                  <div className="flex items-center gap-1" style={{ color: "#00c8ff" }}>
+                    <Zap className="w-3.5 h-3.5" />
+                    <span className="text-lg font-bold font-mono">{plan.credits}</span>
+                    <span className="text-xs font-mono">Credits</span>
+                  </div>
+                </div>
+                <p className="text-[10px] font-mono text-[var(--text-secondary)]/40 mt-0.5">
+                  {plan.perCredit} / Credit
+                </p>
+              </div>
+
+              {/* 描述 */}
+              <p className="text-[11px] text-[var(--text-secondary)]/60 font-mono mb-4 mt-2 leading-relaxed">
+                {plan.desc}
+              </p>
+
+              {/* 购买按钮 */}
               <a
                 href={plan.buyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-auto w-full py-2 rounded-lg text-xs font-semibold transition-all text-center block"
+                className="mt-auto w-full py-2.5 rounded-xl text-xs font-semibold transition-all text-center block"
                 style={plan.highlight ? {
-                  background: "linear-gradient(135deg, rgba(0,140,255,0.85), rgba(0,200,255,0.75))",
+                  background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))",
                   color: "#fff",
-                  boxShadow: "0 0 16px rgba(0,200,255,0.18)",
+                  boxShadow: "0 0 20px rgba(0,200,255,0.2)",
                 } : {
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.5)",
-                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.6)",
+                  background: "rgba(255,255,255,0.04)",
                 }}
               >
-                购买
+                立即充值
               </a>
             </motion.div>
           ))}
         </div>
 
         <p className="text-center text-[10px] text-[var(--text-secondary)]/40 font-mono mt-8">
-          支付由 Creem 处理 · 购买后 Credits 自动到账
+          支付由 Creem 处理 · 充值后 Credits 自动到账 · 永久有效
         </p>
       </main>
     </div>
