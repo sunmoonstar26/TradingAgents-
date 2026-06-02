@@ -100,10 +100,10 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
 
   // 共识：按信号给初始默认值，分析完成后由 insights 覆盖更准确的值
   const consensus =
-    raw.signal.toLowerCase() === "buy"        ? "6/8 Bullish" :
-    raw.signal.toLowerCase() === "overweight" ? "5/8 Bullish" :
-    raw.signal.toLowerCase() === "hold"       ? "4/8 Bullish" :
-    raw.signal.toLowerCase() === "underweight"? "3/8 Bullish" :
+    signal === SignalEnum.STRONG_BUY  ? "6/8 Bullish" :
+    signal === SignalEnum.BUY         ? "5/8 Bullish" :
+    signal === SignalEnum.HOLD        ? "4/8 Bullish" :
+    signal === SignalEnum.SELL        ? "3/8 Bullish" :
     "2/8 Bullish";
 
   // 置信度：从明确的"置信度 XX%"关键词提取，避免误匹配仓位/价格中的百分比
