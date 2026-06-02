@@ -8,6 +8,7 @@ import { ArrowLeft, Star, TrendingUp, Shield, AlertTriangle, Trash2, Plus, Lock 
 import { useAuth } from "../../lib/auth";
 import { getCustomRadarEntries, removeFromRadar } from "../../lib/radar-store";
 import { OpportunityEntry } from "../../types";
+import { RiskLevel } from "@/types/enums";
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
   强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
@@ -180,7 +181,7 @@ export default function WatchlistPage() {
                           </td>
                           <td className="px-5 py-3.5 font-mono font-semibold text-[var(--text-primary)]">{item.conviction}%</td>
                           <td className="px-5 py-3.5">
-                            <span className={`text-[11px] font-medium ${item.risk === "低" ? "text-[var(--green)]" : item.risk === "高" ? "text-[var(--red)]" : "text-[var(--amber)]"}`}>
+                            <span className={`text-[11px] font-medium ${item.risk === RiskLevel.LOW ? "text-[var(--green)]" : item.risk === RiskLevel.HIGH ? "text-[var(--red)]" : "text-[var(--amber)]"}`}>
                               {item.risk}
                             </span>
                           </td>

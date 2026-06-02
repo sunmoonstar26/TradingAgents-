@@ -4,6 +4,7 @@ import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { useState, useCallback } from "react";
 import { addToRadar, isInRadar } from "../../lib/radar-store";
 import { OpportunityEntry } from "../../types";
+import { Signal, RiskLevel } from "../../types/enums";
 
 interface Props {
   ticker: string;
@@ -21,9 +22,9 @@ function buildRadarEntry(ticker: string, name: string): OpportunityEntry {
   return {
     ticker,
     name,
-    signal: "持有",
+    signal: Signal.HOLD,
     conviction: 50,
-    risk: "中",
+    risk: RiskLevel.MEDIUM,
     consensus: { bullish: 0, neutral: 0, bearish: 0 },
     exposure: "低配",
     agentAlignment: {

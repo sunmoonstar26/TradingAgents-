@@ -1,6 +1,7 @@
 "use client";
 
 import { OpportunityEntry, AgentAlignment, ConsensusBreakdown } from "../types";
+import { Signal, RiskLevel } from "../types/enums";
 
 const STORAGE_KEY = "tradingagents_radar_custom";
 
@@ -86,7 +87,7 @@ export function syncRadarFull(
   fields: {
     signal?: string;
     conviction?: number;
-    risk?: "低" | "中" | "高";
+    risk?: RiskLevel;
     consensus?: ConsensusBreakdown;
     exposure?: string;
     agentAlignment?: AgentAlignment;
@@ -101,9 +102,9 @@ export function syncRadarFull(
     entry = {
       ticker,
       name: name || ticker,
-      signal: "持有",
+      signal: Signal.HOLD,
       conviction: 50,
-      risk: "中",
+      risk: RiskLevel.MEDIUM,
       consensus: { ...EMPTY_CONSENSUS },
       exposure: "低配",
       agentAlignment: { fundamental: false, technical: false, sentiment: false, macro: false, risk: false },

@@ -59,7 +59,7 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
             if (riskData?.risk_items?.length) {
               const items = riskData.risk_items.slice(0, 3);
               insight = {
-                verdict: riskData.overall_risk_level === "高" ? "看跌" : riskData.overall_risk_level === "低" ? "看涨" : "中性",
+                verdict: riskData.overall_risk_level === "high" ? "看跌" : riskData.overall_risk_level === "low" ? "看涨" : "中性",
                 core_insight: items[0]?.risk_type || "",
                 supporting_signals: items.slice(1).map((r) => r.risk_type),
                 primary_risk: items[0]?.potential_impact || "",

@@ -1,13 +1,14 @@
 "use client";
 
 import { RiskAlert } from "../types";
+import { AlertLevel } from "../types/enums";
 
 const STORAGE_KEY = "tradingagents_risk_alerts";
 
-const SEVERITY_LEVEL: Record<string, RiskAlert["level"]> = {
-  高: "危险",
-  中: "警告",
-  低: "关注",
+const SEVERITY_LEVEL: Record<string, AlertLevel> = {
+  high: AlertLevel.DANGER,
+  medium: AlertLevel.WARNING,
+  low: AlertLevel.WATCH,
 };
 
 const AGENT_LABEL: Record<string, string> = {
@@ -25,7 +26,7 @@ export function upsertRiskAlertsFromInsights(
     potential_impact: string;
     triggered_by: string;
     mitigation: string;
-    severity: "高" | "中" | "低";
+    severity: "high" | "medium" | "low";
   }[]
 ): void {
   if (typeof window === "undefined") return;
@@ -37,7 +38,7 @@ export function upsertRiskAlertsFromInsights(
   const now = new Date().toISOString();
   const newAlerts: RiskAlert[] = riskItems.slice(0, 4).map((item) => ({
     type: item.risk_type,
-    level: SEVERITY_LEVEL[item.severity] ?? "关注",
+    level: SEVERITY_LEVEL[item.severity] ?? AlertLevel.WATCH,
     source: ticker,
     detail: `${item.why_matters}${item.potential_impact ? "。" + item.potential_impact : ""}`,
     timestamp: now,
@@ -46,7 +47,7 @@ export function upsertRiskAlertsFromInsights(
 
   // 合并后按 level 优先级排序：危险 > 警告 > 关注
   const all = [...filtered, ...newAlerts].sort((a, b) => {
-    const order = { 危险: 0, 警告: 1, 关注: 2 };
+    const order: Record<string, number> = { [AlertLevel.DANGER]: 0, [AlertLevel.WARNING]: 1, [AlertLevel.WATCH]: 2 };
     return (order[a.level] ?? 2) - (order[b.level] ?? 2);
   });
 
