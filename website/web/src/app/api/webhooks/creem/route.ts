@@ -33,8 +33,9 @@ function verifySignature(payload: string, signature: string, secret: string): bo
 /** product_id → credits 数量 */
 function getCreditsForProduct(productId: string): number {
   const map: Record<string, number> = {
-    [process.env.CREEM_PRODUCT_ID_5!]: 20,    // $5 → 20 Credits
-    [process.env.CREEM_PRODUCT_ID_10!]: 100,  // $10 → 100 Credits
+    [process.env.CREEM_PRODUCT_ID_5!]:  5,   // $5  → 5 Credits
+    [process.env.CREEM_PRODUCT_ID_15!]: 20,  // $15 → 20 Credits
+    [process.env.CREEM_PRODUCT_ID_30!]: 50,  // $30 → 50 Credits
   };
   return map[productId] ?? 0;
 }

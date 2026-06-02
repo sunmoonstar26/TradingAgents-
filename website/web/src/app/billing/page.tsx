@@ -15,7 +15,7 @@ const PLANS = [
     discount: null,
     desc: "首次体验，按需购买",
     highlight: false,
-    buyUrl: "https://creem.io/product/prod_3UHbOb0vFwiJxV5InIN94D",
+    buyUrl: "https://creem.io/product/prod_3XIVWJ0ALhzo0ntLavqJge",
   },
   {
     label: "超值",
@@ -25,7 +25,7 @@ const PLANS = [
     discount: "25% OFF",
     desc: "最受欢迎，性价比最高",
     highlight: true,
-    buyUrl: "https://creem.io/product/prod_3XIVWJ0ALhzo0ntLavqJge",
+    buyUrl: "https://creem.io/product/prod_jceFmgfVqXLkcUYmJA4yF",
   },
   {
     label: "囤货",
@@ -35,7 +35,7 @@ const PLANS = [
     discount: "40% OFF",
     desc: "重度用户首选，折扣最大",
     highlight: false,
-    buyUrl: "https://creem.io/product/prod_3XIVWJ0ALhzo0ntLavqJge",
+    buyUrl: "https://creem.io/product/prod_1FSp9WD6So2OJBf4wgfE9v",
   },
 ];
 
