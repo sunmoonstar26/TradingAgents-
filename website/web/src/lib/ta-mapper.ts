@@ -1,7 +1,8 @@
 // TradingAgents 原始 JSON 输出 → StockDetail 映射器
 import { StockDetail } from "../types";
-import { Signal as SignalEnum } from "../types/enums";
+import { Signal as SignalEnum, AgentPersonality, RiskLevel } from "../types/enums";
 import { findStock } from "../data/stocks";
+import { AGENTS } from "@/content/labels";
 
 /**
  * 清洗 LLM 输出中残留的英文 section 标签和 Markdown 粗体符号。
@@ -90,7 +91,7 @@ function mapSignal(taSignal: string): SignalEnum {
 export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
   const info = findStock(raw.ticker);
   const name = info?.name ?? raw.company_name ?? raw.ticker;
-  const sector = info ? "综合" : "综合"; // 可从行业分析中提取
+  const sector = info ? "General" : "General";
   const signal = mapSignal(raw.signal);
 
   // 从报告中提取关键信号词
@@ -136,21 +137,21 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
       rationale:
         stripEnLabels(raw.final_trade_decision?.slice(0, 300) || "") ||
         stripEnLabels(raw.risk_debate_state?.judge_decision?.slice(0, 300) || "") ||
-        `AI 投资委员会已完成对 ${name} 的多维分析。`,
+        `AI Investment Committee has completed multi-dimensional analysis of ${name}.`,
     },
     debate: {
       bullThesis: [
         {
-          agent: "研究团队 · 多方",
-          content: stripEnLabels(raw.investment_debate_state?.bull_history?.slice(0, 500) || "") || "多方论点待生成",
+          agent: "Research Team · Bull",
+          content: stripEnLabels(raw.investment_debate_state?.bull_history?.slice(0, 500) || "") || "Bull thesis pending",
         },
       ],
       moderatorVerdict:
-        stripEnLabels(raw.investment_debate_state?.judge_decision?.slice(0, 500) || "") || "研究经理裁决待生成",
+        stripEnLabels(raw.investment_debate_state?.judge_decision?.slice(0, 500) || "") || "Research manager verdict pending",
       bearThesis: [
         {
-          agent: "研究团队 · 空方",
-          content: stripEnLabels(raw.investment_debate_state?.bear_history?.slice(0, 500) || "") || "空方论点待生成",
+          agent: "Research Team · Bear",
+          content: stripEnLabels(raw.investment_debate_state?.bear_history?.slice(0, 500) || "") || "Bear thesis pending",
         },
       ],
       battleBar: {
@@ -161,113 +162,125 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
     },
     agentAnalyses: [
       {
-        agentName: "基本面分析智能体",
-        role: "财务建模 · 估值",
-        personality: "fundamental",
+        agentName: AGENTS[AgentPersonality.FUNDAMENTAL].name,
+        role:      AGENTS[AgentPersonality.FUNDAMENTAL].role,
+        personality: AgentPersonality.FUNDAMENTAL,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.fundamentals_report?.slice(0, 200) || "") || "基本面分析中",
+        summary: stripEnLabels(raw.fundamentals_report?.slice(0, 200) || "") || "Fundamental analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
       {
-        agentName: "技术面分析智能体",
-        role: "量价分析 · 形态识别",
-        personality: "technical",
+        agentName: AGENTS[AgentPersonality.TECHNICAL].name,
+        role:      AGENTS[AgentPersonality.TECHNICAL].role,
+        personality: AgentPersonality.TECHNICAL,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.market_report?.slice(0, 200) || "") || "技术面分析中",
+        summary: stripEnLabels(raw.market_report?.slice(0, 200) || "") || "Technical analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
       {
-        agentName: "情绪分析智能体",
-        role: "舆情监控 · 社交信号",
-        personality: "sentiment",
+        agentName: AGENTS[AgentPersonality.SENTIMENT].name,
+        role:      AGENTS[AgentPersonality.SENTIMENT].role,
+        personality: AgentPersonality.SENTIMENT,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.sentiment_report?.slice(0, 200) || "") || "情绪面分析中",
+        summary: stripEnLabels(raw.sentiment_report?.slice(0, 200) || "") || "Sentiment analysis in progress",
         keyPoints: [],
         riskFactors: [],
         sentimentPulse: 50,
       },
       {
-        agentName: "风险分析智能体",
-        role: "风控建模 · 压力测试",
-        personality: "risk",
+        agentName: AGENTS[AgentPersonality.RISK].name,
+        role:      AGENTS[AgentPersonality.RISK].role,
+        personality: AgentPersonality.RISK,
         signal: SignalEnum.HOLD,
         conviction: 50,
-        summary: stripEnLabels(raw.risk_debate_state?.judge_decision?.slice(0, 200) || "") || "风险分析中",
+        summary: stripEnLabels(raw.risk_debate_state?.judge_decision?.slice(0, 200) || "") || "Risk analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
       {
-        agentName: "新闻分析智能体",
-        role: "事件驱动 · 催化剂",
-        personality: "news",
+        agentName: AGENTS[AgentPersonality.NEWS].name,
+        role:      AGENTS[AgentPersonality.NEWS].role,
+        personality: AgentPersonality.NEWS,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.news_report?.slice(0, 200) || "") || "新闻分析中",
+        summary: stripEnLabels(raw.news_report?.slice(0, 200) || "") || "News analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
       {
-        agentName: "宏观分析智能体",
-        role: "宏观趋势 · 资本流动",
-        personality: "macro",
+        agentName: AGENTS[AgentPersonality.MACRO].name,
+        role:      AGENTS[AgentPersonality.MACRO].role,
+        personality: AgentPersonality.MACRO,
         signal: SignalEnum.HOLD,
         conviction: 50,
-        summary: "宏观环境分析已完成，详见分析报告。",
+        summary: "Macro environment analysis complete. See full report for details.",
         keyPoints: [],
         riskFactors: [],
       },
     ],
     riskExposures: [
       {
-        label: "波动率风险",
-        value: "中",
-        level: "中",
-        detail: raw.risk_debate_state?.neutral_history?.slice(0, 100) || "风险分析中",
+        label: "Volatility Risk",
+        value: RiskLevel.MEDIUM,
+        level: RiskLevel.MEDIUM,
+        detail: raw.risk_debate_state?.neutral_history?.slice(0, 100) || "Risk analysis in progress",
         score: 50,
       },
       {
-        label: "预期回撤",
+        label: "Expected Drawdown",
         value: "-15%",
-        level: "中",
-        detail: "基于 AI 风险模型估算",
+        level: RiskLevel.MEDIUM,
+        detail: "Estimated by AI risk model",
         score: 45,
       },
-      { label: "行业暴露", value: sector, level: "中", detail: "行业集中度适中", score: 50 },
-      { label: "相关性", value: "市场中性", level: "中", detail: "Beta 接近 1.0", score: 50 },
+      {
+        label: "Sector Exposure",
+        value: sector,
+        level: RiskLevel.MEDIUM,
+        detail: "Moderate sector concentration",
+        score: 50,
+      },
+      {
+        label: "Correlation",
+        value: "Market Neutral",
+        level: RiskLevel.MEDIUM,
+        detail: "Beta near 1.0",
+        score: 50,
+      },
     ],
     positionAllocation: {
       suggestedExposure: signal === SignalEnum.STRONG_BUY ? "15-20%" : "5-10%",
       sizingFactors: {
-        positive: ["AI 智能体积极信号"],
-        negative: ["需关注宏观风险"],
+        positive: ["Positive AI agent signals"],
+        negative: ["Monitor macro risk"],
       },
       scenarioMatrix: [
-        { scenario: "突破上行", action: "适度加仓" },
-        { scenario: "区间震荡", action: "维持现有仓位" },
-        { scenario: "市场回调", action: "降低仓位或对冲" },
+        { scenario: "Breakout",        action: "Add to position" },
+        { scenario: "Range-bound",     action: "Hold current position" },
+        { scenario: "Market pullback", action: "Reduce or hedge" },
       ],
-      entryStrategy: "分批建仓，首次 3-5%",
-      exitTrigger: "跌破关键支撑或基本面恶化",
+      entryStrategy: "Scale in — start with 3-5%",
+      exitTrigger: "Break below key support or fundamental deterioration",
     },
     learningMemory: [
       {
         date: raw.trade_date,
-        whatHappened: `TradingAgents 对 ${raw.ticker} 完成首次分析`,
-        whatAgentsMissed: "首次分析无历史参考",
-        systemAdjustment: "建立基线数据，后续分析纳入历史对比",
+        whatHappened: `TradingAgents completed first analysis of ${raw.ticker}`,
+        whatAgentsMissed: "No historical reference for first analysis",
+        systemAdjustment: "Establishing baseline data for future comparisons",
         pnl: "N/A",
       },
     ],
     liveRail: [
       {
-        time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
-        agent: "系统",
-        message: `${raw.ticker} 分析完成 · 信号: ${raw.signal}`,
+        time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        agent: "System",
+        message: `${raw.ticker} analysis complete · Signal: ${raw.signal}`,
       },
     ],
     updatedAt: raw.trade_date + "T" + new Date().toISOString().slice(11),
