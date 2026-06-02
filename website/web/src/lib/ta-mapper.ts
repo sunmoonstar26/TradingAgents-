@@ -1,5 +1,6 @@
 // TradingAgents 原始 JSON 输出 → StockDetail 映射器
-import { StockDetail, Signal } from "../types";
+import { StockDetail } from "../types";
+import { Signal as SignalEnum } from "../types/enums";
 import { findStock } from "../data/stocks";
 
 /**
@@ -29,11 +30,6 @@ const EN_LABEL_ZH: Record<string, string> = {
   "Stop Loss": "止损",
   "Entry Price": "入场价",
   "Target Price": "目标价",
-  BUY: "买入",
-  SELL: "卖出",
-  HOLD: "持有",
-  OVERWEIGHT: "增持",
-  UNDERWEIGHT: "减持",
 };
 
 function stripEnLabels(text: string): string {
@@ -81,13 +77,13 @@ export interface TARawResult {
 }
 
 /** TradingAgents 信号 → 前端信号格式 */
-function mapSignal(taSignal: string): Signal {
+function mapSignal(taSignal: string): SignalEnum {
   const s = taSignal.toLowerCase();
-  if (s === "buy") return "强烈买入";
-  if (s === "overweight") return "增持";
-  if (s === "underweight") return "减持";
-  if (s === "sell") return "卖出";
-  return "持有";
+  if (s === "buy")         return SignalEnum.STRONG_BUY;
+  if (s === "overweight")  return SignalEnum.BUY;
+  if (s === "underweight") return SignalEnum.SELL;
+  if (s === "sell")        return SignalEnum.STRONG_SELL;
+  return SignalEnum.HOLD;
 }
 
 /** 从原始结果生成本地股票数据 */
@@ -104,11 +100,11 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
 
   // 共识：按信号给初始默认值，分析完成后由 insights 覆盖更准确的值
   const consensus =
-    raw.signal.toLowerCase() === "buy"       ? "6/8 看涨" :
-    raw.signal.toLowerCase() === "overweight" ? "5/8 看涨" :
-    raw.signal.toLowerCase() === "hold"       ? "4/8 看涨" :
-    raw.signal.toLowerCase() === "underweight"? "3/8 看涨" :
-    "2/8 看涨";
+    raw.signal.toLowerCase() === "buy"        ? "6/8 Bullish" :
+    raw.signal.toLowerCase() === "overweight" ? "5/8 Bullish" :
+    raw.signal.toLowerCase() === "hold"       ? "4/8 Bullish" :
+    raw.signal.toLowerCase() === "underweight"? "3/8 Bullish" :
+    "2/8 Bullish";
 
   // 置信度：从明确的"置信度 XX%"关键词提取，避免误匹配仓位/价格中的百分比
   // 优先级：显式置信度关键词 > 信号强度映射 > fallback 65
@@ -116,10 +112,10 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
   const confKeywordMatch = decision.match(/置信度[：:\s]*(\d{2,3})\s*%/);
   const conviction = confKeywordMatch
     ? parseInt(confKeywordMatch[1])
-    : signal === "强烈买入" ? 82
-    : signal === "增持" ? 68
-    : signal === "减持" ? 35
-    : signal === "卖出" ? 22
+    : signal === SignalEnum.STRONG_BUY  ? 82
+    : signal === SignalEnum.BUY         ? 68
+    : signal === SignalEnum.SELL        ? 35
+    : signal === SignalEnum.STRONG_SELL ? 22
     : 55;
 
   return {
@@ -135,7 +131,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
       signal,
       conviction,
       consensus,
-      recommendedExposure: signal === "强烈买入" ? "15-20%" : signal === "增持" ? "10-15%" : "5-10%",
+      recommendedExposure: signal === SignalEnum.STRONG_BUY ? "15-20%" : signal === SignalEnum.BUY ? "10-15%" : "5-10%",
       timeHorizon: "中期（3-6 个月）",
       rationale:
         stripEnLabels(raw.final_trade_decision?.slice(0, 300) || "") ||
@@ -245,7 +241,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
       { label: "相关性", value: "市场中性", level: "中", detail: "Beta 接近 1.0", score: 50 },
     ],
     positionAllocation: {
-      suggestedExposure: signal === "强烈买入" ? "15-20%" : "5-10%",
+      suggestedExposure: signal === SignalEnum.STRONG_BUY ? "15-20%" : "5-10%",
       sizingFactors: {
         positive: ["AI 智能体积极信号"],
         negative: ["需关注宏观风险"],
