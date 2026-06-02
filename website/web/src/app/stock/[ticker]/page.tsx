@@ -1,5 +1,6 @@
 "use client";
 
+import { RiskLevel } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
@@ -219,7 +220,7 @@ export default function StockDetailPage() {
     syncRadarFull(d.ticker, d.name, {
       signal: d.committeeDecision.signal,
       conviction: d.committeeDecision.conviction,
-      risk: d.committeeDecision.conviction >= 60 ? "低" : "中",
+      risk: d.committeeDecision.conviction >= 60 ? RiskLevel.LOW : RiskLevel.MEDIUM,
       consensus: parseConsensus(d.committeeDecision.consensus),
       exposure: d.committeeDecision.recommendedExposure,
       agentAlignment,
