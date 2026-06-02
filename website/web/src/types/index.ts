@@ -1,3 +1,6 @@
+import { Signal, RiskLevel, AlertLevel, AgentPersonality } from "./enums";
+export { Signal, RiskLevel, AlertLevel, AgentPersonality };
+
 // ===== TradingAgents AI 对冲基金操作系统 — 前端类型 =====
 
 // ── 市场状态 ──
@@ -26,7 +29,7 @@ export interface SystemStatus {
   debating: number;
   consensusUpdated: string; // 相对时间，如 "14s ago"
   lastSync: string;
-  modelStatus: "在线" | "降级" | "离线";
+  modelStatus: "online" | "degraded" | "offline";
 }
 
 // ── 首页机会雷达 ──
@@ -42,7 +45,7 @@ export interface OpportunityEntry {
   name: string;
   signal: Signal;
   conviction: number;
-  risk: "低" | "中" | "高";
+  risk: RiskLevel;
   consensus: ConsensusBreakdown;
   exposure: string;
   // 新增：智能体对齐
@@ -50,8 +53,6 @@ export interface OpportunityEntry {
   // 最近一次 AI 分析更新日期（ISO 字符串）
   updatedAt?: string;
 }
-
-export type Signal = "强烈买入" | "买入" | "增持" | "持有" | "减持" | "卖出";
 
 export interface AgentAlignment {
   fundamental: boolean;
@@ -88,7 +89,7 @@ export interface LiveFeedEntry {
 
 export interface RiskAlert {
   type: string;
-  level: "危险" | "警告" | "关注";
+  level: AlertLevel;
   source: string;
   detail: string;
   timestamp: string;
@@ -100,7 +101,7 @@ export interface RiskAlert {
 
 export interface SectorFlow {
   name: string;
-  flow: "↑ 强劲" | "↗ 改善" | "→ 平稳" | "↘ 走弱" | "↓ 流出";
+  flow: "↑ Strong" | "↗ Improving" | "→ Stable" | "↘ Weakening" | "↓ Outflow";
   momentum: number; // 0-100
   change: number;
 }
@@ -159,8 +160,6 @@ export interface Debate {
 
 // ── 智能体分析（差异化个性） ──
 
-export type AgentPersonality = "fundamental" | "technical" | "sentiment" | "risk" | "news" | "macro";
-
 export interface AgentAnalysis {
   agentName: string;
   role: string;
@@ -180,7 +179,7 @@ export interface AgentAnalysis {
 export interface RiskExposure {
   label: string;
   value: string;
-  level: "低" | "中" | "高" | "危险";
+  level: RiskLevel;
   detail: string;
   score?: number; // 0-100
 }
@@ -303,7 +302,7 @@ export interface ReasonCapsule {
   insight: string;              // 核心理由（中文，30字内）
   source_agents: string[];      // 来源智能体
   confidence: number;           // 置信度 0-100
-  impact: "高" | "中" | "低";    // 影响力等级
+  impact: "high" | "medium" | "low";    // 影响力等级
 }
 
 export interface AnalystInsight {
@@ -324,7 +323,7 @@ export interface DebateInsight {
   core_conflict: string;        // 核心分歧主题
   bull_thesis: string;          // 多方核心理由
   bear_thesis: string;          // 空方核心理由
-  conflict_strength: "高" | "中" | "低";
+  conflict_strength: "high" | "medium" | "low";
   confidence: number;
   key_topics?: {
     topic: string;
@@ -352,11 +351,11 @@ export interface RiskInsightItem {
   potential_impact: string;
   triggered_by: string;
   mitigation: string;
-  severity: "高" | "中" | "低";
+  severity: "high" | "medium" | "low";
 }
 
 export interface RiskInsight {
-  overall_risk_level: "高" | "中" | "低";
+  overall_risk_level: "high" | "medium" | "low";
   risk_items: RiskInsightItem[];
   confidence: number;
   error?: string;
