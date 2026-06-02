@@ -91,7 +91,7 @@ function mapSignal(taSignal: string): SignalEnum {
 export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
   const info = findStock(raw.ticker);
   const name = info?.name ?? raw.company_name ?? raw.ticker;
-  const sector = info ? "General" : "General";
+  const sector = "General";
   const signal = mapSignal(raw.signal);
 
   // 从报告中提取关键信号词
