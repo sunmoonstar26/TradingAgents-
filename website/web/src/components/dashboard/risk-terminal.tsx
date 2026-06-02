@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion";
 import { RiskAlert } from "../../types";
+import { AlertLevel } from "../../types/enums";
 import { AlertTriangle, ShieldAlert, AlertCircle } from "lucide-react";
 
 const levelConfig: Record<string, { icon: typeof AlertTriangle; border: string; bg: string; text: string }> = {
-  危险: { icon: ShieldAlert, border: "border-l-[var(--red)]", bg: "bg-[var(--red)]/5", text: "text-[var(--red)]" },
-  警告: { icon: AlertTriangle, border: "border-l-[var(--amber)]", bg: "bg-[var(--amber)]/5", text: "text-[var(--amber)]" },
-  关注: { icon: AlertCircle, border: "border-l-[var(--blue)]", bg: "bg-[var(--blue)]/5", text: "text-[var(--blue)]" },
+  [AlertLevel.DANGER]: { icon: ShieldAlert, border: "border-l-[var(--red)]", bg: "bg-[var(--red)]/5", text: "text-[var(--red)]" },
+  [AlertLevel.WARNING]: { icon: AlertTriangle, border: "border-l-[var(--amber)]", bg: "bg-[var(--amber)]/5", text: "text-[var(--amber)]" },
+  [AlertLevel.WATCH]: { icon: AlertCircle, border: "border-l-[var(--blue)]", bg: "bg-[var(--blue)]/5", text: "text-[var(--blue)]" },
 };
 
 interface Props { data: RiskAlert[] }
@@ -26,13 +27,13 @@ export function RiskTerminal({ data }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {data.map((alert, i) => {
-          const cfg = levelConfig[alert.level] || levelConfig["关注"];
+          const cfg = levelConfig[alert.level] || levelConfig[AlertLevel.WATCH];
           const Icon = cfg.icon;
 
           return (
             <motion.div
               key={i}
-              className={`card-terminal !p-0 overflow-hidden border-l-2 ${cfg.border} ${alert.level === "危险" ? "glow-red" : ""}`}
+              className={`card-terminal !p-0 overflow-hidden border-l-2 ${cfg.border} ${alert.level === AlertLevel.DANGER ? "glow-red" : ""}`}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: i * 0.06 }}

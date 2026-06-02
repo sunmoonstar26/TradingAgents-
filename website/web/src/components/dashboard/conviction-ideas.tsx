@@ -3,22 +3,22 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { InvestmentMemo, StockEntry } from "../../types";
+import { Signal } from "../../types/enums";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, Zap, AlertTriangle, TrendingUp } from "lucide-react";
 import { searchStocks } from "../../data/stocks";
 import { saveCustomMemoEntries } from "../../lib/memo-store";
 
 const signalStyles: Record<string, string> = {
-  强烈买入: "text-[var(--green)] bg-[var(--green)]/10",
-  买入: "text-[var(--green)] bg-[var(--green)]/10",
-  增持: "text-[var(--blue)] bg-[var(--blue)]/10",
-  持有: "text-[var(--amber)] bg-[var(--amber)]/10",
-  减持: "text-[var(--red)] bg-[var(--red)]/10",
-  卖出: "text-[var(--red)] bg-[var(--red)]/10",
+  [Signal.STRONG_BUY]: "text-[var(--green)] bg-[var(--green)]/10",
+  [Signal.BUY]: "text-[var(--green)] bg-[var(--green)]/10",
+  [Signal.HOLD]: "text-[var(--amber)] bg-[var(--amber)]/10",
+  [Signal.SELL]: "text-[var(--red)] bg-[var(--red)]/10",
+  [Signal.STRONG_SELL]: "text-[var(--red)] bg-[var(--red)]/10",
 };
 
 function makeMemo(s: StockEntry): InvestmentMemo {
   return {
-    ticker: s.ticker, name: s.name, signal: "持有", conviction: 50,
+    ticker: s.ticker, name: s.name, signal: Signal.HOLD, conviction: 50,
     agentAlignment: { fundamental: true, technical: true, sentiment: false, macro: true, risk: false },
     timeHorizon: "中期 3-6月", primaryRisk: "待评估", consensus: "4/8 看涨", exposure: "低配", keyDriver: "待评估"
   };

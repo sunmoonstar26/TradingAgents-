@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { OpportunityEntry, StockEntry, ConsensusBreakdown } from "../../types";
+import { Signal, RiskLevel } from "../../types/enums";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { searchStocks } from "../../data/stocks";
 import { saveCustomRadarEntries, updateRadarEntryDate, syncRadarFull, parseConsensus } from "../../lib/radar-store";
@@ -12,18 +13,17 @@ import { upsertRiskAlertsFromInsights } from "../../lib/risk-alert-store";
 import { upsertFeedFromInsights } from "../../lib/livefeed-store";
 
 const signalStyles: Record<string, { bg: string; text: string; dot: string }> = {
-  强烈买入: { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },
-  买入: { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },
-  增持: { bg: "bg-[var(--blue)]/15", text: "text-[var(--blue)]", dot: "bg-[var(--blue)]" },
-  持有: { bg: "bg-[var(--amber)]/15", text: "text-[var(--amber)]", dot: "bg-[var(--amber)]" },
-  减持: { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]", dot: "bg-[var(--red)]" },
-  卖出: { bg: "bg-[var(--red)]/15", text: "text-[var(--red)]", dot: "bg-[var(--red)]" },
+  [Signal.STRONG_BUY]: { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },
+  [Signal.BUY]: { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]", dot: "bg-[var(--green)]" },
+  [Signal.HOLD]: { bg: "bg-[var(--amber)]/15", text: "text-[var(--amber)]", dot: "bg-[var(--amber)]" },
+  [Signal.SELL]: { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]", dot: "bg-[var(--red)]" },
+  [Signal.STRONG_SELL]: { bg: "bg-[var(--red)]/15", text: "text-[var(--red)]", dot: "bg-[var(--red)]" },
 };
 
 const riskColors: Record<string, string> = {
-  低: "text-[var(--green)]",
-  中: "text-[var(--amber)]",
-  高: "text-[var(--red)]",
+  [RiskLevel.LOW]: "text-[var(--green)]",
+  [RiskLevel.MEDIUM]: "text-[var(--amber)]",
+  [RiskLevel.HIGH]: "text-[var(--red)]",
 };
 
 /** ISO 日期转紧凑中文显示 */
@@ -73,7 +73,7 @@ function ConsensusDots({ consensus }: { consensus: ConsensusBreakdown | undefine
 
 function makeEntry(s: StockEntry): OpportunityEntry {
   return {
-    ticker: s.ticker, name: s.name, signal: "持有", conviction: 50, risk: "中",
+    ticker: s.ticker, name: s.name, signal: Signal.HOLD, conviction: 50, risk: RiskLevel.MEDIUM,
     consensus: { bullish: 0, neutral: 0, bearish: 0 }, exposure: "待分析",
     agentAlignment: { fundamental: true, technical: true, sentiment: false, macro: true, risk: false },
     updatedAt: new Date().toISOString(),
@@ -200,7 +200,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
                   syncRadarFull(ticker, d.name || ticker, {
                     signal: d.committeeDecision?.signal,
                     conviction: d.committeeDecision?.conviction,
-                    risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? "低" as const : "中" as const,
+                    risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? RiskLevel.LOW : RiskLevel.MEDIUM,
                     consensus: parseConsensus(d.committeeDecision?.consensus),
                     exposure: d.committeeDecision?.recommendedExposure,
                     agentAlignment,
@@ -212,7 +212,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     name: d.name || ticker,
                     signal: d.committeeDecision?.signal,
                     conviction: d.committeeDecision?.conviction ?? 50,
-                    risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? "低" as const : "中" as const,
+                    risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? RiskLevel.LOW : RiskLevel.MEDIUM,
                     consensus: parseConsensus(d.committeeDecision?.consensus),
                     exposure: d.committeeDecision?.recommendedExposure ?? "",
                     agentAlignment,
@@ -348,7 +348,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
                       syncRadarFull(ticker, d.name || ticker, {
                         signal: d.committeeDecision?.signal,
                         conviction: d.committeeDecision?.conviction,
-                        risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? "低" : "中",
+                        risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? RiskLevel.LOW : RiskLevel.MEDIUM,
                         consensus: parseConsensus(d.committeeDecision?.consensus),
                         exposure: d.committeeDecision?.recommendedExposure,
                         agentAlignment,
@@ -360,7 +360,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
                         name: d.name || ticker,
                         signal: d.committeeDecision?.signal,
                         conviction: d.committeeDecision?.conviction ?? 50,
-                        risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? "低" as const : "中" as const,
+                        risk: (d.committeeDecision?.conviction ?? 50) >= 60 ? RiskLevel.LOW : RiskLevel.MEDIUM,
                         consensus: parseConsensus(d.committeeDecision?.consensus),
                         exposure: d.committeeDecision?.recommendedExposure ?? "",
                         agentAlignment,
@@ -492,7 +492,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
             </thead>
             <tbody>
               {displayData.map((item, idx) => {
-                const style = signalStyles[item.signal] || signalStyles["持有"];
+                const style = signalStyles[item.signal] || signalStyles[Signal.HOLD];
                 const isActive = activeRow === item.ticker;
                 const updateState = updateStates[item.ticker];
                 return (
@@ -608,7 +608,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
       {/* 移动端 */}
       <div className="flex flex-col gap-2 md:hidden">
         {displayData.map((item) => {
-          const style = signalStyles[item.signal] || signalStyles["持有"];
+          const style = signalStyles[item.signal] || signalStyles[Signal.HOLD];
           const updateState = updateStates[item.ticker];
           return (
             <motion.div key={item.ticker} className="card-terminal !p-4 cursor-pointer active:bg-[var(--panel2)]" onClick={() => !editing && router.push(`/stock/${item.ticker}`)} whileTap={{ scale: 0.98 }}>
