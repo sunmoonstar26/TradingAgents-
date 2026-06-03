@@ -8,7 +8,9 @@
     "history": "历史记录",
     "credits": "Credits",
     "logout": "登出",
-    "modelOnline": "模型在线"
+    "modelOnline": "模型在线",
+    "login": "登录",
+    "getCredits": "获取 Credits"
   },
   "dashboard": {
     "marketStatus": "全球市场状态",

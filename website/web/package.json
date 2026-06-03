@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:en": "LOCALE=en next dev -p 3001",
+    "dev:zh": "LOCALE=zh next dev -p 3002",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"

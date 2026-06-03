@@ -8,7 +8,9 @@
     "history": "History",
     "credits": "Credits",
     "logout": "Sign Out",
-    "modelOnline": "Model Online"
+    "modelOnline": "Model Online",
+    "login": "Sign In",
+    "getCredits": "Get Credits"
   },
   "dashboard": {
     "marketStatus": "Global Market Status",
