@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { LiveFeedEntry } from "../../types";
 import { getLiveFeed, seedFeedFromMock, FeedItem } from "../../lib/livefeed-store";
 
@@ -11,7 +12,6 @@ interface Props {
 }
 
 const SIGNAL_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
-  // 中文键（向后兼容已存储数据）
   看涨:   { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
   多方:   { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
   买入:   { bg: "bg-[var(--green)]/15",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
@@ -24,41 +24,27 @@ const SIGNAL_STYLE: Record<string, { bg: string; text: string; dot: string }> = 
   平局:   { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
   持有:   { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
   中风险: { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
-  // 英文键（后端迁移至 TRADINGAGENTS_OUTPUT_LANGUAGE=en 后使用）
-  "Bullish":     { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
-  "Bull":        { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
-  "Buy":         { bg: "bg-[var(--green)]/15",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
-  "Strong Buy":  { bg: "bg-[var(--green)]/15",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
-  "Low Risk":    { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
-  "Bearish":     { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
-  "Bear":        { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
-  "Sell":        { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
-  "Strong Sell": { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
-  "High Risk":   { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
-  "Neutral":     { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
-  "Hold":        { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
-  "Medium Risk": { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
 };
 
 const DEFAULT_SIGNAL = { bg: "bg-[var(--border-custom)]", text: "text-[var(--text-secondary)]", dot: "bg-[var(--text-secondary)]/40" };
 
-function formatTime(iso: string): string {
+function formatTime(iso: string, justNow: string, minutesAgo: (n: number) => string, hoursAgo: (n: number) => string): string {
   try {
     const d = new Date(iso);
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1)  return "just now";
-    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffMin < 1)  return justNow;
+    if (diffMin < 60) return minutesAgo(diffMin);
     const diffH = Math.floor(diffMin / 60);
-    if (diffH < 24)   return `${diffH}h ago`;
-    return d.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" });
+    if (diffH < 24)   return hoursAgo(diffH);
+    return d.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" });
   } catch {
     return iso;
   }
 }
 
-function FeedRow({ item, isNew }: { item: FeedItem; isNew: boolean }) {
+function FeedRow({ item, isNew, formatTimeFn }: { item: FeedItem; isNew: boolean; formatTimeFn: (iso: string) => string }) {
   const sig = SIGNAL_STYLE[item.signal] ?? DEFAULT_SIGNAL;
   return (
     <motion.div
@@ -96,13 +82,20 @@ function FeedRow({ item, isNew }: { item: FeedItem; isNew: boolean }) {
 
       {/* 时间戳 */}
       <span className="shrink-0 text-[10px] font-mono text-[var(--text-secondary)]/35 pt-0.5">
-        {formatTime(item.timestamp)}
+        {formatTimeFn(item.timestamp)}
       </span>
     </motion.div>
   );
 }
 
 export function LiveFeed({ data, feedKey = 0 }: Props) {
+  const t = useTranslations("dashboard");
+  const formatTimeFn = (iso: string) => formatTime(
+    iso,
+    t("feedJustNow"),
+    (n) => t("feedMinutesAgo", { n }),
+    (n) => t("feedHoursAgo", { n }),
+  );
   const [items, setItems] = useState<FeedItem[]>([]);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const [paused, setPaused] = useState(false);
@@ -165,9 +158,9 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
         <div>
           <h2 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] pulse-blue" />
-            AI Live Feed
+            {t("feedTitle")}
           </h2>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Updates automatically after agent analysis completes</p>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{t("feedSubtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           {paused && (
@@ -175,11 +168,11 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
               onClick={scrollToTop}
               className="text-[10px] font-mono text-[var(--blue)] hover:text-[var(--blue)]/80 flex items-center gap-1 transition-colors"
             >
-              ↑ Back to latest
+              {t("feedBackToLatest")}
             </button>
           )}
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">
-            {items.length} signals
+            {t("feedSignalCount", { count: items.length })}
           </span>
         </div>
       </div>
@@ -194,13 +187,13 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
         >
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2">
-              <span className="text-[var(--text-secondary)]/30 text-sm">No signals yet</span>
-              <span className="text-[var(--text-secondary)]/20 text-[11px]">Will appear automatically after stock analysis completes</span>
+              <span className="text-[var(--text-secondary)]/30 text-sm">{t("feedEmpty")}</span>
+              <span className="text-[var(--text-secondary)]/20 text-[11px]">{t("feedEmptyDesc")}</span>
             </div>
           ) : (
             <AnimatePresence initial={false}>
               {items.map((item) => (
-                <FeedRow key={item.id} item={item} isNew={newIds.has(item.id)} />
+                <FeedRow key={item.id} item={item} isNew={newIds.has(item.id)} formatTimeFn={formatTimeFn} />
               ))}
             </AnimatePresence>
           )}

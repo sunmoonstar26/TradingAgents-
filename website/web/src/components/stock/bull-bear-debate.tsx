@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { DebatePoint, ConflictRow, DebateInsight } from "../../types";
 import { TrendingUp, TrendingDown, Scale, Swords, ChevronRight, AlertTriangle, Zap } from "lucide-react";
 import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
+import { useTranslations } from "next-intl";
 
 interface Props {
   bullThesis: DebatePoint[];
@@ -23,15 +24,15 @@ interface ConflictCardData {
   coreDisagreement: string;
   winner: "bull" | "bear" | "tie";
   intensity: number;
-  portfolioImpact: "High" | "Medium" | "Low";
+  portfolioImpact: "高" | "中" | "低";
   index: number;
 }
 
 function intensityLabel(score: number): string {
-  if (score >= 85) return "Extreme Conflict";
-  if (score >= 70) return "High Conflict";
-  if (score >= 50) return "Moderate Conflict";
-  return "Low Conflict";
+  if (score >= 85) return "extremeConflict";
+  if (score >= 70) return "highConflict";
+  if (score >= 50) return "mediumConflict";
+  return "lowConflict";
 }
 
 function intensityColor(score: number): string {
@@ -41,16 +42,16 @@ function intensityColor(score: number): string {
   return "#6B7280";
 }
 
-function impactColor(impact: "High" | "Medium" | "Low"): string {
-  if (impact === "High") return "#E05A6A";
-  if (impact === "Medium") return "#F59E0B";
+function impactColor(impact: "高" | "中" | "低"): string {
+  if (impact === "高") return "#E05A6A";
+  if (impact === "中") return "#F59E0B";
   return "#6B7280";
 }
 
 function verdictLabel(winner: "bull" | "bear" | "tie"): string {
-  if (winner === "bull") return "Committee Favors Bulls";
-  if (winner === "bear") return "Committee Favors Bears";
-  return "Committee Split";
+  if (winner === "bull") return "committeeLeansBull";
+  if (winner === "bear") return "committeeLeansBear";
+  return "committeeDivided";
 }
 
 function verdictColor(winner: "bull" | "bear" | "tie"): string {
@@ -68,6 +69,7 @@ function BattleMeter({
   judgeVerdict?: string;
   coreConflict?: string;
 }) {
+  const t = useTranslations("stockComponents");
   return (
     <div
       className="rounded-2xl p-5 mb-6 border"
@@ -80,7 +82,7 @@ function BattleMeter({
         <div className="flex items-center gap-2.5">
           <Swords className="w-4 h-4 text-[#F59E0B]" />
           <span className="text-[13px] font-semibold text-white/90">
-            {judgeVerdict || "Battle Stance"}
+            {judgeVerdict || t("oppositionStance")}
           </span>
         </div>
         {coreConflict && (
@@ -92,7 +94,7 @@ function BattleMeter({
       <div className="flex items-center gap-4">
         <div className="text-center w-14">
           <div className="text-xl font-mono font-bold" style={{ color: "#18C37E" }}>{bullPct}%</div>
-          <div className="text-[10px] text-white/40 mt-0.5">Bulls</div>
+          <div className="text-[10px] text-white/40 mt-0.5">{t("bullSide")}</div>
         </div>
         <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
           <motion.div
@@ -119,7 +121,7 @@ function BattleMeter({
         </div>
         <div className="text-center w-14">
           <div className="text-xl font-mono font-bold" style={{ color: "#E05A6A" }}>{bearPct}%</div>
-          <div className="text-[10px] text-white/40 mt-0.5">Bears</div>
+          <div className="text-[10px] text-white/40 mt-0.5">{t("bearSide")}</div>
         </div>
       </div>
     </div>
@@ -128,6 +130,7 @@ function BattleMeter({
 
 // ── 单张冲突卡片 ──
 function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string }) {
+  const t = useTranslations("stockComponents");
   const iColor = intensityColor(card.intensity);
   const vColor = verdictColor(card.winner);
 
@@ -169,13 +172,13 @@ function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string
                 className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded"
                 style={{ color: iColor, background: `${iColor}18`, border: `1px solid ${iColor}30` }}
               >
-                {intensityLabel(card.intensity)}
+                {t(intensityLabel(card.intensity) as Parameters<typeof t>[0])}
               </span>
               <span className="text-[11px] font-mono text-white/35">{card.intensity}%</span>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <div className="text-[10px] text-white/30 mb-1">Portfolio Impact</div>
+            <div className="text-[10px] text-white/30 mb-1">{t("portfolioImpactLabel")}</div>
             <span
               className="text-[12px] font-mono font-bold px-2.5 py-1 rounded-lg"
               style={{
@@ -197,7 +200,7 @@ function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string
           <div className="flex items-center gap-2 mb-2.5">
             <TrendingUp className="w-3.5 h-3.5 shrink-0" style={{ color: "#18C37E" }} />
             <span className="font-semibold" style={{ fontSize: "13px", color: "#18C37E" }}>
-              Bull Case
+              {t("bullArgument")}
             </span>
           </div>
           <p className="leading-relaxed text-white/80" style={{ fontSize: "14px" }}>
@@ -213,7 +216,7 @@ function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string
           <div className="flex items-center gap-2 mb-2.5">
             <TrendingDown className="w-3.5 h-3.5 shrink-0" style={{ color: "#E05A6A" }} />
             <span className="font-semibold" style={{ fontSize: "13px", color: "#E05A6A" }}>
-              Bear Case
+              {t("bearArgument")}
             </span>
           </div>
           <p className="leading-relaxed text-white/80" style={{ fontSize: "14px" }}>
@@ -229,7 +232,7 @@ function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string
           <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: "#F59E0B" }} />
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: "#F59E0B99" }}>
-              Core Disagreement
+              {t("coreDisagreementLabel")}
             </p>
             <p className="text-white/70 leading-snug" style={{ fontSize: "13px" }}>
               {card.coreDisagreement}
@@ -246,10 +249,10 @@ function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string
             <Scale className="w-4 h-4 shrink-0" style={{ color: vColor }} />
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-widest mb-0.5" style={{ color: `${vColor}99` }}>
-                Committee Verdict
+                {t("committeeVerdictLabel")}
               </p>
               <p className="font-bold" style={{ fontSize: "16px", color: vColor }}>
-                {verdictLabel(card.winner)}
+                {t(verdictLabel(card.winner) as Parameters<typeof t>[0])}
               </p>
             </div>
           </div>
@@ -278,7 +281,7 @@ function ConflictCard({ card, ticker }: { card: ConflictCardData; ticker: string
           (e.currentTarget as HTMLElement).style.background = "";
         }}
       >
-        View Full Debate
+        {t("expandDebate")}
         <ChevronRight className="w-3.5 h-3.5" />
       </Link>
     </motion.div>
@@ -289,6 +292,7 @@ export function BullBearDebate({
   bullThesis, moderatorVerdict, bearThesis,
   battleBar, conflictMatrix, ticker, debateInsights,
 }: Props) {
+  const t = useTranslations("stockComponents");
   const judgeInsight = debateInsights?.["裁判"];
   const bullInsight = debateInsights?.["多方"];
   const bearInsight = debateInsights?.["空方"];
@@ -325,21 +329,21 @@ export function BullBearDebate({
 
   // 构建 conflict cards
   const cards: ConflictCardData[] = rawTopics
-    ? rawTopics.slice(0, 4).map((t, i) => {
+    ? rawTopics.slice(0, 4).map((topic, i) => {
         // 用 bull/bear 各角色视角补充 argument 内容
         const bullTopics = bullInsight?.key_topics || [];
         const bearTopics = bearInsight?.key_topics || [];
-        const matchBull = bullTopics.find((bt) => bt.topic === t.topic);
-        const matchBear = bearTopics.find((bt) => bt.topic === t.topic);
+        const matchBull = bullTopics.find((bt) => bt.topic === topic.topic);
+        const matchBear = bearTopics.find((bt) => bt.topic === topic.topic);
 
-        const bullArg = matchBull?.bull_view || t.bull_view;
-        const bearArg = matchBear?.bear_view || t.bear_view;
+        const bullArg = matchBull?.bull_view || topic.bull_view;
+        const bearArg = matchBear?.bear_view || topic.bear_view;
 
         // core disagreement: 从 topic 名合成，或用 judge.core_conflict 补充
         const coreDisagreement =
           i === 0 && judgeInsight?.core_conflict
             ? judgeInsight.core_conflict
-            : `Bulls and bears fundamentally disagree on "${t.topic}"`;
+            : t("coreDisagreementDefault", { topic: topic.topic });
 
         // intensity: 用 confidence 作基准，高冲突议题加权
         const baseConf = judgeInsight?.confidence ?? 80;
@@ -347,16 +351,16 @@ export function BullBearDebate({
         const intensity = Math.min(99, baseConf - (intensityMap[i] ?? 8));
 
         // portfolio impact: 前两个高，后两个中/低
-        const impactMap: (typeof cards[number]["portfolioImpact"])[] = ["High", "High", "Medium", "Low"];
+        const impactMap: (typeof cards[number]["portfolioImpact"])[] = ["高", "高", "中", "低"];
 
         return {
-          topic: t.topic,
+          topic: topic.topic,
           bullArgument: bullArg,
           bearArgument: bearArg,
           coreDisagreement,
-          winner: (t.winner as "bull" | "bear" | "tie") || "tie",
+          winner: (topic.winner as "bull" | "bear" | "tie") || "tie",
           intensity,
-          portfolioImpact: impactMap[i] ?? "Medium",
+          portfolioImpact: impactMap[i] ?? "中",
           index: i,
         };
       })
@@ -364,10 +368,10 @@ export function BullBearDebate({
         topic: c.topic,
         bullArgument: c.bullView,
         bearArgument: c.bearView,
-        coreDisagreement: `Bulls and bears fundamentally disagree on "${c.topic}"`,
+        coreDisagreement: t("coreDisagreementDefault", { topic: c.topic }),
         winner: "tie" as const,
         intensity: 75 - i * 5,
-        portfolioImpact: (["High", "High", "Medium", "Low"] as const)[i] ?? "Medium",
+        portfolioImpact: (["高", "高", "中", "低"] as const)[i] ?? "中",
         index: i,
       }));
 
@@ -380,8 +384,8 @@ export function BullBearDebate({
       {/* ── 模块标题 ── */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-base font-bold text-white/90">Core Conflict Matrix</h2>
-          <p className="text-[11px] text-white/35 mt-0.5">Key disputes from the AI Investment Committee</p>
+          <h2 className="text-base font-bold text-white/90">{t("conflictMatrix")}</h2>
+          <p className="text-[11px] text-white/35 mt-0.5">{t("conflictMatrixDesc")}</p>
         </div>
         <div
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
@@ -389,7 +393,7 @@ export function BullBearDebate({
         >
           <Swords className="w-3 h-3" style={{ color: "#F59E0B" }} />
           <span className="text-[11px] font-mono font-semibold" style={{ color: "#F59E0B" }}>
-            {cards.length} conflicts
+            {t("conflictsCount", { count: cards.length })}
           </span>
         </div>
       </div>
@@ -421,7 +425,7 @@ export function BullBearDebate({
           }}
         >
           <TrendingUp className="w-3 h-3" />
-          Full Bull Case
+          {t("bullFullArgs")}
         </Link>
         <Link
           href={`/stock/${ticker}/debate/verdict`}
@@ -433,7 +437,7 @@ export function BullBearDebate({
           }}
         >
           <Scale className="w-3 h-3" />
-          Full Verdict
+          {t("fullVerdict")}
         </Link>
         <Link
           href={`/stock/${ticker}/debate/bear`}
@@ -445,7 +449,7 @@ export function BullBearDebate({
           }}
         >
           <TrendingDown className="w-3 h-3" />
-          Full Bear Case
+          {t("bearFullArgs")}
         </Link>
       </div>
     </motion.section>

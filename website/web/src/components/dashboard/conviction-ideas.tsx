@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { InvestmentMemo, StockEntry } from "../../types";
 import { Signal } from "../../types/enums";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, Zap, AlertTriangle, TrendingUp } from "lucide-react";
@@ -20,13 +21,14 @@ function makeMemo(s: StockEntry): InvestmentMemo {
   return {
     ticker: s.ticker, name: s.name, signal: Signal.HOLD, conviction: 50,
     agentAlignment: { fundamental: true, technical: true, sentiment: false, macro: true, risk: false },
-    timeHorizon: "Mid-term 3-6mo", primaryRisk: "Pending", consensus: "4/8 Bullish", exposure: "Underweight", keyDriver: "Pending"
+    timeHorizon: "中期 3-6月", primaryRisk: "待评估", consensus: "4/8 看涨", exposure: "低配", keyDriver: "待评估"
   };
 }
 
 interface Props { data: InvestmentMemo[]; onSave?: () => void }
 
 export function ConvictionIdeas({ data, onSave }: Props) {
+  const t = useTranslations("dashboard");
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<InvestmentMemo[]>([]);
   const [addQuery, setAddQuery] = useState("");
@@ -80,8 +82,8 @@ export function ConvictionIdeas({ data, onSave }: Props) {
   return (
     <motion.section ref={containerRef} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
       <div className="section-heading justify-between">
-        <span>Investment Memo</span>
-        <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title="Edit">
+        <span>{t("memoTitle")}</span>
+        <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title="编辑">
           <Pencil className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -120,7 +122,7 @@ export function ConvictionIdeas({ data, onSave }: Props) {
                 <div className="flex items-start gap-2">
                   <Zap className="w-3.5 h-3.5 text-[var(--blue)] mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-[var(--text-secondary)]/60 mb-0.5">Key Driver</p>
+                    <p className="text-[10px] text-[var(--text-secondary)]/60 mb-0.5">{t("memoKeyDriver")}</p>
                     <p className="text-[12px] text-[var(--text-primary)] font-medium leading-snug line-clamp-2">
                       {item.keyDriver}
                     </p>
@@ -135,7 +137,7 @@ export function ConvictionIdeas({ data, onSave }: Props) {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-3.5 h-3.5 text-[var(--red)]/70 mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-[var(--red)]/60 mb-0.5">Primary Risk</p>
+                    <p className="text-[10px] text-[var(--red)]/60 mb-0.5">{t("memoPrimaryRisk")}</p>
                     <p className="text-[11px] text-[var(--text-secondary)] leading-snug line-clamp-2">
                       {item.primaryRisk}
                     </p>
@@ -162,7 +164,7 @@ export function ConvictionIdeas({ data, onSave }: Props) {
         {editing && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="card-terminal !p-5 flex flex-col items-center justify-center gap-3 border-dashed border-[var(--blue)]/20 min-h-[200px] relative">
             <div className="relative w-full">
-              <input type="text" value={addQuery} onChange={(e) => handleAddSearch(e.target.value)} placeholder="Add ticker..." className="w-full bg-[var(--panel)] border border-[var(--border-custom)] rounded-lg px-3 py-2 text-xs font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/30 focus:outline-none focus:border-[var(--blue)]/40" />
+              <input type="text" value={addQuery} onChange={(e) => handleAddSearch(e.target.value)} placeholder={t("memoAddPlaceholder")} className="w-full bg-[var(--panel)] border border-[var(--border-custom)] rounded-lg px-3 py-2 text-xs font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/30 focus:outline-none focus:border-[var(--blue)]/40" />
               {addSuggestions.length > 0 && (
                 <div className="absolute top-full mt-1 left-0 right-0 bg-[var(--panel)] border border-[var(--border-custom)] rounded-lg shadow-lg overflow-hidden z-50">
                   {addSuggestions.map((s) => (
@@ -175,8 +177,8 @@ export function ConvictionIdeas({ data, onSave }: Props) {
                 </div>
               )}
             </div>
-            <span className="text-[10px] font-mono text-[var(--text-secondary)]/20">Search to add ticker</span>
-            <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">{editData.length} tickers</span>
+            <span className="text-[10px] font-mono text-[var(--text-secondary)]/20">{t("memoSearchHint")}</span>
+            <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">{editData.length} 只标的</span>
           </motion.div>
         )}
       </div>
@@ -192,13 +194,13 @@ export function ConvictionIdeas({ data, onSave }: Props) {
             <div className="px-3 pb-1.5">
               <div className="flex items-start gap-1.5 p-2 rounded bg-[var(--panel2)]/60 border border-[var(--border-custom)]">
                 <Zap className="w-3 h-3 text-[var(--blue)] mt-0.5 shrink-0" />
-                <div><p className="text-[10px] text-[var(--text-secondary)]/60">Key Driver</p><p className="text-[11px] text-[var(--text-primary)] font-medium line-clamp-2">{item.keyDriver}</p></div>
+                <div><p className="text-[10px] text-[var(--text-secondary)]/60">{t("memoKeyDriver")}</p><p className="text-[11px] text-[var(--text-primary)] font-medium line-clamp-2">{item.keyDriver}</p></div>
               </div>
             </div>
             <div className="px-3 pb-2">
               <div className="flex items-start gap-1.5 p-2 rounded bg-[var(--red)]/5 border border-[var(--red)]/10">
                 <AlertTriangle className="w-3 h-3 text-[var(--red)]/70 mt-0.5 shrink-0" />
-                <div><p className="text-[10px] text-[var(--red)]/60">Primary Risk</p><p className="text-[11px] text-[var(--text-secondary)] line-clamp-2">{item.primaryRisk}</p></div>
+                <div><p className="text-[10px] text-[var(--red)]/60">{t("memoPrimaryRisk")}</p><p className="text-[11px] text-[var(--text-secondary)] line-clamp-2">{item.primaryRisk}</p></div>
               </div>
             </div>
             <div className="mt-auto px-3 pb-3 pt-1 border-t border-[var(--border-custom)] flex items-center gap-2 text-[10px] text-[var(--text-secondary)]/70">

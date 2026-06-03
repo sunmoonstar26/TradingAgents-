@@ -3,15 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { X, Zap, CheckCircle2 } from "lucide-react";
-
-const FEATURES = [
-  "Multi-agent real-time debate",
-  "AI deep research reports",
-  "Dynamic risk modeling",
-  "AI opportunity radar",
-  "Analysis history",
-  "Custom portfolio",
-];
+import { useTranslations } from "next-intl";
 
 interface Props {
   open: boolean;
@@ -20,6 +12,12 @@ interface Props {
 
 export function LoginUnlockModal({ open, onClose }: Props) {
   const router = useRouter();
+  const t = useTranslations("loginModal");
+
+  const features = [
+    t("feature1"), t("feature2"), t("feature3"),
+    t("feature4"), t("feature5"), t("feature6"),
+  ];
 
   const goRegister = () => { onClose(); router.push("/register"); };
   const goLogin = () => { onClose(); router.push("/login"); };
@@ -71,16 +69,16 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                   <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
                 </div>
                 <h2 className="text-base font-bold text-white tracking-wide">
-                  Unlock AI Investment Committee
+                  {t("title")}
                 </h2>
               </div>
               <p className="text-xs text-white/40 mb-6 ml-[42px]">
-                Deep investment research powered by TradingAgents multi-agent system
+                {t("subtitle")}
               </p>
 
               {/* 功能列表 */}
               <ul className="space-y-2.5 mb-6">
-                {FEATURES.map((f) => (
+                {features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-xs text-white/60">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "#00c8ff" }} />
                     {f}
@@ -97,7 +95,7 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                 }}
               >
                 <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: "#00c8ff" }} />
-                <span style={{ color: "#00c8ff" }}>Get 5 free Credits on signup — start AI analysis now</span>
+                <span style={{ color: "#00c8ff" }}>{t("creditsNote")}</span>
               </div>
 
               {/* 按钮组 */}
@@ -111,13 +109,13 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                     color: "#fff",
                   }}
                 >
-                  Sign up free · Get 5 Credits
+                  {t("registerBtn")}
                 </button>
                 <button
                   onClick={goLogin}
                   className="w-full py-2.5 rounded-xl text-xs font-mono text-white/40 hover:text-white/60 hover:bg-white/[0.03] transition-all border border-white/[0.06]"
                 >
-                  Already have an account? Sign in
+                  {t("loginBtn")}
                 </button>
               </div>
             </div>

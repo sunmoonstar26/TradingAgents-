@@ -8,18 +8,18 @@ import {
   FileText, ChevronRight, Zap, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
+import { useTranslations } from "next-intl";
 
-const personalityConfig: Record<string, { borderClass: string; icon: typeof Brain; iconColor: string; label: string; mapKey: string }> = {
-  fundamental: { borderClass: "agent-fundamental", icon: Brain, iconColor: "text-[var(--blue)]", label: "Fundamentals", mapKey: "fundamentals" },
-  technical: { borderClass: "agent-technical", icon: TrendingUp, iconColor: "text-[var(--green)]", label: "Technical", mapKey: "market" },
-  sentiment: { borderClass: "agent-sentiment", icon: MessageCircle, iconColor: "text-[var(--amber)]", label: "Sentiment", mapKey: "sentiment" },
-  risk: { borderClass: "agent-risk", icon: ShieldAlert, iconColor: "text-[var(--red)]", label: "Risk", mapKey: "__risk__" },
-  news: { borderClass: "agent-news", icon: Newspaper, iconColor: "text-[var(--cyan)]", label: "News", mapKey: "news" },
-  macro: { borderClass: "agent-macro", icon: Globe, iconColor: "text-[var(--purple)]", label: "Macro", mapKey: "__macro__" },
+const personalityConfig: Record<string, { borderClass: string; icon: typeof Brain; iconColor: string; labelKey: string; mapKey: string }> = {
+  fundamental: { borderClass: "agent-fundamental", icon: Brain, iconColor: "text-[var(--blue)]", labelKey: "agentLabelFundamental", mapKey: "fundamentals" },
+  technical: { borderClass: "agent-technical", icon: TrendingUp, iconColor: "text-[var(--green)]", labelKey: "agentLabelTechnical", mapKey: "market" },
+  sentiment: { borderClass: "agent-sentiment", icon: MessageCircle, iconColor: "text-[var(--amber)]", labelKey: "agentLabelSentiment", mapKey: "sentiment" },
+  risk: { borderClass: "agent-risk", icon: ShieldAlert, iconColor: "text-[var(--red)]", labelKey: "agentLabelRisk", mapKey: "__risk__" },
+  news: { borderClass: "agent-news", icon: Newspaper, iconColor: "text-[var(--cyan)]", labelKey: "agentLabelNews", mapKey: "news" },
+  macro: { borderClass: "agent-macro", icon: Globe, iconColor: "text-[var(--purple)]", labelKey: "agentLabelMacro", mapKey: "__macro__" },
 };
 
 const verdictStyles: Record<string, { bg: string; text: string }> = {
-  // Chinese keys (legacy backend)
   "看涨": { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]" },
   "看跌": { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]" },
   "中性": { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]" },
@@ -29,15 +29,6 @@ const verdictStyles: Record<string, { bg: string; text: string }> = {
   "持有": { bg: "bg-[var(--amber)]/15", text: "text-[var(--amber)]" },
   "减持": { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]" },
   "卖出": { bg: "bg-[var(--red)]/15", text: "text-[var(--red)]" },
-  // English keys (new backend)
-  "Bullish":    { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]" },
-  "Bearish":    { bg: "bg-[var(--red)]/12",   text: "text-[var(--red)]" },
-  "Neutral":    { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]" },
-  "Strong Buy": { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]" },
-  "Buy":        { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]" },
-  "Hold":       { bg: "bg-[var(--amber)]/15", text: "text-[var(--amber)]" },
-  "Sell":       { bg: "bg-[var(--red)]/10",   text: "text-[var(--red)]" },
-  "Strong Sell":{ bg: "bg-[var(--red)]/15",   text: "text-[var(--red)]" },
 };
 
 interface Props {
@@ -47,6 +38,7 @@ interface Props {
 }
 
 export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
+  const t = useTranslations("stockComponents");
   return (
     <motion.section
       initial={{ opacity: 0, y: 6 }}
@@ -54,7 +46,7 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
       transition={{ duration: 0.4, delay: 0.2 }}
     >
       <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-        Agent Analysis Network
+        {t("agentNetwork")}
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -69,7 +61,7 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
             if (riskData?.risk_items?.length) {
               const items = riskData.risk_items.slice(0, 3);
               insight = {
-                verdict: riskData.overall_risk_level === "high" ? "Bearish" : riskData.overall_risk_level === "low" ? "Bullish" : "Neutral",
+                verdict: riskData.overall_risk_level === "high" ? "看跌" : riskData.overall_risk_level === "low" ? "看涨" : "中性",
                 core_insight: items[0]?.risk_type || "",
                 supporting_signals: items.slice(1).map((r) => r.risk_type),
                 primary_risk: items[0]?.potential_impact || "",
@@ -95,11 +87,11 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
               if (debateInsights) {
                 for (const role of ["多方", "裁判", "空方"] as const) {
                   const roleData = debateInsights[role];
-                  for (const t of (roleData?.key_topics || [])) {
-                    if (keywordsRe.test(t.topic) || keywordsRe.test(t.bull_view) || keywordsRe.test(t.bear_view)) {
-                      const view = role === "空方" ? t.bear_view : t.bull_view;
+                  for (const topic of (roleData?.key_topics || [])) {
+                    if (keywordsRe.test(topic.topic) || keywordsRe.test(topic.bull_view) || keywordsRe.test(topic.bear_view)) {
+                      const view = role === "空方" ? topic.bear_view : topic.bull_view;
                       macroTopics.push({
-                        title: `${t.topic}：${view}`,
+                        title: `${topic.topic}：${view}`,
                         type: macroTopics.length === 0 ? "primary" : macroTopics.length === 2 ? "risk" : "supporting",
                       });
                       if (macroTopics.length >= 3) break;
@@ -120,7 +112,7 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
               }
               if (macroTopics.length > 0) {
                 insight = {
-                  verdict: "Neutral",
+                  verdict: "中性",
                   core_insight: macroTopics[0]?.title || "",
                   supporting_signals: macroTopics.slice(1).map((t) => t.title),
                   primary_risk: macroTopics.find((t) => t.type === "risk")?.title || "",
@@ -234,9 +226,10 @@ function AgentCard({
   ticker: string;
   index: number;
 }) {
+  const t = useTranslations("stockComponents");
   const verdict = insight?.verdict || agent.signal;
   const confidence = insight?.confidence || agent.conviction;
-  const verdictCfg = verdictStyles[verdict] || verdictStyles["Hold"] || verdictStyles["持有"];
+  const verdictCfg = verdictStyles[verdict] || verdictStyles["持有"];
   const keyInsights = buildKeyInsights(insight, agent);
 
   return (
@@ -255,7 +248,7 @@ function AgentCard({
             </div>
             <div>
               <p className="text-[13px] font-semibold text-[var(--text-primary)]">{agent.agentName}</p>
-              <p className="text-[10px] text-[var(--text-secondary)]/60">{cfg.label} Analysis</p>
+              <p className="text-[10px] text-[var(--text-secondary)]/60">{t("agentAnalysisLabel", { label: t(cfg.labelKey as Parameters<typeof t>[0]) })}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -289,7 +282,7 @@ function AgentCard({
         className="flex items-center justify-center gap-1.5 py-2.5 border-t border-[var(--border-custom)] text-[11px] text-[var(--blue)] hover:bg-[var(--blue)]/5 transition-colors font-medium"
       >
         <FileText className="w-3.5 h-3.5" />
-        Full Report
+        {t("expandFullReport")}
         <ChevronRight className="w-3.5 h-3.5" />
       </Link>
     </motion.div>

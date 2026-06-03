@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { MarketIndicator } from "../../types";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 function StatusBadge({ status }: { status: MarketIndicator["status"] }) {
+  const t = useTranslations("market");
   const colors: Record<string, string> = {
     up: "bg-[var(--green)]/15 text-[var(--green)]",
     down: "bg-[var(--red)]/15 text-[var(--red)]",
@@ -13,11 +15,11 @@ function StatusBadge({ status }: { status: MarketIndicator["status"] }) {
     danger: "bg-[var(--red)]/15 text-[var(--red)]",
   };
   const labels: Record<string, string> = {
-    up: "Bullish",
-    down: "Bearish",
-    neutral: "Neutral",
-    warning: "Watch",
-    danger: "Danger",
+    up: "看涨",
+    down: "看跌",
+    neutral: t("stable"),
+    warning: "关注",
+    danger: "危险",
   };
   return (
     <span
@@ -37,6 +39,7 @@ interface Props {
 }
 
 export function GlobalMarketState({ data, fetchDate }: Props) {
+  const t = useTranslations("market");
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
@@ -44,10 +47,10 @@ export function GlobalMarketState({ data, fetchDate }: Props) {
       transition={{ duration: 0.4 }}
     >
       <div className="flex items-center justify-between mb-3">
-        <h2 className="section-heading !mb-0">Global Market State</h2>
+        <h2 className="section-heading !mb-0">{t("globalMarketStatus")}</h2>
         {fetchDate && (
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">
-            Data as of {fetchDate}
+            {t("dataDate")} {fetchDate}
           </span>
         )}
       </div>      {/* 桌面端：6 列紧凑卡片网格 */}

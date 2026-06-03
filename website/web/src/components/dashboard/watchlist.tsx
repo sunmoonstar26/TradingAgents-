@@ -1,27 +1,25 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Signal } from "../../types/enums";
-import { SIGNAL_LABELS } from "../../content/labels";
+import { useTranslations } from "next-intl";
 
 const watchlistItems = [
-  { ticker: "NVDA", name: "NVIDIA",    signal: Signal.BUY,  change: 2.34 },
-  { ticker: "TSLA", name: "Tesla",     signal: Signal.BUY,  change: -1.22 },
-  { ticker: "MSFT", name: "Microsoft", signal: Signal.HOLD, change: 0.45 },
-  { ticker: "META", name: "Meta",      signal: Signal.BUY,  change: 1.87 },
-  { ticker: "GOOGL", name: "Alphabet", signal: Signal.BUY,  change: 0.12 },
-  { ticker: "AMZN", name: "Amazon",    signal: Signal.BUY,  change: 0.89 },
+  { ticker: "NVDA", name: "英伟达", signal: "买入", change: 2.34 },
+  { ticker: "TSLA", name: "特斯拉", signal: "增持", change: -1.22 },
+  { ticker: "MSFT", name: "微软", signal: "持有", change: 0.45 },
+  { ticker: "META", name: "Meta", signal: "买入", change: 1.87 },
+  { ticker: "GOOGL", name: "谷歌", signal: "增持", change: 0.12 },
+  { ticker: "AMZN", name: "亚马逊", signal: "增持", change: 0.89 },
 ];
 
 const signalColors: Record<string, string> = {
-  [Signal.STRONG_BUY]:  "text-[var(--green)]",
-  [Signal.BUY]:         "text-[var(--green)]",
-  [Signal.HOLD]:        "text-[var(--amber)]",
-  [Signal.SELL]:        "text-[var(--red)]",
-  [Signal.STRONG_SELL]: "text-[var(--red)]",
+  买入: "text-[var(--green)]",
+  增持: "text-[var(--blue)]",
+  持有: "text-[var(--amber)]",
 };
 
 export function Watchlist() {
+  const t = useTranslations("dashboard");
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
@@ -29,7 +27,7 @@ export function Watchlist() {
       transition={{ duration: 0.4, delay: 0.4 }}
     >
       <h2 className="mb-3 text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-        Watchlist
+        {t("watchlistTitle")}
       </h2>
       <div className="card-terminal overflow-hidden">
         <div className="grid grid-cols-2 md:grid-cols-6 divide-x divide-[var(--border-custom)]">
@@ -45,7 +43,7 @@ export function Watchlist() {
                 <span
                   className={`text-[10px] ${signalColors[item.signal]}`}
                 >
-                  {SIGNAL_LABELS[item.signal as Signal]}
+                  {item.signal}
                 </span>
               </div>
               <div className="flex items-center justify-between">

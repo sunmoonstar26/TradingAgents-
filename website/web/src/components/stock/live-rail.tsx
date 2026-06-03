@@ -4,12 +4,14 @@ import { motion } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { Terminal, Radio } from "lucide-react";
 import { LiveFeedEntry } from "../../types";
+import { useTranslations } from "next-intl";
 
 interface Props {
   data: LiveFeedEntry[];
 }
 
 export function LiveRail({ data }: Props) {
+  const t = useTranslations("stockComponents");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,11 +30,11 @@ export function LiveRail({ data }: Props) {
       <div className="flex items-center gap-2 mb-3">
         <Terminal className="w-4 h-4 text-[var(--green)]" />
         <h2 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-          Live Reasoning Feed
+          {t("liveReasoning")}
         </h2>
         <span className="w-2 h-2 rounded-full bg-[var(--green)] pulse-green" />
         <span className="text-[9px] font-mono text-[var(--green)]/60 ml-auto">
-          Live
+          {t("online")}
         </span>
       </div>
 
@@ -49,7 +51,7 @@ export function LiveRail({ data }: Props) {
             <span className="w-2 h-2 rounded-full bg-[var(--green)]/60" />
           </div>
           <span className="text-[var(--text-secondary)]/40 text-[10px]">
-            trading-agents ~reasoning-engine
+            {t("reasoningEngineTitle")}
           </span>
         </div>
 
@@ -80,7 +82,7 @@ export function LiveRail({ data }: Props) {
       <div className="md:hidden flex items-center gap-2 mt-2 px-2">
         <Radio className="w-3 h-3 text-[var(--green)] animate-pulse" />
         <span className="text-[9px] font-mono text-[var(--green)]/70">
-          Reasoning engine running · {data.length} live entries
+          {t("reasoningEngineRunning", { count: data.length })}
         </span>
       </div>
     </motion.section>
