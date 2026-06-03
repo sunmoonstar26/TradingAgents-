@@ -4,45 +4,10 @@ import { Signal as SignalEnum, AgentPersonality, RiskLevel } from "../types/enum
 import { findStock } from "../data/stocks";
 import { AGENTS } from "@/content/labels";
 
-/**
- * 清洗 LLM 输出中残留的英文 section 标签和 Markdown 粗体符号。
- * 例如：**Recommendation**: Underweight → 评级：减持
- * 只处理映射到前端卡片的摘要字段（rationale/summary/content），
- * 三级页面长报告由 MarkdownContent 组件渲染，不在此处处理。
- */
-const EN_LABEL_ZH: Record<string, string> = {
-  Rating: "评级",
-  Recommendation: "建议",
-  "Executive Summary": "摘要",
-  "Investment Thesis": "投资论点",
-  "Price Target": "目标价",
-  "Time Horizon": "投资周期",
-  Action: "操作建议",
-  "Position Sizing": "仓位规模",
-  Reasoning: "分析依据",
-  "Risk Factors": "风险因素",
-  Conclusion: "结论",
-  Summary: "摘要",
-  Verdict: "裁决",
-  Decision: "决策",
-  Assessment: "评估",
-  Analysis: "分析",
-  Rationale: "理由",
-  "Stop Loss": "止损",
-  "Entry Price": "入场价",
-  "Target Price": "目标价",
-};
-
-function stripEnLabels(text: string): string {
+/** Strip bold section-label prefixes from LLM output, e.g. **Rating**: → "" */
+function stripMarkdownLabels(text: string): string {
   if (!text) return text;
-  // **Label**: 或 **Label**：
-  return text.replace(
-    /\*\*([A-Za-z][A-Za-z ]+)\*\*\s*[:：]\s*/g,
-    (_, label: string) => {
-      const zh = EN_LABEL_ZH[label.trim()] ?? null;
-      return zh ? zh + "：" : "";
-    }
-  );
+  return text.replace(/\*\*[A-Za-z][A-Za-z ]+\*\*\s*[:：]\s*/g, "");
 }
 
 /** TradingAgents Python 脚本输出的原始 JSON */
@@ -110,7 +75,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
   // 置信度：从明确的"置信度 XX%"关键词提取，避免误匹配仓位/价格中的百分比
   // 优先级：显式置信度关键词 > 信号强度映射 > fallback 65
   const decision = raw.final_trade_decision || raw.risk_debate_state?.judge_decision || "";
-  const confKeywordMatch = decision.match(/置信度[：:\s]*(\d{2,3})\s*%/);
+  const confKeywordMatch = decision.match(/(?:conviction|confidence)[:\s]*(\d{2,3})\s*%/i);
   const conviction = confKeywordMatch
     ? parseInt(confKeywordMatch[1])
     : signal === SignalEnum.STRONG_BUY  ? 82
@@ -125,33 +90,33 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
     price: raw.price || (100 + Math.random() * 500),
     change: raw.change || 0,
     changePercent: raw.changePercent || 0,
-    marketCap: raw.marketCap || "待更新",
-    pe: raw.pe || "待更新",
+    marketCap: raw.marketCap || "—",
+    pe: raw.pe || "—",
     sector,
     committeeDecision: {
       signal,
       conviction,
       consensus,
       recommendedExposure: signal === SignalEnum.STRONG_BUY ? "15-20%" : signal === SignalEnum.BUY ? "10-15%" : "5-10%",
-      timeHorizon: "中期（3-6 个月）",
+      timeHorizon: "Medium (3-6 months)",
       rationale:
-        stripEnLabels(raw.final_trade_decision?.slice(0, 300) || "") ||
-        stripEnLabels(raw.risk_debate_state?.judge_decision?.slice(0, 300) || "") ||
+        stripMarkdownLabels(raw.final_trade_decision?.slice(0, 300) || "") ||
+        stripMarkdownLabels(raw.risk_debate_state?.judge_decision?.slice(0, 300) || "") ||
         `AI Investment Committee has completed multi-dimensional analysis of ${name}.`,
     },
     debate: {
       bullThesis: [
         {
           agent: "Research Team · Bull",
-          content: stripEnLabels(raw.investment_debate_state?.bull_history?.slice(0, 500) || "") || "Bull thesis pending",
+          content: stripMarkdownLabels(raw.investment_debate_state?.bull_history?.slice(0, 500) || "") || "Bull thesis pending",
         },
       ],
       moderatorVerdict:
-        stripEnLabels(raw.investment_debate_state?.judge_decision?.slice(0, 500) || "") || "Research manager verdict pending",
+        stripMarkdownLabels(raw.investment_debate_state?.judge_decision?.slice(0, 500) || "") || "Research manager verdict pending",
       bearThesis: [
         {
           agent: "Research Team · Bear",
-          content: stripEnLabels(raw.investment_debate_state?.bear_history?.slice(0, 500) || "") || "Bear thesis pending",
+          content: stripMarkdownLabels(raw.investment_debate_state?.bear_history?.slice(0, 500) || "") || "Bear thesis pending",
         },
       ],
       battleBar: {
@@ -167,7 +132,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
         personality: AgentPersonality.FUNDAMENTAL,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.fundamentals_report?.slice(0, 200) || "") || "Fundamental analysis in progress",
+        summary: stripMarkdownLabels(raw.fundamentals_report?.slice(0, 200) || "") || "Fundamental analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
@@ -177,7 +142,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
         personality: AgentPersonality.TECHNICAL,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.market_report?.slice(0, 200) || "") || "Technical analysis in progress",
+        summary: stripMarkdownLabels(raw.market_report?.slice(0, 200) || "") || "Technical analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
@@ -187,7 +152,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
         personality: AgentPersonality.SENTIMENT,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.sentiment_report?.slice(0, 200) || "") || "Sentiment analysis in progress",
+        summary: stripMarkdownLabels(raw.sentiment_report?.slice(0, 200) || "") || "Sentiment analysis in progress",
         keyPoints: [],
         riskFactors: [],
         sentimentPulse: 50,
@@ -198,7 +163,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
         personality: AgentPersonality.RISK,
         signal: SignalEnum.HOLD,
         conviction: 50,
-        summary: stripEnLabels(raw.risk_debate_state?.judge_decision?.slice(0, 200) || "") || "Risk analysis in progress",
+        summary: stripMarkdownLabels(raw.risk_debate_state?.judge_decision?.slice(0, 200) || "") || "Risk analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
@@ -208,7 +173,7 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
         personality: AgentPersonality.NEWS,
         signal: SignalEnum.HOLD,
         conviction: 55,
-        summary: stripEnLabels(raw.news_report?.slice(0, 200) || "") || "News analysis in progress",
+        summary: stripMarkdownLabels(raw.news_report?.slice(0, 200) || "") || "News analysis in progress",
         keyPoints: [],
         riskFactors: [],
       },
