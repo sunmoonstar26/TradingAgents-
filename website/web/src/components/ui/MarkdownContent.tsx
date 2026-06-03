@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   content: string;
@@ -31,10 +32,11 @@ function renderWithLineBreaks(text: string): React.ReactNode {
 }
 
 export function MarkdownContent({ content }: Props) {
+  const t = useTranslations("common");
   if (!content) {
     return (
       <p className="text-sm text-[var(--text-secondary)]/60 italic">
-        暂无内容
+        {t("noContent")}
       </p>
     );
   }

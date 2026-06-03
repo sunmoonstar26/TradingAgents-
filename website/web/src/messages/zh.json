@@ -389,6 +389,9 @@
     "futureImpact": "未来影响",
     "eventLabel": "事件",
     "missedLabel": "忽略",
-    "adjustmentLabel": "调整"
+    "adjustmentLabel": "调整",
+    "aiTrendDominant": "AI 趋势仍占主导",
+    "riskRewardAcceptable": "风险回报尚可接受",
+    "maintainCashReserves": "保持充足现金储备"
   }
 }

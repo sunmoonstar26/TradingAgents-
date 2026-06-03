@@ -5,6 +5,7 @@ import { Signal, ReasonCapsule } from "../../types";
 import { Shield, TrendingUp, AlertTriangle, Zap, ChevronDown, ChevronUp } from "lucide-react";
 import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 const signalConfig: Record<string, { bg: string; text: string; icon: typeof TrendingUp; glow: string }> = {
   "强烈买入": { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 40px rgba(34,197,94,0.3)" },
@@ -49,6 +50,7 @@ export function FinalDecision({
   reportDate,
   thesis,
 }: Props) {
+  const t = useTranslations("stockComponents");
   const cfg = signalConfig[signal] || signalConfig["持有"];
   const Icon = cfg.icon;
   const [expanded, setExpanded] = useState(false);
@@ -78,7 +80,7 @@ export function FinalDecision({
       transition={{ duration: 0.5, delay: 0.1 }}
     >
       <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest flex items-center justify-between">
-        <span>投资委员会决策</span>
+        <span>{t("committeeDecision")}</span>
         {formattedDate && (
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/50 tracking-normal normal-case">
             {formattedDate}
@@ -106,7 +108,7 @@ export function FinalDecision({
           </div>
           <div className="ml-auto shrink-0 flex items-center gap-3">
             <div className="text-center">
-              <div className="text-[10px] text-[var(--text-secondary)]/60 tracking-wider">置信度</div>
+              <div className="text-[10px] text-[var(--text-secondary)]/60 tracking-wider">{t("conviction")}</div>
               <div className="text-lg font-mono font-bold text-[var(--green)]">{thesisConviction}%</div>
             </div>
           </div>
@@ -116,7 +118,7 @@ export function FinalDecision({
         {reasons.length > 0 && (
           <div className="border-t border-[var(--border-custom)] pt-5 space-y-3">
             <div className="text-[11px] font-semibold text-[var(--text-secondary)]/80 uppercase tracking-wider">
-              核心决策依据
+              {t("coreReasons")}
             </div>
             {reasons.map((reason, idx) => (
               <motion.div
@@ -157,7 +159,7 @@ export function FinalDecision({
                     </div>
                     {/* Impact */}
                     <span className={`text-[10px] font-medium ${impactColors[reason.impact] || "text-[var(--text-secondary)]/60"}`}>
-                      {reason.impact}影响
+                      {reason.impact}{t("impactSuffix")}
                     </span>
                   </div>
                 </div>
@@ -170,15 +172,15 @@ export function FinalDecision({
 
         {/* 底部元数据 */}
         <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]/60 pt-2 border-t border-[var(--border-custom)]">
-          <span>共识：{consensus}</span>
+          <span>{t("consensus")}：{consensus}</span>
           <span>·</span>
-          <span>建议仓位：{recommendedExposure}</span>
+          <span>{t("suggestedExposure")}：{recommendedExposure}</span>
           <span>·</span>
-          <span>时间框架：{thesisHorizon}</span>
+          <span>{t("timeframe")}：{thesisHorizon}</span>
           {riskSummary && (
             <>
               <span>·</span>
-              <span className="text-[var(--red)]/70">风险：{riskSummary}</span>
+              <span className="text-[var(--red)]/70">{t("risk")}：{riskSummary}</span>
             </>
           )}
         </div>

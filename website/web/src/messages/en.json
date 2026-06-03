@@ -389,6 +389,9 @@
     "futureImpact": "Future impact",
     "eventLabel": "Event",
     "missedLabel": "Missed",
-    "adjustmentLabel": "Adjustment"
+    "adjustmentLabel": "Adjustment",
+    "aiTrendDominant": "AI trend remains dominant",
+    "riskRewardAcceptable": "Risk/reward ratio acceptable",
+    "maintainCashReserves": "Maintain sufficient cash reserves"
   }
 }

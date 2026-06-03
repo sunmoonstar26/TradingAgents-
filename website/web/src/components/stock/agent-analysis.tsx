@@ -8,14 +8,15 @@ import {
   FileText, ChevronRight, Zap, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
+import { useTranslations } from "next-intl";
 
-const personalityConfig: Record<string, { borderClass: string; icon: typeof Brain; iconColor: string; label: string; mapKey: string }> = {
-  fundamental: { borderClass: "agent-fundamental", icon: Brain, iconColor: "text-[var(--blue)]", label: "基本面", mapKey: "fundamentals" },
-  technical: { borderClass: "agent-technical", icon: TrendingUp, iconColor: "text-[var(--green)]", label: "技术面", mapKey: "market" },
-  sentiment: { borderClass: "agent-sentiment", icon: MessageCircle, iconColor: "text-[var(--amber)]", label: "情绪面", mapKey: "sentiment" },
-  risk: { borderClass: "agent-risk", icon: ShieldAlert, iconColor: "text-[var(--red)]", label: "风控", mapKey: "__risk__" },
-  news: { borderClass: "agent-news", icon: Newspaper, iconColor: "text-[var(--cyan)]", label: "事件驱动", mapKey: "news" },
-  macro: { borderClass: "agent-macro", icon: Globe, iconColor: "text-[var(--purple)]", label: "宏观", mapKey: "__macro__" },
+const personalityConfig: Record<string, { borderClass: string; icon: typeof Brain; iconColor: string; labelKey: string; mapKey: string }> = {
+  fundamental: { borderClass: "agent-fundamental", icon: Brain, iconColor: "text-[var(--blue)]", labelKey: "agentLabelFundamental", mapKey: "fundamentals" },
+  technical: { borderClass: "agent-technical", icon: TrendingUp, iconColor: "text-[var(--green)]", labelKey: "agentLabelTechnical", mapKey: "market" },
+  sentiment: { borderClass: "agent-sentiment", icon: MessageCircle, iconColor: "text-[var(--amber)]", labelKey: "agentLabelSentiment", mapKey: "sentiment" },
+  risk: { borderClass: "agent-risk", icon: ShieldAlert, iconColor: "text-[var(--red)]", labelKey: "agentLabelRisk", mapKey: "__risk__" },
+  news: { borderClass: "agent-news", icon: Newspaper, iconColor: "text-[var(--cyan)]", labelKey: "agentLabelNews", mapKey: "news" },
+  macro: { borderClass: "agent-macro", icon: Globe, iconColor: "text-[var(--purple)]", labelKey: "agentLabelMacro", mapKey: "__macro__" },
 };
 
 const verdictStyles: Record<string, { bg: string; text: string }> = {
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
+  const t = useTranslations("stockComponents");
   return (
     <motion.section
       initial={{ opacity: 0, y: 6 }}
@@ -44,7 +46,7 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
       transition={{ duration: 0.4, delay: 0.2 }}
     >
       <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-        智能体分析网络
+        {t("agentNetwork")}
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -85,11 +87,11 @@ export function MultiAgentAnalysis({ data, ticker, insights }: Props) {
               if (debateInsights) {
                 for (const role of ["多方", "裁判", "空方"] as const) {
                   const roleData = debateInsights[role];
-                  for (const t of (roleData?.key_topics || [])) {
-                    if (keywordsRe.test(t.topic) || keywordsRe.test(t.bull_view) || keywordsRe.test(t.bear_view)) {
-                      const view = role === "空方" ? t.bear_view : t.bull_view;
+                  for (const topic of (roleData?.key_topics || [])) {
+                    if (keywordsRe.test(topic.topic) || keywordsRe.test(topic.bull_view) || keywordsRe.test(topic.bear_view)) {
+                      const view = role === "空方" ? topic.bear_view : topic.bull_view;
                       macroTopics.push({
-                        title: `${t.topic}：${view}`,
+                        title: `${topic.topic}：${view}`,
                         type: macroTopics.length === 0 ? "primary" : macroTopics.length === 2 ? "risk" : "supporting",
                       });
                       if (macroTopics.length >= 3) break;
@@ -224,6 +226,7 @@ function AgentCard({
   ticker: string;
   index: number;
 }) {
+  const t = useTranslations("stockComponents");
   const verdict = insight?.verdict || agent.signal;
   const confidence = insight?.confidence || agent.conviction;
   const verdictCfg = verdictStyles[verdict] || verdictStyles["持有"];
@@ -245,7 +248,7 @@ function AgentCard({
             </div>
             <div>
               <p className="text-[13px] font-semibold text-[var(--text-primary)]">{agent.agentName}</p>
-              <p className="text-[10px] text-[var(--text-secondary)]/60">{cfg.label}分析</p>
+              <p className="text-[10px] text-[var(--text-secondary)]/60">{t("agentAnalysisLabel", { label: t(cfg.labelKey as Parameters<typeof t>[0]) })}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -279,7 +282,7 @@ function AgentCard({
         className="flex items-center justify-center gap-1.5 py-2.5 border-t border-[var(--border-custom)] text-[11px] text-[var(--blue)] hover:bg-[var(--blue)]/5 transition-colors font-medium"
       >
         <FileText className="w-3.5 h-3.5" />
-        展开完整报告
+        {t("expandFullReport")}
         <ChevronRight className="w-3.5 h-3.5" />
       </Link>
     </motion.div>

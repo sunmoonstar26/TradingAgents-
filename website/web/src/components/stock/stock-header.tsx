@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import { addToRadar, isInRadar } from "../../lib/radar-store";
 import { OpportunityEntry } from "../../types";
 import { Signal, RiskLevel } from "../../types/enums";
+import { useTranslations } from "next-intl";
 
 interface Props {
   ticker: string;
@@ -48,6 +49,7 @@ export function StockHeader({
   pe,
   sector,
 }: Props) {
+  const t = useTranslations("stockComponents");
   const isUp = changePercent > 0;
   const isDown = changePercent < 0;
   const changeColor = isUp
@@ -86,7 +88,7 @@ export function StockHeader({
                 : "bg-[var(--blue)]/10 text-[var(--blue)] border border-[var(--blue)]/30 hover:bg-[var(--blue)]/20 hover:border-[var(--blue)]/50 active:scale-95"
             }`}
           >
-            {added ? "✓ 已添加雷达" : "📡 添加至雷达"}
+            {added ? t("radarAdded") : t("radarAdd")}
           </button>
         </div>
         <div className="text-[10px] font-mono text-[var(--text-secondary)]/60">

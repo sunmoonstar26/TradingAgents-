@@ -6,6 +6,7 @@ import { RiskExposure, RiskInsight } from "../../types";
 import { RiskLevel } from "../../types/enums";
 import { Shield, AlertTriangle, ChevronRight, FileText } from "lucide-react";
 import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
+import { useTranslations } from "next-intl";
 
 interface Props {
   data: RiskExposure[];
@@ -20,6 +21,7 @@ const severityConfig: Record<string, { bg: string; text: string; border: string;
 };
 
 export function RiskAnalysis({ data, ticker, riskInsight }: Props) {
+  const t = useTranslations("stockComponents");
   const riskLevel = riskInsight?.overall_risk_level || RiskLevel.MEDIUM;
   const riskItems = riskInsight?.risk_items?.length ? riskInsight.risk_items.slice(0, 3) : [];
   const riskConfidence = riskInsight?.confidence;
@@ -33,7 +35,7 @@ export function RiskAnalysis({ data, ticker, riskInsight }: Props) {
       transition={{ duration: 0.4, delay: 0.25 }}
     >
       <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-        风险暴露系统
+        {t("riskExposureSystem")}
       </h2>
 
       <div
@@ -43,12 +45,12 @@ export function RiskAnalysis({ data, ticker, riskInsight }: Props) {
         {/* 头部：总体风险等级 */}
         <div className="px-4 py-3 border-b border-[var(--border-custom)] flex items-center gap-2">
           <Shield className="w-4 h-4" style={{ color: levelCfg.text }} />
-          <span className="text-[13px] font-semibold text-[var(--text-primary)]">风险暴露</span>
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">{t("riskExposure")}</span>
           <span
             className="ml-auto px-2.5 py-1 rounded-full text-[11px] font-semibold"
             style={{ background: levelCfg.bg, color: levelCfg.text }}
           >
-            {riskLevel}风险
+            {t("riskLevelSuffix", { level: riskLevel })}
           </span>
           {riskConfidence && (
             <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
@@ -127,7 +129,7 @@ export function RiskAnalysis({ data, ticker, riskInsight }: Props) {
           className="flex items-center justify-center gap-1.5 py-2.5 border-t border-[var(--border-custom)] text-[11px] text-[var(--blue)]/70 hover:text-[var(--blue)] hover:bg-[var(--blue)]/5 transition-colors font-medium"
         >
           <FileText className="w-3 h-3" />
-          查看风控团队完整决策
+          {t("viewFullRiskDecision")}
           <ChevronRight className="w-3 h-3" />
         </Link>
       </div>

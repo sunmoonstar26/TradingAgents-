@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Header } from "../../components/layout/header";
 import { Cpu, Loader2, AlertTriangle, ArrowLeft, FileText } from "lucide-react";
 import { findStock } from "../../data/stocks";
+import { useTranslations } from "next-intl";
 
 interface SessionStatusResponse {
   success: boolean;
@@ -22,12 +23,12 @@ interface SessionStatusResponse {
 }
 
 const AGENT_LABELS: Record<string, string> = {
-  fundamental: "基本面",
-  technical: "技术面",
-  sentiment: "情绪面",
-  macro: "宏观",
-  news: "新闻",
-  risk: "风控",
+  fundamental: "agentLabelFundamental",
+  technical: "agentLabelTechnical",
+  sentiment: "agentLabelSentiment",
+  macro: "agentLabelMacro",
+  news: "agentLabelNews",
+  risk: "agentLabelRisk",
 };
 
 // report 单独展示，不参与 6 个智能体的进度计算
@@ -55,6 +56,7 @@ function IndeterminateBar() {
 }
 
 export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: Props) {
+  const t = useTranslations("stockComponents");
   const qc = useQueryClient();
   const finishedRef = useRef(false);
   const stockInfo = findStock(ticker);
@@ -130,7 +132,7 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
               className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]/50 hover:text-[var(--text-secondary)] transition-colors font-mono mb-6"
             >
               <ArrowLeft className="w-3 h-3" />
-              返回
+              {t("back")}
             </button>
             <div className="mb-4 flex justify-center">
               <motion.div
@@ -153,12 +155,12 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
               {ticker} <span className="text-[var(--text-secondary)] font-normal">{displayName}</span>
             </h1>
             <p className="text-sm text-[var(--text-secondary)] mb-1">
-              {isFailed ? "本次分析失败" : "AI 投资委员会正在分析"}
+              {isFailed ? t("analysisFailedShort") : t("aiAnalyzing")}
             </p>
             <p className="text-[10px] font-mono text-[var(--text-secondary)]/50">
               {isFailed
-                ? "请稍后重试，或检查数据源 / API key 配置"
-                : "完成后此页面将自动刷新为最新结果"}
+                ? t("failedRetry")
+                : t("autoRefresh")}
             </p>
           </div>
 
@@ -178,9 +180,9 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
                   <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] mb-4">
                     <span className="flex items-center gap-1.5">
                       <Loader2 className="w-3 h-3 animate-spin text-[var(--blue)]" />
-                      {session?.current_step || "智能体分析中"}
+                      {session?.current_step || t("agentAnalyzingStep")}
                     </span>
-                    <span>{completedCount}/{total} 智能体</span>
+                    <span>{t("agentsCountLabel", { completed: completedCount, total })}</span>
                   </div>
                 </>
               ) : (
@@ -190,15 +192,15 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
                   <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] mb-4 mt-3">
                     <span className="flex items-center gap-1.5">
                       <FileText className="w-3 h-3 text-[var(--blue)]" />
-                      {isReportDone ? "综合报告已生成" : "正在生成综合报告..."}
+                      {isReportDone ? t("reportGenerated") : t("generatingReport")}
                     </span>
                     {isReportRunning && reportElapsed > 0 && (
                       <span className="text-[var(--text-secondary)]/40">
-                        已用时 {reportElapsed}s · 通常需 1-3 分钟
+                        {t("reportElapsedLabel", { elapsed: reportElapsed })}
                       </span>
                     )}
                     {!isReportRunning && !isReportDone && (
-                      <span className="text-[var(--text-secondary)]/40">等待生成...</span>
+                      <span className="text-[var(--text-secondary)]/40">{t("waitingGenerate")}</span>
                     )}
                   </div>
                 </>
@@ -228,7 +230,7 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
                   return (
                     <li key={key} className={`flex items-center gap-2 ${color}`}>
                       <span className="w-3 inline-block">{symbol}</span>
-                      <span>{AGENT_LABELS[key]}</span>
+                      <span>{t(AGENT_LABELS[key] as Parameters<typeof t>[0])}</span>
                     </li>
                   );
                 })}
@@ -243,10 +245,10 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
                   <span className="w-3 inline-block">
                     {isReportDone ? "✓" : isReportRunning ? "▸" : "·"}
                   </span>
-                  <span>综合报告</span>
+                  <span>{t("comprehensiveReport")}</span>
                   {isReportRunning && (
                     <span className="ml-auto text-[9px] text-[var(--text-secondary)]/30">
-                      耗时较长，请耐心等待
+                      {t("waitingPatience")}
                     </span>
                   )}
                 </li>
