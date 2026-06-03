@@ -3,10 +3,10 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Header } from "../../../../../../components/layout/header";
-import { MarkdownContent } from "../../../../../../components/ui/MarkdownContent";
-import { Skeleton } from "../../../../../../components/ui/skeleton";
-import { AnalyzingState } from "../../../../../../components/stock/analyzing-state";
+import { Header } from "@/components/layout/header";
+import { MarkdownContent } from "@/components/ui/MarkdownContent";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AnalyzingState } from "@/components/stock/analyzing-state";
 import { ArrowLeft, Target } from "lucide-react";
 
 export default function AllocationDetailPage() {
