@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { OpportunityEntry, StockEntry, ConsensusBreakdown } from "../../types";
 import { Signal, RiskLevel } from "../../types/enums";
 import { Pencil, Trash2, ChevronUp, ChevronDown, Plus, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
@@ -87,6 +88,7 @@ interface Props {
 
 export function OpportunityRadar({ data, onSave }: Props) {
   const router = useRouter();
+  const t = useTranslations("dashboard");
   const [activeRow, setActiveRow] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<OpportunityEntry[]>([]);
@@ -444,13 +446,12 @@ export function OpportunityRadar({ data, onSave }: Props) {
     <motion.section ref={containerRef} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">AI 机会雷达</h2>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">{t("radarTitle")}</h2>
           <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 flex items-center gap-1.5">
-            全市场多智能体扫描
             <span className="flex items-center gap-1 text-[var(--blue)]/60">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--blue)] pulse-blue inline-block" />
-              每 30 秒更新
             </span>
+            {t("radarSubtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -469,7 +470,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
             <RefreshCw className={`w-3 h-3 ${bulkUpdating && !bulkAborting ? "animate-spin" : ""}`} />
             {bulkUpdating
               ? `更新中 ${bulkUpdating.done}/${bulkUpdating.total}`
-              : "更新全部"}
+              : t("updateAll")}
           </button>
         </div>
       </div>
@@ -481,13 +482,13 @@ export function OpportunityRadar({ data, onSave }: Props) {
             <thead>
               <tr className="border-b border-[var(--border-custom)]">
                 {editing && <th className="w-16" />}
-                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">代码</th>
-                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">信号</th>
-                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">置信度</th>
-                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">风险</th>
-                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">共识</th>
-                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">建议仓位</th>
-                <th className="text-right px-5 py-3.5 font-medium text-[var(--text-secondary)]">更新</th>
+                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colCode")}</th>
+                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colSignal")}</th>
+                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colConfidence")}</th>
+                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colRisk")}</th>
+                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colConsensus")}</th>
+                <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colPosition")}</th>
+                <th className="text-right px-5 py-3.5 font-medium text-[var(--text-secondary)]">{t("colUpdated")}</th>
               </tr>
             </thead>
             <tbody>

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { TrendingUp, Shield, AlertTriangle, Zap, ArrowRight } from "lucide-react";
 
 interface ResearchCard {
@@ -79,15 +80,16 @@ const signalConfig: Record<string, { color: string; bg: string; icon: typeof Tre
 
 export function FeaturedResearch() {
   const router = useRouter();
+  const t = useTranslations("dashboard");
 
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">热门研究</h2>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">AI 投资委员会精选分析摘要</p>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">{t("featuredTitle")}</h2>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{t("featuredSubtitle")}</p>
         </div>
-        <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">公开 · 无需登录</span>
+        <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">{t("featuredPublic")}</span>
       </div>
 
       {/* 桌面端：3列网格 */}
@@ -133,7 +135,7 @@ export function FeaturedResearch() {
                 <div className="p-2.5 rounded-lg bg-[var(--panel2)]/60 border border-[var(--border-custom)] mb-2">
                   <p className="text-[10px] text-[var(--text-secondary)]/50 mb-0.5 flex items-center gap-1">
                     <Zap className="w-2.5 h-2.5" style={{ color: "#00c8ff" }} />
-                    核心驱动
+                    {t("featuredKeyDriver")}
                   </p>
                   <p className="text-[11px] text-[var(--text-primary)] leading-snug line-clamp-2">{card.keyDriver}</p>
                 </div>
@@ -142,7 +144,7 @@ export function FeaturedResearch() {
                 <div className="p-2.5 rounded-lg bg-[var(--red)]/5 border border-[var(--red)]/10 mb-3">
                   <p className="text-[10px] text-[var(--red)]/50 mb-0.5 flex items-center gap-1">
                     <AlertTriangle className="w-2.5 h-2.5" />
-                    主要风险
+                    {t("featuredPrimaryRisk")}
                   </p>
                   <p className="text-[11px] text-[var(--text-secondary)] leading-snug line-clamp-2">{card.primaryRisk}</p>
                 </div>
@@ -156,7 +158,7 @@ export function FeaturedResearch() {
                     <span>·</span>
                     <span>{card.timeHorizon}</span>
                     <span>·</span>
-                    <span>{card.agentCount} 智能体</span>
+                    <span>{t("featuredAgentCount", { count: card.agentCount })}</span>
                   </div>
                   <span className="text-[var(--text-secondary)]/30">{card.updatedAt}</span>
                 </div>
@@ -165,7 +167,7 @@ export function FeaturedResearch() {
               {/* hover 查看详情 */}
               <div className="px-4 pb-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: "#00c8ff" }}>
-                  查看完整分析
+                  {t("featuredViewFull")}
                   <ArrowRight className="w-3 h-3" />
                 </div>
               </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { LiveFeedEntry } from "../../types";
 import { getLiveFeed, seedFeedFromMock, FeedItem } from "../../lib/livefeed-store";
 
@@ -27,23 +28,23 @@ const SIGNAL_STYLE: Record<string, { bg: string; text: string; dot: string }> = 
 
 const DEFAULT_SIGNAL = { bg: "bg-[var(--border-custom)]", text: "text-[var(--text-secondary)]", dot: "bg-[var(--text-secondary)]/40" };
 
-function formatTime(iso: string): string {
+function formatTime(iso: string, justNow: string, minutesAgo: (n: number) => string, hoursAgo: (n: number) => string): string {
   try {
     const d = new Date(iso);
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1)  return "刚刚";
-    if (diffMin < 60) return `${diffMin}m 前`;
+    if (diffMin < 1)  return justNow;
+    if (diffMin < 60) return minutesAgo(diffMin);
     const diffH = Math.floor(diffMin / 60);
-    if (diffH < 24)   return `${diffH}h 前`;
+    if (diffH < 24)   return hoursAgo(diffH);
     return d.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" });
   } catch {
     return iso;
   }
 }
 
-function FeedRow({ item, isNew }: { item: FeedItem; isNew: boolean }) {
+function FeedRow({ item, isNew, formatTimeFn }: { item: FeedItem; isNew: boolean; formatTimeFn: (iso: string) => string }) {
   const sig = SIGNAL_STYLE[item.signal] ?? DEFAULT_SIGNAL;
   return (
     <motion.div
@@ -81,13 +82,20 @@ function FeedRow({ item, isNew }: { item: FeedItem; isNew: boolean }) {
 
       {/* 时间戳 */}
       <span className="shrink-0 text-[10px] font-mono text-[var(--text-secondary)]/35 pt-0.5">
-        {formatTime(item.timestamp)}
+        {formatTimeFn(item.timestamp)}
       </span>
     </motion.div>
   );
 }
 
 export function LiveFeed({ data, feedKey = 0 }: Props) {
+  const t = useTranslations("dashboard");
+  const formatTimeFn = (iso: string) => formatTime(
+    iso,
+    t("feedJustNow"),
+    (n) => t("feedMinutesAgo", { n }),
+    (n) => t("feedHoursAgo", { n }),
+  );
   const [items, setItems] = useState<FeedItem[]>([]);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const [paused, setPaused] = useState(false);
@@ -150,9 +158,9 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
         <div>
           <h2 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] pulse-blue" />
-            AI 实时信息流
+            {t("feedTitle")}
           </h2>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">智能体分析完成后自动更新</p>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{t("feedSubtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           {paused && (
@@ -160,11 +168,11 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
               onClick={scrollToTop}
               className="text-[10px] font-mono text-[var(--blue)] hover:text-[var(--blue)]/80 flex items-center gap-1 transition-colors"
             >
-              ↑ 回到最新
+              {t("feedBackToLatest")}
             </button>
           )}
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">
-            {items.length} 条信号
+            {t("feedSignalCount", { count: items.length })}
           </span>
         </div>
       </div>
@@ -179,13 +187,13 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
         >
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2">
-              <span className="text-[var(--text-secondary)]/30 text-sm">暂无信号</span>
-              <span className="text-[var(--text-secondary)]/20 text-[11px]">完成股票分析后将自动显示</span>
+              <span className="text-[var(--text-secondary)]/30 text-sm">{t("feedEmpty")}</span>
+              <span className="text-[var(--text-secondary)]/20 text-[11px]">{t("feedEmptyDesc")}</span>
             </div>
           ) : (
             <AnimatePresence initial={false}>
               {items.map((item) => (
-                <FeedRow key={item.id} item={item} isNew={newIds.has(item.id)} />
+                <FeedRow key={item.id} item={item} isNew={newIds.has(item.id)} formatTimeFn={formatTimeFn} />
               ))}
             </AnimatePresence>
           )}

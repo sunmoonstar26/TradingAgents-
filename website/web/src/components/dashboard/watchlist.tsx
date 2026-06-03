@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const watchlistItems = [
   { ticker: "NVDA", name: "英伟达", signal: "买入", change: 2.34 },
@@ -18,6 +19,7 @@ const signalColors: Record<string, string> = {
 };
 
 export function Watchlist() {
+  const t = useTranslations("dashboard");
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
@@ -25,7 +27,7 @@ export function Watchlist() {
       transition={{ duration: 0.4, delay: 0.4 }}
     >
       <h2 className="mb-3 text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-        自选列表
+        {t("watchlistTitle")}
       </h2>
       <div className="card-terminal overflow-hidden">
         <div className="grid grid-cols-2 md:grid-cols-6 divide-x divide-[var(--border-custom)]">

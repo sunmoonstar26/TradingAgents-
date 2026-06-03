@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { SectorFlow } from "../../types";
 
 function MomentumBar({ value }: { value: number }) {
@@ -56,23 +57,24 @@ interface Props {
 }
 
 export function SectorHeatmap({ data }: Props) {
+  const t = useTranslations("dashboard");
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.35 }}
     >
-      <h2 className="section-heading">板块资金流向</h2>
+      <h2 className="section-heading">{t("sectorFlowTitle")}</h2>
 
       {/* 桌面端：列表/表格 */}
       <div className="hidden md:block card-terminal overflow-hidden !p-0">
         <div className="divide-y divide-[var(--border-custom)]">
           {/* 表头 */}
           <div className="flex items-center px-6 py-3 text-[11px] font-medium text-[var(--text-secondary)]">
-            <span className="w-32 shrink-0">板块</span>
-            <span className="w-28 shrink-0">资金流向</span>
-            <span className="flex-1">动量指数</span>
-            <span className="w-20 shrink-0 text-right">变化</span>
+            <span className="w-32 shrink-0">{t("sectorColSector")}</span>
+            <span className="w-28 shrink-0">{t("sectorColFlow")}</span>
+            <span className="flex-1">{t("sectorColMomentum")}</span>
+            <span className="w-20 shrink-0 text-right">{t("sectorColChange")}</span>
           </div>
           {/* 数据行 */}
           {data.map((sector, idx) => (

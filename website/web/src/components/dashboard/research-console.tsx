@@ -3,14 +3,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { searchStocks, isValidTickerFormat, inferMarket } from "../../data/stocks";
 import { AnalysisMode, AnalysisStartResponse, Market, StockEntry } from "../../types";
 import { Search, Zap, ChevronDown } from "lucide-react";
 import { useAuth } from "../../lib/auth";
 import { LoginUnlockModal } from "../../components/auth/LoginUnlockModal";
 
-const MARKET_LABELS: Record<Market, string> = { US: "美股", HK: "港股", CN: "A股" };
-const MODE_LABELS: Record<AnalysisMode, string> = { standard: "标准分析", deep: "深度研究" };
+const MARKET_LABELS: Record<Market, string> = { US: "US", HK: "HK", CN: "CN" };
+const MODE_LABELS: Record<AnalysisMode, string> = { standard: "standard", deep: "deep" };
 
 const TRENDING = ["NVDA", "TSLA", "META", "PLTR", "AMD"];
 
@@ -24,8 +25,11 @@ const BOOT_STEPS = [
 
 export function AIResearchConsole() {
   const router = useRouter();
-  const { isLoggedIn, ready, user, deductCredit } = useAuth();
-  const [query, setQuery] = useState("");
+  const t = useTranslations("dashboard");
+  const tMarket = useTranslations("market");
+  const marketLabels: Record<Market, string> = { US: tMarket("usStocks"), HK: tMarket("hkStocks"), CN: tMarket("aShares") };
+  const modeLabels: Record<AnalysisMode, string> = { standard: "标准分析", deep: "深度研究" };
+  const { isLoggedIn, ready, user, deductCredit } = useAuth();  const [query, setQuery] = useState("");
   const [selectedStock, setSelectedStock] = useState<StockEntry | null>(null);
   const [market, setMarket] = useState<Market>("US");
   const [mode, setMode] = useState<AnalysisMode>("standard");
@@ -178,10 +182,9 @@ export function AIResearchConsole() {
           <div>
             <h2 className="text-xs font-semibold text-white/90 flex items-center gap-1.5 tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--blue)]" />
-              AI 研究控制台
-            </h2>
-            <p className="text-[10px] text-white/25 mt-0.5 font-mono">
-              多智能体工作流引擎
+              {t("consoleTitle")}
+            </h2>            <p className="text-[10px] text-white/25 mt-0.5 font-mono">
+              {t("consoleSubtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -239,7 +242,7 @@ export function AIResearchConsole() {
                     setHighlightIndex(-1);
                   }
                 }}
-                placeholder="输入股票代码或公司名称，按 Enter 启动分析..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg pl-11 pr-4 text-sm font-mono font-semibold text-white placeholder:text-white/15 focus:outline-none focus:border-[var(--blue)]/40 focus:bg-white/[0.05] transition-all"
                 style={{ height: 48 }}
               />
@@ -267,7 +270,7 @@ export function AIResearchConsole() {
                         </span>
                         <span className="text-white/50 text-xs">{s.name}</span>
                         <span className="ml-auto text-[10px] text-white/25 font-mono">
-                          {MARKET_LABELS[s.market]}
+                          {marketLabels[s.market]}
                         </span>
                       </button>
                     ))}
@@ -286,8 +289,8 @@ export function AIResearchConsole() {
                 className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-0 text-xs font-mono text-white/70 hover:border-white/[0.12] transition-all min-w-[110px]"
                 style={{ height: 48 }}
               >
-                <span className="text-[9px] text-white/20">市场</span>
-                <span className="text-white">{MARKET_LABELS[market]}</span>
+                <span className="text-[9px] text-white/20">{t("market")}</span>
+                <span className="text-white">{marketLabels[market]}</span>
                 <ChevronDown className={`ml-auto w-3 h-3 text-white/20 transition-transform ${showMarketMenu ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
@@ -304,7 +307,7 @@ export function AIResearchConsole() {
                         onClick={() => { setMarket(m); setShowMarketMenu(false); }}
                         className={`w-full text-left px-3 py-2 text-xs font-mono transition-colors ${m === market ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-white/50 hover:bg-white/[0.04]"}`}
                       >
-                        {MARKET_LABELS[m]}
+                        {marketLabels[m]}
                       </button>
                     ))}
                   </motion.div>
@@ -322,8 +325,8 @@ export function AIResearchConsole() {
                 className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-0 text-xs font-mono text-white/70 hover:border-white/[0.12] transition-all min-w-[120px]"
                 style={{ height: 48 }}
               >
-                <span className="text-[9px] text-white/20">模式</span>
-                <span className="text-white">{MODE_LABELS[mode]}</span>
+                <span className="text-[9px] text-white/20">{t("depth")}</span>
+                <span className="text-white">{modeLabels[mode]}</span>
                 <ChevronDown className={`ml-auto w-3 h-3 text-white/20 transition-transform ${showModeMenu ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
@@ -340,7 +343,7 @@ export function AIResearchConsole() {
                         onClick={() => { setMode(m); setShowModeMenu(false); }}
                         className={`w-full text-left px-3 py-2 text-xs font-mono transition-colors ${m === mode ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-white/50 hover:bg-white/[0.04]"}`}
                       >
-                        {MODE_LABELS[m]}
+                        {modeLabels[m]}
                       </button>
                     ))}
                   </motion.div>
@@ -365,7 +368,7 @@ export function AIResearchConsole() {
                 style={{ height: 48, paddingLeft: 24, paddingRight: 24, minWidth: 160 }}
               >
                 <Zap className="w-3.5 h-3.5" />
-                {!hasEnoughCredits ? "Credits 不足" : "启动 AI 分析"}
+                {!hasEnoughCredits ? "Credits 不足" : t("startAnalysis")}
               </motion.button>
               {/* Credits 余额提示 */}
               {isLoggedIn && user && (
