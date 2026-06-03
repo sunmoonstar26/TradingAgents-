@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, Zap } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "../../lib/auth";
 import { LoginUnlockModal } from "../../components/auth/LoginUnlockModal";
 
 interface Props {
   children: React.ReactNode;
-  /** 锁定状态下显示的标题，默认"AI 研究控制台" */
+  /** 锁定状态下显示的标题，默认 t("defaultLabel") */
   label?: string;
 }
 
@@ -18,9 +19,10 @@ interface Props {
  * 未登录 → 渲染模糊遮罩 + 解锁入口，点击弹出 LoginUnlockModal。
  * ready 前不渲染任何内容（避免 SSR 不匹配）。
  */
-export function PrivateZone({ children, label = "AI 研究控制台" }: Props) {
+export function PrivateZone({ children, label }: Props) {
   const { isLoggedIn, ready } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const t = useTranslations("privateZone");
 
   if (!ready) return null;
   if (isLoggedIn) return <>{children}</>;
@@ -60,8 +62,8 @@ export function PrivateZone({ children, label = "AI 研究控制台" }: Props) {
             </div>
 
             <div className="text-center">
-              <p className="text-sm font-semibold text-white/90">{label}</p>
-              <p className="text-xs text-white/40 mt-0.5 font-mono">登录后解锁 AI 分析能力</p>
+              <p className="text-sm font-semibold text-white/90">{label ?? t("defaultLabel")}</p>
+              <p className="text-xs text-white/40 mt-0.5 font-mono">{t("unlockPrompt")}</p>
             </div>
 
             <button
@@ -74,7 +76,7 @@ export function PrivateZone({ children, label = "AI 研究控制台" }: Props) {
               }}
             >
               <Zap className="w-3.5 h-3.5" />
-              免费解锁 · 赠 5 Credits
+              {t("unlockCta")}
             </button>
           </motion.div>
         </div>

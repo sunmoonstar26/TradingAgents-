@@ -3,15 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { X, Zap, CheckCircle2 } from "lucide-react";
-
-const FEATURES = [
-  "多 Agent 实时辩论",
-  "AI 深度研究报告",
-  "风险动态推演",
-  "AI 机会雷达",
-  "历史分析记录",
-  "自定义投资组合",
-];
+import { useTranslations } from "next-intl";
 
 interface Props {
   open: boolean;
@@ -20,6 +12,12 @@ interface Props {
 
 export function LoginUnlockModal({ open, onClose }: Props) {
   const router = useRouter();
+  const t = useTranslations("loginModal");
+
+  const features = [
+    t("feature1"), t("feature2"), t("feature3"),
+    t("feature4"), t("feature5"), t("feature6"),
+  ];
 
   const goRegister = () => { onClose(); router.push("/register"); };
   const goLogin = () => { onClose(); router.push("/login"); };
@@ -71,16 +69,16 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                   <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
                 </div>
                 <h2 className="text-base font-bold text-white tracking-wide">
-                  解锁 AI 投资委员会
+                  {t("title")}
                 </h2>
               </div>
               <p className="text-xs text-white/40 mb-6 ml-[42px]">
-                使用 TradingAgents 多智能体系统进行深度投资研究
+                {t("subtitle")}
               </p>
 
               {/* 功能列表 */}
               <ul className="space-y-2.5 mb-6">
-                {FEATURES.map((f) => (
+                {features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-xs text-white/60">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "#00c8ff" }} />
                     {f}
@@ -97,7 +95,7 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                 }}
               >
                 <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: "#00c8ff" }} />
-                <span style={{ color: "#00c8ff" }}>首次注册赠送 5 Credits，立即开始 AI 分析</span>
+                <span style={{ color: "#00c8ff" }}>{t("creditsNote")}</span>
               </div>
 
               {/* 按钮组 */}
@@ -111,13 +109,13 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                     color: "#fff",
                   }}
                 >
-                  免费注册 · 获取 5 Credits
+                  {t("registerBtn")}
                 </button>
                 <button
                   onClick={goLogin}
                   className="w-full py-2.5 rounded-xl text-xs font-mono text-white/40 hover:text-white/60 hover:bg-white/[0.03] transition-all border border-white/[0.06]"
                 >
-                  已有账号，直接登录
+                  {t("loginBtn")}
                 </button>
               </div>
             </div>

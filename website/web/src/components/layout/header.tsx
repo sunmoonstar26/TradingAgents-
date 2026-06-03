@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "../../lib/auth";
 import { Zap } from "lucide-react";
 
@@ -11,6 +12,8 @@ const TIME_FMT: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit
 export function Header() {
   const [time, setTime] = useState("");
   const { user, ready, logout } = useAuth();
+  const t = useTranslations("nav");
+  const td = useTranslations("dashboard");
 
   useEffect(() => {
     const tick = () => setTime(new Date().toLocaleTimeString("zh-CN", TIME_FMT));
@@ -41,16 +44,16 @@ export function Header() {
 
         {/* 中间：AI 系统状态 */}
         <div className="hidden lg:flex items-center gap-3 text-[11px] font-mono">
-          <span className="text-[var(--text-secondary)]">智能体在线</span>
+          <span className="text-[var(--text-secondary)]">{td("agentsOnline")}</span>
           <span className="text-[var(--green)] font-semibold">12</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
-          <span className="text-[var(--text-secondary)]">运行中</span>
+          <span className="text-[var(--text-secondary)]">{td("running")}</span>
           <span className="text-[var(--blue)] font-semibold pulse-blue">4</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
-          <span className="text-[var(--text-secondary)]">辩论中</span>
+          <span className="text-[var(--text-secondary)]">{td("debating")}</span>
           <span className="text-[var(--amber)] font-semibold">2</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
-          <span className="text-[var(--text-secondary)]">共识更新</span>
+          <span className="text-[var(--text-secondary)]">{td("consensusUpdate")}</span>
           <span className="text-[var(--text-primary)]">14s 前</span>
         </div>
 
@@ -65,13 +68,13 @@ export function Header() {
                 href="/workspace"
                 className="hidden sm:inline text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                我的工作台
+                {t("workspace")}
               </Link>
               <Link
                 href="/history"
                 className="hidden md:inline text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                历史记录
+                {t("history")}
               </Link>
               {/* Credits */}
               <Link
@@ -96,7 +99,7 @@ export function Header() {
                 onClick={logout}
                 className="text-[var(--text-secondary)]/40 hover:text-[var(--red)] transition-colors text-[11px] font-mono"
               >
-                登出
+                {t("logout")}
               </button>
             </>
           ) : (
@@ -106,7 +109,7 @@ export function Header() {
                 href="/login"
                 className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono text-[11px]"
               >
-                登录
+                {t("login")}
               </Link>
               <Link
                 href="/register"
@@ -119,7 +122,7 @@ export function Header() {
                 }}
               >
                 <Zap className="w-3 h-3" />
-                获取 Credits
+                {t("getCredits")}
               </Link>
             </>
           )}
@@ -127,7 +130,7 @@ export function Header() {
           {/* 系统状态 */}
           <span className="hidden md:flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--green)] pulse-green" />
-            <span className="text-[var(--text-primary)] font-mono text-[11px]">模型在线</span>
+            <span className="text-[var(--text-primary)] font-mono text-[11px]">{t("modelOnline")}</span>
           </span>
           <span className="hidden sm:inline font-mono text-[11px] text-[var(--text-secondary)]/80">{time}</span>
         </div>
