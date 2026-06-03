@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     if (!ticker || !market || !mode) {
       return NextResponse.json(
-        { success: false, error: "缺少必要参数 ticker / market / mode" },
+        { success: false, error: "Missing required parameters: ticker / market / mode" },
         { status: 400 }
       );
     }
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     });
   } catch {
     return NextResponse.json(
-      { success: false, error: "服务器内部错误" },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }

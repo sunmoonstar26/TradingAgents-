@@ -10,7 +10,7 @@ export async function GET(
 
   if (!session) {
     return NextResponse.json(
-      { success: false, error: "会话未找到" },
+      { success: false, error: "Session not found" },
       { status: 404 },
     );
   }

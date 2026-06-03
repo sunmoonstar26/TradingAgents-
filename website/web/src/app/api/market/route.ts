@@ -5,14 +5,13 @@ import { GlobalMarketState } from "../../../types";
 
 const MARKET_FILE = join(process.cwd(), "data", "market.json");
 
-// fallback：当文件不存在或解析失败时返回 mock 数据
 const FALLBACK: GlobalMarketState = {
-  usMarket:          { label: "美股",       value: "—",  change: null, status: "neutral" },
-  hkMarket:          { label: "港股",       value: "—",  change: null, status: "neutral" },
-  cnMarket:          { label: "A 股",       value: "—",  change: null, status: "neutral" },
-  vix:               { label: "VIX",        value: "—",  change: null, status: "neutral" },
-  aiSectorMomentum:  { label: "AI 板块动量", value: "—", change: null, status: "neutral" },
-  marketRiskLevel:   { label: "市场风险",   value: "—",  change: null, status: "neutral" },
+  usMarket:          { label: "US Market",      value: "—", change: null, status: "neutral" },
+  hkMarket:          { label: "HK Market",      value: "—", change: null, status: "neutral" },
+  cnMarket:          { label: "CN Market",      value: "—", change: null, status: "neutral" },
+  vix:               { label: "VIX",            value: "—", change: null, status: "neutral" },
+  aiSectorMomentum:  { label: "AI Momentum",    value: "—", change: null, status: "neutral" },
+  marketRiskLevel:   { label: "Market Risk",    value: "—", change: null, status: "neutral" },
 };
 
 export async function GET() {
