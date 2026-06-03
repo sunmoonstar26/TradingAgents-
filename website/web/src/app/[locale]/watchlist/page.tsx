@@ -1,13 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "../../components/layout/header";
+import { Header } from "../../../components/layout/header";
 import { ArrowLeft, Star, TrendingUp, Shield, AlertTriangle, Trash2, Plus, Lock } from "lucide-react";
-import { useAuth } from "../../lib/auth";
-import { getCustomRadarEntries, removeFromRadar } from "../../lib/radar-store";
-import { OpportunityEntry } from "../../types";
+import { useAuth } from "../../../lib/auth";
+import { getCustomRadarEntries, removeFromRadar } from "../../../lib/radar-store";
+import { OpportunityEntry } from "../../../types";
 import { RiskLevel } from "@/types/enums";
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
@@ -24,12 +25,13 @@ function formatDate(iso?: string): string {
   const d = new Date(iso);
   const now = new Date();
   const diff = (now.getTime() - d.getTime()) / 86400000;
-  if (diff < 1) return `今天 ${d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`;
-  if (diff < 2) return `昨天 ${d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`;
+  if (diff < 1) return `Today ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
+  if (diff < 2) return `Yesterday ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
   return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export default function WatchlistPage() {
+  const t = useTranslations("watchlist");
   const router = useRouter();
   const { isLoggedIn, ready } = useAuth();
   const [entries, setEntries] = useState<OpportunityEntry[]>([]);
@@ -59,27 +61,27 @@ export default function WatchlistPage() {
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回首页
+          {t("back")}
         </button>
 
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Star className="w-4 h-4 text-[var(--amber)]" />
-              自选列表
+              {t("pageTitle")}
             </h1>
             <p className="text-xs text-[var(--text-secondary)] mt-1 font-mono">
-              来自 AI 机会雷达的关注标的
+              {t("pageSubtitle")}
             </p>
           </div>
           {ready && isLoggedIn && entries.length > 0 && (
             <span className="text-[11px] font-mono text-[var(--text-secondary)]/40">
-              {entries.length} 只标的
+              {t("tickerCount", { count: entries.length })}
             </span>
           )}
         </div>
 
-        {/* 未登录 */}
+        {/* Not logged in */}
         {ready && !isLoggedIn && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -92,9 +94,9 @@ export default function WatchlistPage() {
             >
               <Lock className="w-5 h-5" style={{ color: "#00c8ff" }} />
             </div>
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">登录后查看自选列表</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">{t("loginPrompt")}</p>
             <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">
-              在 AI 机会雷达添加标的后，可在此统一管理
+              {t("loginDesc")}
             </p>
             <div className="flex items-center justify-center gap-3">
               <button
@@ -102,19 +104,19 @@ export default function WatchlistPage() {
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all"
                 style={{ background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))", boxShadow: "0 0 16px rgba(0,200,255,0.2)" }}
               >
-                免费注册
+                {t("registerBtn")}
               </button>
               <button
                 onClick={() => router.push("/login")}
                 className="px-5 py-2 rounded-xl text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-custom)] transition-all"
               >
-                已有账号登录
+                {t("loginBtn")}
               </button>
             </div>
           </motion.div>
         )}
 
-        {/* 已登录：空列表 */}
+        {/* Logged in: empty list */}
         {ready && isLoggedIn && entries.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -122,9 +124,9 @@ export default function WatchlistPage() {
             className="card-terminal p-10 text-center"
           >
             <Star className="w-8 h-8 text-[var(--text-secondary)]/20 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">自选列表为空</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">{t("emptyTitle")}</p>
             <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">
-              在 AI 机会雷达或股票详情页添加标的
+              {t("emptyDesc")}
             </p>
             <button
               onClick={() => router.push("/")}
@@ -132,12 +134,12 @@ export default function WatchlistPage() {
               style={{ background: "rgba(0,200,255,0.08)", border: "1px solid rgba(0,200,255,0.18)", color: "#00c8ff" }}
             >
               <Plus className="w-3.5 h-3.5" />
-              去 AI 机会雷达添加
+              {t("goToRadar")}
             </button>
           </motion.div>
         )}
 
-        {/* 已登录：标的列表 */}
+        {/* Logged in: ticker list */}
         {ready && isLoggedIn && entries.length > 0 && (
           <>
             <div className="hidden md:block card-hero overflow-visible !p-0">
@@ -145,12 +147,12 @@ export default function WatchlistPage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-[var(--border-custom)]">
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">代码</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">信号</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">置信度</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">风险</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">建议仓位</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">更新</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Code</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Signal</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Confidence</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Risk</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Position</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Updated</th>
                       <th className="w-12" />
                     </tr>
                   </thead>
@@ -203,7 +205,7 @@ export default function WatchlistPage() {
               </div>
             </div>
 
-            {/* 移动端卡片 */}
+            {/* Mobile cards */}
             <div className="flex md:hidden flex-col gap-2">
               {entries.map((item, idx) => {
                 const cfg = signalConfig[item.signal] ?? signalConfig["持有"];
@@ -244,7 +246,7 @@ export default function WatchlistPage() {
             </div>
 
             <p className="text-center text-[10px] text-[var(--text-secondary)]/30 font-mono mt-6">
-              数据来自 AI 机会雷达 · 点击标的查看完整分析
+              {t("footer")}
             </p>
           </>
         )}

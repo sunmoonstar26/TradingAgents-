@@ -1,21 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "../components/layout/header";
-import { GlobalMarketState } from "../components/dashboard/global-market-state";
-import { AIResearchConsole } from "../components/dashboard/research-console";
-import { OpportunityRadar } from "../components/dashboard/opportunity-radar";
-import { ConvictionIdeas } from "../components/dashboard/conviction-ideas";
-import { RiskTerminal } from "../components/dashboard/risk-terminal";
-import { LiveFeed } from "../components/dashboard/live-feed";
-import { PrivateZone } from "../components/auth/PrivateZone";
-import { FeaturedResearch } from "../components/dashboard/featured-research";
-import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "../types";
-import { Skeleton } from "../components/ui/skeleton";
-import { getCustomRadarEntries } from "../lib/radar-store";
-import { getCustomMemoEntries, seedMemosFromApi } from "../lib/memo-store";
-import { getRiskAlerts, seedRiskAlertsFromApi } from "../lib/risk-alert-store";
-import { seedFeedFromMock } from "../lib/livefeed-store";
+import { Header } from "../../components/layout/header";
+import { GlobalMarketState } from "../../components/dashboard/global-market-state";
+import { AIResearchConsole } from "../../components/dashboard/research-console";
+import { OpportunityRadar } from "../../components/dashboard/opportunity-radar";
+import { ConvictionIdeas } from "../../components/dashboard/conviction-ideas";
+import { RiskTerminal } from "../../components/dashboard/risk-terminal";
+import { LiveFeed } from "../../components/dashboard/live-feed";
+import { PrivateZone } from "../../components/auth/PrivateZone";
+import { FeaturedResearch } from "../../components/dashboard/featured-research";
+import { DashboardData, GlobalMarketState as GlobalMarketStateType } from "../../types";
+import { Skeleton } from "../../components/ui/skeleton";
+import { getCustomRadarEntries } from "../../lib/radar-store";
+import { getCustomMemoEntries, seedMemosFromApi } from "../../lib/memo-store";
+import { getRiskAlerts, seedRiskAlertsFromApi } from "../../lib/risk-alert-store";
+import { seedFeedFromMock } from "../../lib/livefeed-store";
 import { useMemo, useState, useEffect } from "react";
 
 function DashboardSkeleton() {
@@ -39,6 +40,8 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard");
+
   const { data, isLoading, error } = useQuery<{
     success: boolean;
     data: DashboardData;
@@ -57,8 +60,8 @@ export default function DashboardPage() {
   }>({
     queryKey: ["market"],
     queryFn: () => fetch("/api/market").then((r) => r.json()),
-    staleTime: 23 * 60 * 60 * 1000,   // 23 小时内不重新 fetch
-    refetchInterval: 24 * 60 * 60 * 1000, // 24 小时自动刷新
+    staleTime: 23 * 60 * 60 * 1000,
+    refetchInterval: 24 * 60 * 60 * 1000,
   });
 
   // 雷达编辑版本号 — 编辑保存后 +1 触发 useMemo 重算
@@ -108,8 +111,6 @@ export default function DashboardPage() {
   const mergedOpportunities = useMemo(() => {
     const apiOpportunities = data?.data?.opportunities ?? [];
     const custom = getCustomRadarEntries();
-    // localStorage 有数据 → 以 localStorage 为唯一数据源
-    // localStorage 为空 → 首次使用 API 数据
     if (custom.length > 0) return custom;
     return apiOpportunities;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,7 +135,7 @@ export default function DashboardPage() {
   if (error || !data?.data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-[var(--text-secondary)]">数据加载失败，请稍后重试</p>
+        <p className="text-[var(--text-secondary)]">{t("errorLoad")}</p>
       </div>
     );
   }
@@ -156,39 +157,38 @@ export default function DashboardPage() {
     <div className="min-h-screen">
       <Header />
 
-      {/* 主内容区 */}
       <main className="px-4 md:px-6 py-6 max-w-[1600px] mx-auto space-y-10">
-        {/* 1. 全球市场状态 */}
+        {/* 1. Global Market Status */}
         <GlobalMarketState data={marketIndicators} fetchDate={marketData?.fetchDate} />
 
-        {/* 1.5. AI 研究控制台（私版区域） */}
-        <PrivateZone label="AI 研究控制台">
+        {/* 1.5. AI Research Console (private zone) */}
+        <PrivateZone label={t("consoleTitle")}>
           <AIResearchConsole />
         </PrivateZone>
 
-        {/* 2. AI 机会雷达（Hero） */}
+        {/* 2. AI Opportunity Radar (Hero) */}
         <OpportunityRadar
           data={mergedOpportunities}
           onSave={() => { setRadarKey((k) => k + 1); setMemoKey((k) => k + 1); setRiskKey((k) => k + 1); setFeedKey((k) => k + 1); }}
         />
 
-        {/* 3. 投资备忘录 */}
+        {/* 3. Conviction Ideas */}
         <ConvictionIdeas data={mergedMemos} onSave={() => setMemoKey((k) => k + 1)} />
 
-        {/* 4. 风险终端 */}
+        {/* 4. Risk Terminal */}
         <RiskTerminal data={riskAlerts} />
 
-        {/* 5. 热门研究内容（公开区域） */}
+        {/* 5. Featured Research (public zone) */}
         <FeaturedResearch />
 
-        {/* 4.5. AI 实时信息流 */}
+        {/* 4.5. AI Live Feed */}
         <LiveFeed data={d.liveFeed} feedKey={feedKey} />
 
-        {/* 页脚 */}
+        {/* Footer */}
         <div className="text-center pt-4 pb-8">
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-            数据更新 ·{" "}
-            {new Date(d.updatedAt).toLocaleString("zh-CN", {
+            {t("updateAll")} ·{" "}
+            {new Date(d.updatedAt).toLocaleString("en-US", {
               year: "numeric",
               month: "2-digit",
               day: "2-digit",
