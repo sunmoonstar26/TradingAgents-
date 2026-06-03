@@ -28,11 +28,11 @@ export function LiveRail({ data }: Props) {
       <div className="flex items-center gap-2 mb-3">
         <Terminal className="w-4 h-4 text-[var(--green)]" />
         <h2 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-          实时推理滚动条
+          Live Reasoning Feed
         </h2>
         <span className="w-2 h-2 rounded-full bg-[var(--green)] pulse-green" />
         <span className="text-[9px] font-mono text-[var(--green)]/60 ml-auto">
-          在线
+          Live
         </span>
       </div>
 
@@ -49,7 +49,7 @@ export function LiveRail({ data }: Props) {
             <span className="w-2 h-2 rounded-full bg-[var(--green)]/60" />
           </div>
           <span className="text-[var(--text-secondary)]/40 text-[10px]">
-            trading-agents ~推理引擎
+            trading-agents ~reasoning-engine
           </span>
         </div>
 
@@ -80,7 +80,7 @@ export function LiveRail({ data }: Props) {
       <div className="md:hidden flex items-center gap-2 mt-2 px-2">
         <Radio className="w-3 h-3 text-[var(--green)] animate-pulse" />
         <span className="text-[9px] font-mono text-[var(--green)]/70">
-          推理引擎运行中 · {data.length} 条实时记录
+          Reasoning engine running · {data.length} live entries
         </span>
       </div>
     </motion.section>

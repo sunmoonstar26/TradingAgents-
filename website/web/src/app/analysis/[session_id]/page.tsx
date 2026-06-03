@@ -9,20 +9,20 @@ import { Skeleton } from "../../../components/ui/skeleton";
 import { ArrowLeft, Loader2, CheckCircle2, Cpu } from "lucide-react";
 
 const AGENT_LABELS: Record<string, string> = {
-  fundamental: "基本面分析",
-  technical: "技术面分析",
-  sentiment: "情绪分析",
-  macro: "宏观分析",
-  news: "新闻分析",
-  risk: "风险分析",
-  report: "综合报告",
+  fundamental: "Fundamentals",
+  technical: "Technical",
+  sentiment: "Sentiment",
+  macro: "Macro",
+  news: "News",
+  risk: "Risk",
+  report: "Final Report",
 };
 
 const STATUS_TEXT: Record<string, string> = {
-  waiting: "等待中",
-  running: "运行中...",
-  completed: "已完成",
-  failed: "失败",
+  waiting: "Waiting",
+  running: "Running...",
+  completed: "Done",
+  failed: "Failed",
 };
 
 const AGENT_KEYS = ["fundamental", "technical", "sentiment", "macro", "news", "risk"];
@@ -187,7 +187,7 @@ export default function AnalysisPage() {
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回首页
+          Back to home
         </button>
 
         {isLoading ? (
@@ -198,18 +198,18 @@ export default function AnalysisPage() {
         ) : !session ? (
           <div className="card-hero !p-10 text-center">
             <span className="text-5xl font-mono text-[var(--text-secondary)]/40">404</span>
-            <p className="mt-3 text-sm text-[var(--text-secondary)]">分析会话未找到</p>
+            <p className="mt-3 text-sm text-[var(--text-secondary)]">Analysis session not found</p>
           </div>
         ) : (
           <>
             <div className="mb-6">
               <h1 className="text-lg font-bold text-[var(--text-primary)] tracking-wide flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-[var(--blue)]" />
-                AI 投资委员会工作台
+                AI Investment Committee
               </h1>
               <p className="text-[10px] text-[var(--text-secondary)]/60 mt-0.5 font-mono">
-                会话 {session.session_id} · 标的 {tickerFromSession} ·{" "}
-                {new Date(session.created_at).toLocaleTimeString("zh-CN")}
+                Session {session.session_id} · Ticker {tickerFromSession} ·{" "}
+                {new Date(session.created_at).toLocaleTimeString("en-US")}
               </p>
             </div>
 
@@ -221,10 +221,10 @@ export default function AnalysisPage() {
               >
                 <CheckCircle2 className="w-10 h-10 text-[var(--green)] mx-auto mb-3" />
                 <h2 className="text-sm font-semibold text-[var(--green)]">
-                  分析完成 · AI 投资委员会已生成完整报告
+                  Analysis complete · AI Investment Committee report ready
                 </h2>
                 <p className="text-xs text-[var(--text-secondary)] mt-2">
-                  正在跳转到详细结果页面...
+                  Redirecting to results...
                 </p>
               </motion.div>
             )}
@@ -235,15 +235,15 @@ export default function AnalysisPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="card-hero !p-8 text-center mb-6 border-[var(--red)]/30"
               >
-                <h2 className="text-sm font-semibold text-[var(--red)]">分析失败</h2>
+                <h2 className="text-sm font-semibold text-[var(--red)]">Analysis Failed</h2>
                 <p className="text-xs text-[var(--text-secondary)] mt-2 max-w-md mx-auto">
-                  数据供应商暂不可用（yfinance 频率限制 / API 未配置），请稍后重试或使用已有分析数据。
+                  Data provider unavailable (yfinance rate limit / API not configured). Please retry later or use existing analysis data.
                 </p>
                 <button
                   onClick={() => router.push("/")}
                   className="mt-4 px-4 py-1.5 text-xs rounded-lg bg-[var(--red)]/10 text-[var(--red)] hover:bg-[var(--red)]/20 transition-colors"
                 >
-                  返回首页
+                  Back to home
                 </button>
               </motion.div>
             )}
@@ -259,12 +259,12 @@ export default function AnalysisPage() {
                       className="w-12 h-12 mx-auto mb-3 rounded-full border-2 border-[var(--blue)]/30 border-t-[var(--blue)]"
                     />
                     <p className="text-sm text-[var(--text-primary)] font-semibold mb-1">
-                      正在生成综合报告
+                      Generating final report
                     </p>
                     <p className="text-xs text-[var(--text-secondary)]/60 font-mono">
                       {reportElapsed > 0
-                        ? `已用时 ${reportElapsed}s · 通常需 1-3 分钟，请耐心等待`
-                        : "AI 正在综合 6 位智能体的分析结论..."}
+                        ? `Elapsed ${reportElapsed}s · typically 1–3 min, please wait`
+                        : "Synthesizing conclusions from 6 AI agents..."}
                     </p>
                   </>
                 ) : (
@@ -275,10 +275,10 @@ export default function AnalysisPage() {
                       className="w-12 h-12 mx-auto mb-3 rounded-full border-2 border-[var(--blue)]/30 border-t-[var(--blue)]"
                     />
                     <p className="text-sm text-[var(--text-primary)] font-semibold mb-1">
-                      AI 智能体分析中
+                      AI agents analyzing
                     </p>
                     <p className="text-xs text-[var(--text-secondary)]/60 font-mono">
-                      {completedCount} / {totalAgents} 个智能体已完成
+                      {completedCount} / {totalAgents} agents complete
                     </p>
                   </>
                 )}
@@ -293,7 +293,7 @@ export default function AnalysisPage() {
                     isComplete ? "text-[var(--green)]" : "text-[var(--blue)] animate-spin"
                   }`}
                 />
-                多智能体分析进度
+                Multi-agent Progress
               </h3>
               <div className="space-y-2 font-mono text-xs">
                 {/* 前 6 个智能体 */}
@@ -361,18 +361,18 @@ export default function AnalysisPage() {
                           : "bg-[var(--text-secondary)]/30"
                   }`}
                 />
-                {session.status === "running" && "分析运行中"}
-                {session.status === "completed" && "分析已完成"}
+                {session.status === "running" && "Analysis running"}
+                {session.status === "completed" && "Analysis complete"}
                 {session.status === "failed" && (
                   <span className="text-[var(--red)]/90">
-                    分析失败{session.error_message ? `：${session.error_message}` : ""}
+                    Analysis failed{session.error_message ? `：${session.error_message}` : ""}
                   </span>
                 )}
-                {session.status === "pending" && "等待启动"}
+                {session.status === "pending" && "Pending"}
                 {session.completed_at && (
                   <>
                     <span className="mx-1">·</span>
-                    完成于 {new Date(session.completed_at).toLocaleTimeString("zh-CN")}
+                    Completed at {new Date(session.completed_at).toLocaleTimeString("en-US")}
                   </>
                 )}
               </div>

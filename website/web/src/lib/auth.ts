@@ -22,7 +22,7 @@ export function useAuth() {
     const res = await fetch("/api/user/credits");
     const credits = res.ok ? (await res.json()).credits ?? 0 : 0;
     return {
-      name: supabaseUser.user_metadata?.name || supabaseUser.email?.split("@")[0] || "投资者",
+      name: supabaseUser.user_metadata?.name || supabaseUser.email?.split("@")[0] || "Investor",
       email: supabaseUser.email ?? "",
       credits,
     };

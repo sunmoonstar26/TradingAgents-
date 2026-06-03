@@ -34,7 +34,7 @@ export function MarkdownContent({ content }: Props) {
   if (!content) {
     return (
       <p className="text-sm text-[var(--text-secondary)]/60 italic">
-        暂无内容
+        No content
       </p>
     );
   }

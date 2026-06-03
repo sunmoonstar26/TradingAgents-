@@ -21,28 +21,28 @@ const RISK_CONFIG: Record<
   }
 > = {
   aggressive: {
-    name: "激进策略",
-    label: "激进型",
+    name: "Aggressive Strategy",
+    label: "Aggressive",
     icon: Activity,
     iconColor: "text-[var(--green)]",
     borderClass: "agent-technical",
-    description: "高风险承受 · 追求最大收益",
+    description: "High risk tolerance · Maximize returns",
   },
   conservative: {
-    name: "保守策略",
-    label: "保守型",
+    name: "Conservative Strategy",
+    label: "Conservative",
     icon: ShieldAlert,
     iconColor: "text-[var(--blue)]",
     borderClass: "agent-fundamental",
-    description: "低风险偏好 · 资本保值为先",
+    description: "Low risk preference · Capital preservation first",
   },
   neutral: {
-    name: "中性策略",
-    label: "中性型",
+    name: "Neutral Strategy",
+    label: "Neutral",
     icon: TrendingDown,
     iconColor: "text-[var(--amber)]",
     borderClass: "agent-sentiment",
-    description: "风险收益平衡 · 稳健持仓",
+    description: "Balanced risk/reward · Steady positioning",
   },
 };
 
@@ -76,7 +76,7 @@ export default function RiskDetailPage() {
     queryKey: ["risk-detail", ticker, stance],
     queryFn: () =>
       fetch(`/api/stocks/${ticker}/report/risk/${stance}`).then((r) => {
-        if (!r.ok) throw new Error("未找到风控报告");
+        if (!r.ok) throw new Error("Risk report not found.");
         return r.json();
       }),
     enabled: !!cfg && stockStatus?.status !== "analyzing",
@@ -99,7 +99,7 @@ export default function RiskDetailPage() {
         <Header />
         <main className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <span className="text-5xl font-mono text-[var(--text-secondary)]/60">404</span>
-          <p className="text-sm text-[var(--text-secondary)]">未知的风控策略</p>
+          <p className="text-sm text-[var(--text-secondary)]">Unknown risk strategy</p>
         </main>
       </div>
     );
@@ -118,7 +118,7 @@ export default function RiskDetailPage() {
           className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]/70 hover:text-[var(--text-primary)] transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回投资委员会工作台
+          Back to Investment Committee
         </button>
 
         {/* Hero 标题区 */}
@@ -129,10 +129,10 @@ export default function RiskDetailPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-[var(--text-primary)]">
-                {cfg.name} · 风控决策分析
+                {cfg.name} · Risk Decision Analysis
               </h1>
               <p className="text-[10px] text-[var(--text-secondary)]/60 mt-0.5 font-mono">
-                {ticker} · {cfg.description} · 风控团队报告
+                {ticker} · {cfg.description} · Risk Team Report
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function RiskDetailPage() {
           <div className="card-terminal p-8 flex flex-col items-center justify-center gap-3">
             <span className="text-4xl font-mono text-[var(--text-secondary)]/60">404</span>
             <p className="text-sm text-[var(--text-secondary)]">
-              未找到 {cfg.name} 的风控报告
+              No risk report found for {cfg.name}.
             </p>
           </div>
         ) : (
@@ -163,7 +163,7 @@ export default function RiskDetailPage() {
       {/* 底部 */}
       <div className="text-center pt-4 pb-8">
         <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-          {cfg.name} 风控报告 · {ticker}
+          {cfg.name} Risk Report · {ticker}
         </span>
       </div>
     </div>

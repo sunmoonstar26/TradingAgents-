@@ -10,6 +10,13 @@ import { getCustomRadarEntries } from "../../lib/radar-store";
 import { OpportunityEntry } from "../../types";
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
+  // English keys (canonical)
+  "Strong Buy":  { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
+  "Buy":         { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
+  "Hold":        { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
+  "Sell":        { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
+  "Strong Sell": { color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
+  // Chinese keys (legacy compat)
   强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
   买入:     { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
   增持:     { color: "#3b82f6", bg: "rgba(59,130,246,0.1)", icon: TrendingUp },
@@ -19,10 +26,10 @@ const signalConfig: Record<string, { color: string; bg: string; icon: typeof Tre
 };
 
 const RECENT_ANALYSES = [
-  { ticker: "NVDA", name: "英伟达",  signal: "强烈买入", conviction: 84, analyzedAt: "今天 09:15" },
-  { ticker: "TSLA", name: "特斯拉",  signal: "增持",     conviction: 72, analyzedAt: "今天 08:42" },
-  { ticker: "META", name: "Meta",    signal: "买入",     conviction: 76, analyzedAt: "昨天 15:30" },
-  { ticker: "PLTR", name: "Palantir",signal: "增持",     conviction: 69, analyzedAt: "昨天 11:05" },
+  { ticker: "NVDA", name: "NVIDIA",   signal: "Strong Buy", conviction: 84, analyzedAt: "Today 09:15",    headline: "Blackwell ramp accelerates, AI compute demand beats" },
+  { ticker: "TSLA", name: "Tesla",    signal: "Buy",        conviction: 72, analyzedAt: "Today 08:42",    headline: "FSD v13 commercialization, energy as second growth engine" },
+  { ticker: "META", name: "Meta",     signal: "Buy",        conviction: 76, analyzedAt: "Yesterday 15:30", headline: "Llama 4 open-source moat, AI-driven ad efficiency gains" },
+  { ticker: "PLTR", name: "Palantir", signal: "Buy",        conviction: 69, analyzedAt: "Yesterday 11:05", headline: "AIP enterprise customers doubled, US commercial exploding" },
 ];
 
 export default function WorkspacePage() {
@@ -36,7 +43,7 @@ export default function WorkspacePage() {
     }
   }, [ready, isLoggedIn]);
 
-  const bullishCount = radarEntries.filter(e => ["强烈买入", "买入", "增持"].includes(e.signal)).length;
+  const bullishCount = radarEntries.filter(e => ["强烈买入", "买入", "增持", "Strong Buy", "Buy"].includes(e.signal)).length;
   const avgConviction = radarEntries.length
     ? Math.round(radarEntries.reduce((s, e) => s + e.conviction, 0) / radarEntries.length)
     : 0;
@@ -50,7 +57,7 @@ export default function WorkspacePage() {
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回首页
+          Back to home
         </button>
 
         {/* 未登录 */}
@@ -60,17 +67,17 @@ export default function WorkspacePage() {
               style={{ background: "rgba(0,200,255,0.08)", border: "1px solid rgba(0,200,255,0.18)" }}>
               <Lock className="w-5 h-5" style={{ color: "#00c8ff" }} />
             </div>
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">登录后进入工作台</p>
-            <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">管理你的 AI 分析、自选列表和 Credits</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">Sign in to access your workspace</p>
+            <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">Manage your AI analyses, watchlist, and Credits</p>
             <div className="flex items-center justify-center gap-3">
               <button onClick={() => router.push("/register")}
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all"
                 style={{ background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))", boxShadow: "0 0 16px rgba(0,200,255,0.2)" }}>
-                免费注册
+                Sign up free
               </button>
               <button onClick={() => router.push("/login")}
                 className="px-5 py-2 rounded-xl text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-custom)] transition-all">
-                已有账号登录
+                Sign in
               </button>
             </div>
           </motion.div>
@@ -84,9 +91,9 @@ export default function WorkspacePage() {
               className="flex items-center justify-between mb-6">
               <div>
                 <h1 className="text-lg font-bold text-[var(--text-primary)]">
-                  你好，{user.name}
+                  Hello, {user.name}
                 </h1>
-                <p className="text-xs text-[var(--text-secondary)] mt-0.5 font-mono">AI 投资委员会工作台</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5 font-mono">AI Investment Committee Workspace</p>
               </div>
               <button onClick={() => router.push("/billing")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all"
@@ -99,10 +106,10 @@ export default function WorkspacePage() {
             {/* 统计卡片 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {[
-                { label: "Credits 余额", value: user.credits, unit: "", icon: Zap, color: "#00c8ff", onClick: () => router.push("/billing") },
-                { label: "雷达标的", value: radarEntries.length, unit: "只", icon: Star, color: "#f59e0b", onClick: () => router.push("/watchlist") },
-                { label: "看涨标的", value: bullishCount, unit: "只", icon: TrendingUp, color: "#22c55e", onClick: () => router.push("/watchlist") },
-                { label: "平均置信度", value: avgConviction, unit: "%", icon: BarChart2, color: "#3b82f6", onClick: () => router.push("/watchlist") },
+                { label: "Credits Balance", value: user.credits, unit: "", icon: Zap, color: "#00c8ff", onClick: () => router.push("/billing") },
+                { label: "Radar Tickers", value: radarEntries.length, unit: "", icon: Star, color: "#f59e0b", onClick: () => router.push("/watchlist") },
+                { label: "Bullish", value: bullishCount, unit: "", icon: TrendingUp, color: "#22c55e", onClick: () => router.push("/watchlist") },
+                { label: "Avg Conviction", value: avgConviction, unit: "%", icon: BarChart2, color: "#3b82f6", onClick: () => router.push("/watchlist") },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
@@ -135,16 +142,16 @@ export default function WorkspacePage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-[var(--blue)]" />
-                    最近分析
+                    Recent Analyses
                   </h2>
                   <button onClick={() => router.push("/history")}
                     className="text-[10px] font-mono text-[var(--blue)]/60 hover:text-[var(--blue)] transition-colors">
-                    查看全部 →
+                    View all →
                   </button>
                 </div>
                 <ul className="space-y-2.5">
                   {RECENT_ANALYSES.map((a) => {
-                    const cfg = signalConfig[a.signal] ?? signalConfig["持有"];
+                    const cfg = signalConfig[a.signal] ?? signalConfig["Hold"] ?? signalConfig["持有"];
                     const Icon = cfg.icon;
                     return (
                       <li key={a.ticker}
@@ -177,26 +184,26 @@ export default function WorkspacePage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                     <Star className="w-3.5 h-3.5 text-[var(--amber)]" />
-                    雷达快照
+                    Radar Snapshot
                   </h2>
                   <button onClick={() => router.push("/watchlist")}
                     className="text-[10px] font-mono text-[var(--blue)]/60 hover:text-[var(--blue)] transition-colors">
-                    管理自选 →
+                    Manage →
                   </button>
                 </div>
                 {radarEntries.length === 0 ? (
                   <div className="text-center py-6">
                     <Star className="w-6 h-6 text-[var(--text-secondary)]/20 mx-auto mb-2" />
-                    <p className="text-[11px] text-[var(--text-secondary)] font-mono">雷达暂无标的</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] font-mono">No tickers on radar</p>
                     <button onClick={() => router.push("/")}
                       className="mt-3 text-[10px] font-mono text-[var(--blue)]/60 hover:text-[var(--blue)] transition-colors">
-                      去首页添加 →
+                      Add from home →
                     </button>
                   </div>
                 ) : (
                   <ul className="space-y-2.5">
                     {radarEntries.slice(0, 4).map((e) => {
-                      const cfg = signalConfig[e.signal] ?? signalConfig["持有"];
+                      const cfg = signalConfig[e.signal] ?? signalConfig["Hold"] ?? signalConfig["持有"];
                       const Icon = cfg.icon;
                       return (
                         <li key={e.ticker}
@@ -219,7 +226,7 @@ export default function WorkspacePage() {
                     })}
                     {radarEntries.length > 4 && (
                       <p className="text-[10px] text-[var(--text-secondary)]/30 font-mono text-center pt-1">
-                        还有 {radarEntries.length - 4} 只标的
+                        + {radarEntries.length - 4} more
                       </p>
                     )}
                   </ul>
@@ -231,9 +238,9 @@ export default function WorkspacePage() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="grid grid-cols-3 gap-3 mt-4">
               {[
-                { label: "启动 AI 分析", desc: "分析新标的", icon: Cpu, color: "#00c8ff", onClick: () => router.push("/") },
-                { label: "历史记录", desc: "查看过往分析", icon: Clock, color: "#3b82f6", onClick: () => router.push("/history") },
-                { label: "充值 Credits", desc: "购买分析额度", icon: Zap, color: "#22c55e", onClick: () => router.push("/billing") },
+                { label: "Launch AI Analysis", desc: "Analyze a new ticker", icon: Cpu, color: "#00c8ff", onClick: () => router.push("/") },
+                { label: "History", desc: "View past analyses", icon: Clock, color: "#3b82f6", onClick: () => router.push("/history") },
+                { label: "Top up Credits", desc: "Purchase analysis quota", icon: Zap, color: "#22c55e", onClick: () => router.push("/billing") },
               ].map((action, i) => {
                 const Icon = action.icon;
                 return (

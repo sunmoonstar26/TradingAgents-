@@ -6,9 +6,9 @@ export default function SettingsPage() {
       <Header />
       <main className="px-4 md:px-6 py-12 max-w-[1400px] mx-auto text-center">
         <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-          设置
+          Settings
         </h2>
-        <p className="text-sm text-[var(--text-secondary)]">即将推出</p>
+        <p className="text-sm text-[var(--text-secondary)]">Coming soon</p>
       </main>
     </div>
   );

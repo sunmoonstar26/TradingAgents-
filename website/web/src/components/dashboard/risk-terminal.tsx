@@ -22,7 +22,7 @@ export function RiskTerminal({ data }: Props) {
     >
       <h2 className="section-heading">
         <span className="w-1.5 h-1.5 rounded-full bg-[var(--red)] pulse-red" />
-        风险终端
+        Risk Terminal
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -57,7 +57,7 @@ export function RiskTerminal({ data }: Props) {
                       {alert.riskScore}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[10px] text-[var(--text-secondary)]/60 mb-1">风险分数 / 100</div>
+                      <div className="text-[10px] text-[var(--text-secondary)]/60 mb-1">Risk score / 100</div>
                       <div className="h-1.5 rounded-full bg-[var(--panel2)] overflow-hidden">
                         <motion.div
                           className={`h-full rounded-full ${alert.riskScore >= 75 ? "bg-[var(--red)]" : alert.riskScore >= 50 ? "bg-[var(--amber)]" : "bg-[var(--blue)]"}`}
@@ -81,7 +81,7 @@ export function RiskTerminal({ data }: Props) {
               {/* 底部：触发智能体 + 时间 */}
               <div className="mt-auto px-4 pb-3 pt-2 border-t border-[var(--border-custom)] flex items-center justify-between text-[10px]">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[var(--text-secondary)]/50">触发</span>
+                  <span className="text-[var(--text-secondary)]/50">Triggered by</span>
                   {alert.triggeredBy?.slice(0, 2).map((agent, j) => (
                     <span key={j} className="font-mono px-1 py-0.5 rounded bg-[var(--panel2)] text-[var(--text-secondary)]/60">
                       {agent}

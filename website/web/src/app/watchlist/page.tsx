@@ -11,6 +11,13 @@ import { OpportunityEntry } from "../../types";
 import { RiskLevel } from "@/types/enums";
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
+  // English keys (canonical)
+  "Strong Buy":  { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
+  "Buy":         { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
+  "Hold":        { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
+  "Sell":        { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
+  "Strong Sell": { color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
+  // Chinese keys (legacy compat)
   强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
   买入:     { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
   增持:     { color: "#3b82f6", bg: "rgba(59,130,246,0.1)", icon: TrendingUp },
@@ -24,8 +31,8 @@ function formatDate(iso?: string): string {
   const d = new Date(iso);
   const now = new Date();
   const diff = (now.getTime() - d.getTime()) / 86400000;
-  if (diff < 1) return `今天 ${d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`;
-  if (diff < 2) return `昨天 ${d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`;
+  if (diff < 1) return `Today ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
+  if (diff < 2) return `Yesterday ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
   return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
@@ -59,22 +66,22 @@ export default function WatchlistPage() {
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回首页
+          Back to home
         </button>
 
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Star className="w-4 h-4 text-[var(--amber)]" />
-              自选列表
+              Watchlist
             </h1>
             <p className="text-xs text-[var(--text-secondary)] mt-1 font-mono">
-              来自 AI 机会雷达的关注标的
+              Tracked positions from AI Opportunity Radar
             </p>
           </div>
           {ready && isLoggedIn && entries.length > 0 && (
             <span className="text-[11px] font-mono text-[var(--text-secondary)]/40">
-              {entries.length} 只标的
+              {entries.length} tickers
             </span>
           )}
         </div>
@@ -92,9 +99,9 @@ export default function WatchlistPage() {
             >
               <Lock className="w-5 h-5" style={{ color: "#00c8ff" }} />
             </div>
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">登录后查看自选列表</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">Sign in to view your watchlist</p>
             <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">
-              在 AI 机会雷达添加标的后，可在此统一管理
+              Add tickers from the AI Opportunity Radar to manage them here
             </p>
             <div className="flex items-center justify-center gap-3">
               <button
@@ -102,13 +109,13 @@ export default function WatchlistPage() {
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all"
                 style={{ background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))", boxShadow: "0 0 16px rgba(0,200,255,0.2)" }}
               >
-                免费注册
+                Sign up free
               </button>
               <button
                 onClick={() => router.push("/login")}
                 className="px-5 py-2 rounded-xl text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-custom)] transition-all"
               >
-                已有账号登录
+                Sign in
               </button>
             </div>
           </motion.div>
@@ -122,9 +129,9 @@ export default function WatchlistPage() {
             className="card-terminal p-10 text-center"
           >
             <Star className="w-8 h-8 text-[var(--text-secondary)]/20 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">自选列表为空</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">Watchlist is empty</p>
             <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">
-              在 AI 机会雷达或股票详情页添加标的
+              Add tickers from the AI Opportunity Radar or any stock page
             </p>
             <button
               onClick={() => router.push("/")}
@@ -132,7 +139,7 @@ export default function WatchlistPage() {
               style={{ background: "rgba(0,200,255,0.08)", border: "1px solid rgba(0,200,255,0.18)", color: "#00c8ff" }}
             >
               <Plus className="w-3.5 h-3.5" />
-              去 AI 机会雷达添加
+              Go to AI Opportunity Radar
             </button>
           </motion.div>
         )}
@@ -145,18 +152,18 @@ export default function WatchlistPage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-[var(--border-custom)]">
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">代码</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">信号</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">置信度</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">风险</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">建议仓位</th>
-                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">更新</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Ticker</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Signal</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Conviction</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Risk</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Exposure</th>
+                      <th className="text-left px-5 py-3.5 font-medium text-[var(--text-secondary)]">Updated</th>
                       <th className="w-12" />
                     </tr>
                   </thead>
                   <tbody>
                     {entries.map((item, idx) => {
-                      const cfg = signalConfig[item.signal] ?? signalConfig["持有"];
+                      const cfg = signalConfig[item.signal] ?? signalConfig["Hold"] ?? signalConfig["持有"];
                       const Icon = cfg.icon;
                       return (
                         <motion.tr
@@ -206,7 +213,7 @@ export default function WatchlistPage() {
             {/* 移动端卡片 */}
             <div className="flex md:hidden flex-col gap-2">
               {entries.map((item, idx) => {
-                const cfg = signalConfig[item.signal] ?? signalConfig["持有"];
+                const cfg = signalConfig[item.signal] ?? signalConfig["Hold"] ?? signalConfig["持有"];
                 const Icon = cfg.icon;
                 return (
                   <motion.div
@@ -244,7 +251,7 @@ export default function WatchlistPage() {
             </div>
 
             <p className="text-center text-[10px] text-[var(--text-secondary)]/30 font-mono mt-6">
-              数据来自 AI 机会雷达 · 点击标的查看完整分析
+              Data from AI Opportunity Radar · Click ticker for full analysis
             </p>
           </>
         )}

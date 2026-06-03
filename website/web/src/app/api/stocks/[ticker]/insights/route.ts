@@ -31,7 +31,7 @@ export async function GET(
   // 查找最新报告目录
   const reportFolder = findReportWithInsights(ticker);
   if (!reportFolder) {
-    return NextResponse.json({ success: false, error: "未找到分析报告" }, { status: 404 });
+    return NextResponse.json({ success: false, error: "Analysis report not found" }, { status: 404 });
   }
 
   const insightsPath = join(REPORTS_DIR, reportFolder, "insights.json");
@@ -39,7 +39,7 @@ export async function GET(
   if (!existsSync(insightsPath)) {
     return NextResponse.json({
       success: false,
-      error: "洞察数据尚未生成，请用 insight_extractor.py 提取",
+      error: "Insights not yet generated — run insight_extractor.py",
       reportDir: reportFolder,
     }, { status: 404 });
   }
@@ -49,6 +49,6 @@ export async function GET(
     const data = JSON.parse(raw);
     return NextResponse.json({ success: true, data });
   } catch (e) {
-    return NextResponse.json({ success: false, error: "洞察数据解析失败" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Failed to parse insights data" }, { status: 500 });
   }
 }

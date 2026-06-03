@@ -26,7 +26,7 @@ function buildRadarEntry(ticker: string, name: string): OpportunityEntry {
     conviction: 50,
     risk: RiskLevel.MEDIUM,
     consensus: { bullish: 0, neutral: 0, bearish: 0 },
-    exposure: "低配",
+    exposure: "Underweight",
     agentAlignment: {
       fundamental: false,
       technical: false,
@@ -86,7 +86,7 @@ export function StockHeader({
                 : "bg-[var(--blue)]/10 text-[var(--blue)] border border-[var(--blue)]/30 hover:bg-[var(--blue)]/20 hover:border-[var(--blue)]/50 active:scale-95"
             }`}
           >
-            {added ? "✓ 已添加雷达" : "📡 添加至雷达"}
+            {added ? "✓ On Radar" : "📡 Add to Radar"}
           </button>
         </div>
         <div className="text-[10px] font-mono text-[var(--text-secondary)]/60">

@@ -16,6 +16,6 @@ export async function GET(
     );
   }
   const data = getStockDetail(tickerUpper);
-  if (!data) return NextResponse.json({ success: false, error: "未找到" }, { status: 404 });
+  if (!data) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
   return NextResponse.json({ success: true, data: data.learningMemory });
 }

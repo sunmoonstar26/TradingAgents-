@@ -9,17 +9,17 @@ import { Search, Zap, ChevronDown } from "lucide-react";
 import { useAuth } from "../../lib/auth";
 import { LoginUnlockModal } from "../../components/auth/LoginUnlockModal";
 
-const MARKET_LABELS: Record<Market, string> = { US: "美股", HK: "港股", CN: "A股" };
-const MODE_LABELS: Record<AnalysisMode, string> = { standard: "标准分析", deep: "深度研究" };
+const MARKET_LABELS: Record<Market, string> = { US: "US Stocks", HK: "HK Stocks", CN: "A-Shares" };
+const MODE_LABELS: Record<AnalysisMode, string> = { standard: "Standard", deep: "Deep Research" };
 
 const TRENDING = ["NVDA", "TSLA", "META", "PLTR", "AMD"];
 
 const BOOT_STEPS = [
-  "连接市场数据",
-  "基本面分析智能体就绪",
-  "情绪分析引擎就绪",
-  "辩论系统在线",
-  "仓位引擎就绪",
+  "Connecting to market data",
+  "Fundamental analysis agent ready",
+  "Sentiment analysis engine ready",
+  "Debate system online",
+  "Position engine ready",
 ];
 
 export function AIResearchConsole() {
@@ -178,16 +178,16 @@ export function AIResearchConsole() {
           <div>
             <h2 className="text-xs font-semibold text-white/90 flex items-center gap-1.5 tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--blue)]" />
-              AI 研究控制台
+              AI Research Console
             </h2>
             <p className="text-[10px] text-white/25 mt-0.5 font-mono">
-              多智能体工作流引擎
+              Multi-agent workflow engine
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[var(--green)] pulse-green" />
             <span className="text-[10px] text-[var(--green)]/80 font-mono">
-              AI 智能体就绪
+              AI agents ready
             </span>
           </div>
         </div>
@@ -239,7 +239,7 @@ export function AIResearchConsole() {
                     setHighlightIndex(-1);
                   }
                 }}
-                placeholder="输入股票代码或公司名称，按 Enter 启动分析..."
+                placeholder="Enter ticker or company name, press Enter to launch..."
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg pl-11 pr-4 text-sm font-mono font-semibold text-white placeholder:text-white/15 focus:outline-none focus:border-[var(--blue)]/40 focus:bg-white/[0.05] transition-all"
                 style={{ height: 48 }}
               />
@@ -286,7 +286,7 @@ export function AIResearchConsole() {
                 className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-0 text-xs font-mono text-white/70 hover:border-white/[0.12] transition-all min-w-[110px]"
                 style={{ height: 48 }}
               >
-                <span className="text-[9px] text-white/20">市场</span>
+                <span className="text-[9px] text-white/20">Market</span>
                 <span className="text-white">{MARKET_LABELS[market]}</span>
                 <ChevronDown className={`ml-auto w-3 h-3 text-white/20 transition-transform ${showMarketMenu ? "rotate-180" : ""}`} />
               </button>
@@ -322,7 +322,7 @@ export function AIResearchConsole() {
                 className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-0 text-xs font-mono text-white/70 hover:border-white/[0.12] transition-all min-w-[120px]"
                 style={{ height: 48 }}
               >
-                <span className="text-[9px] text-white/20">模式</span>
+                <span className="text-[9px] text-white/20">Mode</span>
                 <span className="text-white">{MODE_LABELS[mode]}</span>
                 <ChevronDown className={`ml-auto w-3 h-3 text-white/20 transition-transform ${showModeMenu ? "rotate-180" : ""}`} />
               </button>
@@ -365,7 +365,7 @@ export function AIResearchConsole() {
                 style={{ height: 48, paddingLeft: 24, paddingRight: 24, minWidth: 160 }}
               >
                 <Zap className="w-3.5 h-3.5" />
-                {!hasEnoughCredits ? "Credits 不足" : "启动 AI 分析"}
+                {!hasEnoughCredits ? "Insufficient Credits" : "Launch AI Analysis"}
               </motion.button>
               {/* Credits 余额提示 */}
               {isLoggedIn && user && (
@@ -378,7 +378,7 @@ export function AIResearchConsole() {
                   <Zap className="w-2.5 h-2.5 shrink-0" style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }} />
                   <span className="text-[10px] font-mono font-medium"
                     style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }}>
-                    {user.credits} Credits · 本次 -{cost}
+                    {user.credits} Credits · -{cost} this run
                   </span>
                 </div>
               )}
@@ -398,13 +398,13 @@ export function AIResearchConsole() {
                   border: "1px solid rgba(245,158,11,0.2)",
                 }}
               >
-                <span style={{ color: "#f59e0b" }}>Credits 不足，无法启动分析</span>
+                <span style={{ color: "#f59e0b" }}>Insufficient credits to start analysis</span>
                 <button
                   onClick={() => router.push("/billing")}
                   className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all"
                   style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b" }}
                 >
-                  立即充值 →
+                  Top up →
                 </button>
               </motion.div>
             )}
@@ -412,7 +412,7 @@ export function AIResearchConsole() {
 
           {/* 热门快捷入口 */}
           <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-            <span className="text-[9px] text-white/12 font-mono mr-1">热门</span>
+            <span className="text-[9px] text-white/12 font-mono mr-1">Trending</span>
             {TRENDING.map((t) => (
               <button
                 key={t}
@@ -460,7 +460,7 @@ export function AIResearchConsole() {
               <div className="flex items-center gap-3 mb-8">
                 <span className="w-2.5 h-2.5 rounded-full bg-[var(--blue)] pulse-blue" />
                 <h2 className="text-sm font-semibold text-white tracking-wider">
-                  正在启动 AI 投资委员会...
+                  Launching AI Investment Committee...
                 </h2>
               </div>
 
@@ -504,7 +504,7 @@ export function AIResearchConsole() {
                   className="mt-7 pt-5 border-t border-[rgba(80,120,255,0.1)] text-center"
                 >
                   <span className="text-xs text-[var(--green)]/80 font-mono">
-                    启动分析会话...
+                    Starting analysis session...
                   </span>
                 </motion.div>
               )}

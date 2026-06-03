@@ -65,7 +65,7 @@ export function createSession(
     completed_at: null,
     progress: defaultProgress(),
     result_json: null,
-    current_step: "排队中",
+    current_step: "Queued",
     error_message: null,
   };
   sessions.set(session_id, session);
@@ -237,12 +237,12 @@ function readLogStep(outputFile: string): { step: string; message: string } | nu
 
 function stepToMessage(step: string, rawMessage: string): string {
   const MAP: Record<string, string> = {
-    init: "初始化分析引擎",
-    started: "启动多智能体分析",
-    running: "智能体分析中",
-    completed: "多智能体分析完成，正在综合报告",
-    extracting_insights: "萃取 AI 洞察",
-    insights_ready: "洞察萃取完成，写入报告",
+    init: "Initializing analysis engine",
+    started: "Launching multi-agent analysis",
+    running: "Agents analyzing",
+    completed: "Agents done, generating report",
+    extracting_insights: "Extracting AI insights",
+    insights_ready: "Insights ready, writing report",
     env_check: rawMessage,
     warning: rawMessage,
     error: rawMessage,
@@ -279,7 +279,7 @@ function pollForResult(session_id: string, outputFile: string, ticker: string) {
         if (raw.trim()) {
           const result = JSON.parse(raw);
           if (result.status === "failed" || result.error) {
-            const reason = result.error || "分析进程返回失败状态";
+            const reason = result.error || "Analysis process returned a failure status";
             failSession(session_id, reason);
             console.error(`[TradingAgents] 会话 ${session_id} 失败: ${reason}`);
             return;

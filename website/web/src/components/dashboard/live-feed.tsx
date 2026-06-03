@@ -11,6 +11,7 @@ interface Props {
 }
 
 const SIGNAL_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
+  // 中文键（向后兼容已存储数据）
   看涨:   { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
   多方:   { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
   买入:   { bg: "bg-[var(--green)]/15",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
@@ -23,6 +24,20 @@ const SIGNAL_STYLE: Record<string, { bg: string; text: string; dot: string }> = 
   平局:   { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
   持有:   { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
   中风险: { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
+  // 英文键（后端迁移至 TRADINGAGENTS_OUTPUT_LANGUAGE=en 后使用）
+  "Bullish":     { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
+  "Bull":        { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
+  "Buy":         { bg: "bg-[var(--green)]/15",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
+  "Strong Buy":  { bg: "bg-[var(--green)]/15",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
+  "Low Risk":    { bg: "bg-[var(--green)]/10",  text: "text-[var(--green)]",  dot: "bg-[var(--green)]" },
+  "Bearish":     { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
+  "Bear":        { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
+  "Sell":        { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
+  "Strong Sell": { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
+  "High Risk":   { bg: "bg-[var(--red)]/10",    text: "text-[var(--red)]",    dot: "bg-[var(--red)]" },
+  "Neutral":     { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
+  "Hold":        { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
+  "Medium Risk": { bg: "bg-[var(--amber)]/10",  text: "text-[var(--amber)]",  dot: "bg-[var(--amber)]" },
 };
 
 const DEFAULT_SIGNAL = { bg: "bg-[var(--border-custom)]", text: "text-[var(--text-secondary)]", dot: "bg-[var(--text-secondary)]/40" };
@@ -33,11 +48,11 @@ function formatTime(iso: string): string {
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1)  return "刚刚";
-    if (diffMin < 60) return `${diffMin}m 前`;
+    if (diffMin < 1)  return "just now";
+    if (diffMin < 60) return `${diffMin}m ago`;
     const diffH = Math.floor(diffMin / 60);
-    if (diffH < 24)   return `${diffH}h 前`;
-    return d.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" });
+    if (diffH < 24)   return `${diffH}h ago`;
+    return d.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" });
   } catch {
     return iso;
   }
@@ -150,9 +165,9 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
         <div>
           <h2 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] pulse-blue" />
-            AI 实时信息流
+            AI Live Feed
           </h2>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">智能体分析完成后自动更新</p>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Updates automatically after agent analysis completes</p>
         </div>
         <div className="flex items-center gap-3">
           {paused && (
@@ -160,11 +175,11 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
               onClick={scrollToTop}
               className="text-[10px] font-mono text-[var(--blue)] hover:text-[var(--blue)]/80 flex items-center gap-1 transition-colors"
             >
-              ↑ 回到最新
+              ↑ Back to latest
             </button>
           )}
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">
-            {items.length} 条信号
+            {items.length} signals
           </span>
         </div>
       </div>
@@ -179,8 +194,8 @@ export function LiveFeed({ data, feedKey = 0 }: Props) {
         >
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2">
-              <span className="text-[var(--text-secondary)]/30 text-sm">暂无信号</span>
-              <span className="text-[var(--text-secondary)]/20 text-[11px]">完成股票分析后将自动显示</span>
+              <span className="text-[var(--text-secondary)]/30 text-sm">No signals yet</span>
+              <span className="text-[var(--text-secondary)]/20 text-[11px]">Will appear automatically after stock analysis completes</span>
             </div>
           ) : (
             <AnimatePresence initial={false}>

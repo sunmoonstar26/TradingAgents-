@@ -8,10 +8,10 @@ import { Zap, CheckCircle2, ArrowRight } from "lucide-react";
 import { useAuth } from "../../lib/auth";
 
 const FEATURES = [
-  "多 Agent 实时辩论",
-  "AI 深度研究报告",
-  "风险动态推演",
-  "历史分析记录",
+  "Multi-Agent Real-Time Debate",
+  "AI Deep Research Reports",
+  "Dynamic Risk Simulation",
+  "Historical Analysis Records",
 ];
 
 export default function RegisterPage() {
@@ -36,7 +36,7 @@ export default function RegisterPage() {
       await register(email, password);
       setDone(true); // Supabase 默认需要邮件验证
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "注册失败，请重试");
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -67,9 +67,9 @@ export default function RegisterPage() {
             <div className="px-8 py-8">
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
-                <h1 className="text-base font-bold text-white">免费注册</h1>
+                <h1 className="text-base font-bold text-white">Create Free Account</h1>
               </div>
-              <p className="text-xs text-white/40 font-mono mb-5">解锁 AI 投资委员会 · 赠送 5 Credits</p>
+              <p className="text-xs text-white/40 font-mono mb-5">Unlock AI Investment Committee · 5 Credits included</p>
 
               {/* 功能亮点 */}
               <ul className="space-y-1.5 mb-6">
@@ -83,7 +83,7 @@ export default function RegisterPage() {
 
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">邮箱</label>
+                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">Email</label>
                   <input
                     type="email"
                     value={email}
@@ -98,7 +98,7 @@ export default function RegisterPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">密码</label>
+                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">Password</label>
                   <input
                     type="password"
                     value={password}
@@ -121,7 +121,7 @@ export default function RegisterPage() {
                     boxShadow: "0 0 20px rgba(0,200,255,0.2)",
                   }}
                 >
-                  {loading ? "注册中..." : "注册并获取 5 Credits"}
+                  {loading ? "Creating account..." : "Sign Up · Get 5 Credits"}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
                 {error && (
@@ -129,19 +129,19 @@ export default function RegisterPage() {
                 )}
                 {done && (
                   <p className="text-[11px] font-mono text-center pt-1" style={{ color: "#00c8ff" }}>
-                    ✓ 注册成功！请检查邮箱完成验证后登录
+                    ✓ Registration successful! Check your email to verify your account before signing in.
                   </p>
                 )}
               </form>
 
               <div className="mt-5 pt-5 border-t border-white/[0.06] text-center">
-                <span className="text-[11px] text-white/30 font-mono">已有账号？</span>
+                <span className="text-[11px] text-white/30 font-mono">Already have an account?</span>
                 <button
                   onClick={() => router.push("/login")}
                   className="ml-1.5 text-[11px] font-mono transition-colors"
                   style={{ color: "#00c8ff" }}
                 >
-                  直接登录
+                  Sign in
                 </button>
               </div>
             </div>

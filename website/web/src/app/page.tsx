@@ -134,7 +134,7 @@ export default function DashboardPage() {
   if (error || !data?.data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-[var(--text-secondary)]">数据加载失败，请稍后重试</p>
+        <p className="text-[var(--text-secondary)]">Failed to load data. Please try again later.</p>
       </div>
     );
   }
@@ -162,7 +162,7 @@ export default function DashboardPage() {
         <GlobalMarketState data={marketIndicators} fetchDate={marketData?.fetchDate} />
 
         {/* 1.5. AI 研究控制台（私版区域） */}
-        <PrivateZone label="AI 研究控制台">
+        <PrivateZone label="AI Research Console">
           <AIResearchConsole />
         </PrivateZone>
 
@@ -187,8 +187,8 @@ export default function DashboardPage() {
         {/* 页脚 */}
         <div className="text-center pt-4 pb-8">
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-            数据更新 ·{" "}
-            {new Date(d.updatedAt).toLocaleString("zh-CN", {
+            Data updated ·{" "}
+            {new Date(d.updatedAt).toLocaleString("en-US", {
               year: "numeric",
               month: "2-digit",
               day: "2-digit",

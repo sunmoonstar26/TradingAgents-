@@ -8,43 +8,43 @@ import { useAuth } from "../../lib/auth";
 
 const PLANS = [
   {
-    label: "入门",
+    label: "Starter",
     price: "$5",
     credits: 5,
     perCredit: "$1.00",
     discount: null,
-    desc: "首次体验，按需购买",
+    desc: "Try it out, pay as you go",
     highlight: false,
     buyUrl: "https://creem.io/product/prod_3XIVWJ0ALhzo0ntLavqJge",
   },
   {
-    label: "超值",
+    label: "Popular",
     price: "$15",
     credits: 20,
     perCredit: "$0.75",
     discount: "25% OFF",
-    desc: "最受欢迎，性价比最高",
+    desc: "Most popular, best value",
     highlight: true,
     buyUrl: "https://creem.io/product/prod_jceFmgfVqXLkcUYmJA4yF",
   },
   {
-    label: "囤货",
+    label: "Power",
     price: "$30",
     credits: 50,
     perCredit: "$0.60",
     discount: "40% OFF",
-    desc: "重度用户首选，折扣最大",
+    desc: "Best for heavy users, biggest discount",
     highlight: false,
     buyUrl: "https://creem.io/product/prod_1FSp9WD6So2OJBf4wgfE9v",
   },
 ];
 
 const MOCK_HISTORY = [
-  { icon: Cpu,        action: "AI 分析 · NVDA",  cost: -1, time: "今天 09:15", color: "#00c8ff" },
-  { icon: BarChart2,  action: "深度研究 · TSLA",  cost: -3, time: "今天 08:42", color: "#00c8ff" },
-  { icon: TrendingUp, action: "注册赠送",          cost: +5, time: "昨天 22:10", color: "#22c55e" },
-  { icon: Cpu,        action: "AI 分析 · META",   cost: -1, time: "昨天 15:30", color: "#00c8ff" },
-  { icon: Shield,     action: "风险扫描 · AMD",   cost: -1, time: "昨天 11:05", color: "#00c8ff" },
+  { icon: Cpu,        action: "AI Analysis · NVDA",  cost: -1, time: "Today 09:15",      color: "#00c8ff" },
+  { icon: BarChart2,  action: "Deep Research · TSLA", cost: -3, time: "Today 08:42",      color: "#00c8ff" },
+  { icon: TrendingUp, action: "Sign-up Bonus",         cost: +5, time: "Yesterday 22:10", color: "#22c55e" },
+  { icon: Cpu,        action: "AI Analysis · META",   cost: -1, time: "Yesterday 15:30", color: "#00c8ff" },
+  { icon: Shield,     action: "Risk Scan · AMD",      cost: -1, time: "Yesterday 11:05", color: "#00c8ff" },
 ];
 
 export default function BillingPage() {
@@ -64,16 +64,16 @@ export default function BillingPage() {
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回首页
+          Back to Home
         </button>
 
         <div className="mb-8">
           <h1 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
             <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
-            Credits 充值中心
+            Credits Recharge Center
           </h1>
           <p className="text-xs text-[var(--text-secondary)] mt-1 font-mono">
-            标准分析 1 Credit · 深度研究 3 Credits · 风险扫描 1 Credit
+            Standard analysis 1 Credit · Deep research 3 Credits · Risk scan 1 Credit
           </p>
         </div>
 
@@ -90,21 +90,21 @@ export default function BillingPage() {
             >
               <Zap className="w-5 h-5" style={{ color: "#00c8ff" }} />
             </div>
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">登录后查看余额</p>
-            <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">注册即赠 5 Credits，立即开始 AI 分析</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">Sign in to view your balance</p>
+            <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">Get 5 Credits on signup · Start AI analysis today</p>
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => router.push("/register")}
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all"
                 style={{ background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))", boxShadow: "0 0 16px rgba(0,200,255,0.2)" }}
               >
-                免费注册
+                Sign Up Free
               </button>
               <button
                 onClick={() => router.push("/login")}
                 className="px-5 py-2 rounded-xl text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-custom)] transition-all"
               >
-                已有账号登录
+                Already have an account? Sign in
               </button>
             </div>
           </motion.div>
@@ -118,7 +118,7 @@ export default function BillingPage() {
               className="card-terminal p-5"
               style={{ border: "1px solid rgba(0,200,255,0.15)", boxShadow: "0 0 20px rgba(0,200,255,0.06)" }}
             >
-              <p className="text-[11px] text-[var(--text-secondary)] font-mono mb-3">当前余额</p>
+              <p className="text-[11px] text-[var(--text-secondary)] font-mono mb-3">Current Balance</p>
               <div className="flex items-end gap-2 mb-4">
                 <span className="text-3xl font-bold font-mono" style={{ color: "#00c8ff" }}>
                   {user.credits}
@@ -136,7 +136,7 @@ export default function BillingPage() {
                 />
               </div>
               <p className="text-[10px] text-[var(--text-secondary)]/50 font-mono">
-                剩余 {user.credits} / {maxCredits} Credits
+                Remaining {user.credits} / {maxCredits} Credits
               </p>
             </motion.div>
 
@@ -147,7 +147,7 @@ export default function BillingPage() {
               transition={{ delay: 0.06 }}
               className="card-terminal p-5"
             >
-              <p className="text-[11px] text-[var(--text-secondary)] font-mono mb-3">使用明细</p>
+              <p className="text-[11px] text-[var(--text-secondary)] font-mono mb-3">Usage History</p>
               <ul className="space-y-2.5">
                 {MOCK_HISTORY.map((h, i) => {
                   const Icon = h.icon;
@@ -179,8 +179,8 @@ export default function BillingPage() {
 
         {/* 在线充值 */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs font-semibold text-[var(--text-secondary)] font-mono tracking-wider uppercase">在线充值</h2>
-          <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">1 Credit = 1 次 AI 分析</span>
+          <h2 className="text-xs font-semibold text-[var(--text-secondary)] font-mono tracking-wider uppercase">Top Up</h2>
+          <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">1 Credit = 1 AI analysis</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {PLANS.map((plan, i) => (
@@ -216,7 +216,7 @@ export default function BillingPage() {
                     {plan.discount}
                   </span>
                 ) : (
-                  <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">标准价</span>
+                  <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">Standard price</span>
                 )}
               </div>
 
@@ -256,14 +256,14 @@ export default function BillingPage() {
                   background: "rgba(255,255,255,0.04)",
                 }}
               >
-                立即充值
+                Buy Now
               </a>
             </motion.div>
           ))}
         </div>
 
         <p className="text-center text-[10px] text-[var(--text-secondary)]/40 font-mono mt-8">
-          支付由 Creem 处理 · 充值后 Credits 自动到账 · 永久有效
+          Payments processed by Creem · Credits credited instantly · Never expire
         </p>
       </main>
     </div>

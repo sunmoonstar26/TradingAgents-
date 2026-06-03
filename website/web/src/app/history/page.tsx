@@ -21,54 +21,53 @@ interface HistoryEntry {
 
 const MOCK_HISTORY: HistoryEntry[] = [
   {
-    id: "sess_nvda_001", ticker: "NVDA", name: "英伟达", signal: "强烈买入", conviction: 84,
-    mode: "deep", duration: "4分32秒", analyzedAt: "今天 09:15",
-    agentCount: 8, headline: "Blackwell 量产加速，AI 算力需求超预期",
+    id: "sess_nvda_001", ticker: "NVDA", name: "NVIDIA", signal: "Strong Buy", conviction: 84,
+    mode: "deep", duration: "4m 32s", analyzedAt: "Today 09:15",
+    agentCount: 8, headline: "Blackwell ramp accelerates, AI compute demand beats",
   },
   {
-    id: "sess_tsla_002", ticker: "TSLA", name: "特斯拉", signal: "增持", conviction: 72,
-    mode: "standard", duration: "2分18秒", analyzedAt: "今天 08:42",
-    agentCount: 8, headline: "FSD v13 商业化落地，能源业务成第二增长曲线",
+    id: "sess_tsla_002", ticker: "TSLA", name: "Tesla", signal: "Buy", conviction: 72,
+    mode: "standard", duration: "2m 18s", analyzedAt: "Today 08:42",
+    agentCount: 8, headline: "FSD v13 commercialization, energy as second growth engine",
   },
   {
-    id: "sess_meta_003", ticker: "META", name: "Meta", signal: "买入", conviction: 76,
-    mode: "standard", duration: "2分05秒", analyzedAt: "昨天 15:30",
-    agentCount: 8, headline: "Llama 4 开源生态构建护城河，广告 AI 化提效",
+    id: "sess_meta_003", ticker: "META", name: "Meta", signal: "Buy", conviction: 76,
+    mode: "standard", duration: "2m 05s", analyzedAt: "Yesterday 15:30",
+    agentCount: 8, headline: "Llama 4 open-source moat, AI-driven ad efficiency gains",
   },
   {
-    id: "sess_pltr_004", ticker: "PLTR", name: "Palantir", signal: "增持", conviction: 69,
-    mode: "deep", duration: "5分11秒", analyzedAt: "昨天 11:05",
-    agentCount: 7, headline: "AIP 平台企业客户数翻倍，美国商业业务爆发",
+    id: "sess_pltr_004", ticker: "PLTR", name: "Palantir", signal: "Buy", conviction: 69,
+    mode: "deep", duration: "5m 11s", analyzedAt: "Yesterday 11:05",
+    agentCount: 7, headline: "AIP enterprise customers doubled, US commercial exploding",
   },
   {
-    id: "sess_amd_005", ticker: "AMD", name: "AMD", signal: "持有", conviction: 52,
-    mode: "standard", duration: "2分44秒", analyzedAt: "2天前 14:20",
-    agentCount: 7, headline: "MI300X 出货提速，但与 NVDA 差距仍在扩大",
+    id: "sess_amd_005", ticker: "AMD", name: "AMD", signal: "Hold", conviction: 52,
+    mode: "standard", duration: "2m 44s", analyzedAt: "2d ago 14:20",
+    agentCount: 7, headline: "MI300X shipments ramping, but gap with NVDA widening",
   },
   {
-    id: "sess_aapl_006", ticker: "AAPL", name: "苹果", signal: "减持", conviction: 35,
-    mode: "standard", duration: "1分58秒", analyzedAt: "3天前 10:00",
-    agentCount: 8, headline: "iPhone 16 销量低于预期，AI 功能落地进度滞后",
+    id: "sess_aapl_006", ticker: "AAPL", name: "Apple", signal: "Sell", conviction: 35,
+    mode: "standard", duration: "1m 58s", analyzedAt: "3d ago 10:00",
+    agentCount: 8, headline: "iPhone 16 sales below expectations, AI feature rollout lagging",
   },
   {
-    id: "sess_amzn_007", ticker: "AMZN", name: "亚马逊", signal: "增持", conviction: 71,
-    mode: "deep", duration: "4分50秒", analyzedAt: "4天前 16:45",
-    agentCount: 8, headline: "AWS 重回加速增长，广告业务超预期成新引擎",
+    id: "sess_amzn_007", ticker: "AMZN", name: "Amazon", signal: "Buy", conviction: 71,
+    mode: "deep", duration: "4m 50s", analyzedAt: "4d ago 16:45",
+    agentCount: 8, headline: "AWS re-accelerating, ad business beats as new growth engine",
   },
   {
-    id: "sess_li_008", ticker: "LI", name: "理想汽车", signal: "持有", conviction: 52,
-    mode: "standard", duration: "2分30秒", analyzedAt: "5天前 09:30",
-    agentCount: 6, headline: "L9 AI 旗舰交付稳健，中东市场拓展超预期",
+    id: "sess_li_008", ticker: "LI", name: "Li Auto", signal: "Hold", conviction: 52,
+    mode: "standard", duration: "2m 30s", analyzedAt: "5d ago 09:30",
+    agentCount: 6, headline: "L9 AI flagship deliveries steady, Middle East expansion beats",
   },
 ];
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
-  强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
-  买入:     { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
-  增持:     { color: "#3b82f6", bg: "rgba(59,130,246,0.1)", icon: TrendingUp },
-  持有:     { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
-  减持:     { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
-  卖出:     { color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
+  "Strong Buy": { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
+  "Buy":        { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
+  "Hold":       { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
+  "Sell":       { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
+  "Strong Sell":{ color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
 };
 
 export default function HistoryPage() {
@@ -84,22 +83,22 @@ export default function HistoryPage() {
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回首页
+          Back to home
         </button>
 
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Clock className="w-4 h-4 text-[var(--blue)]" />
-              历史分析记录
+              Analysis History
             </h1>
             <p className="text-xs text-[var(--text-secondary)] mt-1 font-mono">
-              AI 投资委员会历次分析存档
+              Archives of all AI Investment Committee analyses
             </p>
           </div>
           {ready && isLoggedIn && (
             <span className="text-[11px] font-mono text-[var(--text-secondary)]/40">
-              共 {MOCK_HISTORY.length} 条记录
+              {MOCK_HISTORY.length} records
             </span>
           )}
         </div>
@@ -117,9 +116,9 @@ export default function HistoryPage() {
             >
               <Lock className="w-5 h-5" style={{ color: "#00c8ff" }} />
             </div>
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">登录后查看历史记录</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">Sign in to view history</p>
             <p className="text-xs text-[var(--text-secondary)] font-mono mb-5">
-              每次 AI 分析结果自动保存，随时回顾
+              Each AI analysis is auto-saved for future reference
             </p>
             <div className="flex items-center justify-center gap-3">
               <button
@@ -127,13 +126,13 @@ export default function HistoryPage() {
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all"
                 style={{ background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))", boxShadow: "0 0 16px rgba(0,200,255,0.2)" }}
               >
-                免费注册
+                Sign up free
               </button>
               <button
                 onClick={() => router.push("/login")}
                 className="px-5 py-2 rounded-xl text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-custom)] transition-all"
               >
-                已有账号登录
+                Sign in
               </button>
             </div>
           </motion.div>
@@ -143,7 +142,7 @@ export default function HistoryPage() {
         {ready && isLoggedIn && (
           <div className="space-y-2">
             {MOCK_HISTORY.map((entry, idx) => {
-              const cfg = signalConfig[entry.signal] ?? signalConfig["持有"];
+              const cfg = signalConfig[entry.signal] ?? signalConfig["Hold"];
               const Icon = cfg.icon;
               return (
                 <motion.div
@@ -186,7 +185,7 @@ export default function HistoryPage() {
                             color: entry.mode === "deep" ? "#00c8ff" : "rgba(255,255,255,0.3)",
                           }}
                         >
-                          {entry.mode === "deep" ? "深度研究" : "标准分析"}
+                          {entry.mode === "deep" ? "Deep Research" : "Standard"}
                         </span>
                       </div>
                       <p className="text-[11px] text-[var(--text-secondary)] truncate">{entry.headline}</p>
@@ -195,7 +194,7 @@ export default function HistoryPage() {
                     {/* 右侧元数据 */}
                     <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 text-[10px] font-mono text-[var(--text-secondary)]/40">
                       <span className="font-semibold text-[11px]" style={{ color: cfg.color }}>{entry.conviction}%</span>
-                      <span>{entry.agentCount} 智能体 · {entry.duration}</span>
+                      <span>{entry.agentCount} agents · {entry.duration}</span>
                       <span>{entry.analyzedAt}</span>
                     </div>
 

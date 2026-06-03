@@ -9,7 +9,7 @@ export interface MockUser {
   credits: number;
 }
 
-const DEFAULT_USER: MockUser = { name: "投资者", credits: 12 };
+const DEFAULT_USER: MockUser = { name: "Investor", credits: 12 };
 
 function readUser(): MockUser | null {
   try {

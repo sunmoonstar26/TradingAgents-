@@ -17,52 +17,52 @@ const AGENT_CONFIG: Record<
     icon: typeof Brain;
     iconColor: string;
     borderClass: string;
-    mapping: string | null; // null = 建设中；"__risk__" = 特殊多文件处理
+    mapping: string | null; // null = under construction; "__risk__" = special multi-file handling
   }
 > = {
   fundamental: {
-    name: "基本面分析智能体",
-    label: "基本面",
+    name: "Fundamental Analysis Agent",
+    label: "Fundamentals",
     icon: Brain,
     iconColor: "text-[var(--blue)]",
     borderClass: "agent-fundamental",
     mapping: "fundamentals",
   },
   technical: {
-    name: "技术面分析智能体",
-    label: "技术面",
+    name: "Technical Analysis Agent",
+    label: "Technicals",
     icon: TrendingUp,
     iconColor: "text-[var(--green)]",
     borderClass: "agent-technical",
     mapping: "market",
   },
   sentiment: {
-    name: "情绪分析智能体",
-    label: "情绪面",
+    name: "Sentiment Analysis Agent",
+    label: "Sentiment",
     icon: MessageCircle,
     iconColor: "text-[var(--amber)]",
     borderClass: "agent-sentiment",
     mapping: "sentiment",
   },
   risk: {
-    name: "风险分析智能体",
-    label: "风控",
+    name: "Risk Analysis Agent",
+    label: "Risk",
     icon: ShieldAlert,
     iconColor: "text-[var(--red)]",
     borderClass: "agent-risk",
     mapping: "__risk__",
   },
   news: {
-    name: "新闻分析智能体",
-    label: "事件驱动",
+    name: "News Analysis Agent",
+    label: "Event-Driven",
     icon: Newspaper,
     iconColor: "text-[var(--cyan)]",
     borderClass: "agent-news",
     mapping: "news",
   },
   macro: {
-    name: "宏观分析智能体",
-    label: "宏观",
+    name: "Macro Analysis Agent",
+    label: "Macro",
     icon: Globe,
     iconColor: "text-[var(--purple)]",
     borderClass: "agent-macro",
@@ -71,9 +71,9 @@ const AGENT_CONFIG: Record<
 };
 
 const RISK_SECTIONS = [
-  { key: "aggressive", label: "激进型分析师", icon: Activity, color: "text-[var(--green)]", borderClass: "agent-technical" },
-  { key: "conservative", label: "保守型分析师", icon: ShieldAlert, color: "text-[var(--blue)]", borderClass: "agent-fundamental" },
-  { key: "neutral", label: "中性分析师", icon: TrendingDown, color: "text-[var(--amber)]", borderClass: "agent-sentiment" },
+  { key: "aggressive", label: "Aggressive Analyst", icon: Activity, color: "text-[var(--green)]", borderClass: "agent-technical" },
+  { key: "conservative", label: "Conservative Analyst", icon: ShieldAlert, color: "text-[var(--blue)]", borderClass: "agent-fundamental" },
+  { key: "neutral", label: "Neutral Analyst", icon: TrendingDown, color: "text-[var(--amber)]", borderClass: "agent-sentiment" },
 ] as const;
 
 export default function AgentDetailPage() {
@@ -152,7 +152,7 @@ export default function AgentDetailPage() {
         <Header />
         <main className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <span className="text-5xl font-mono text-[var(--text-secondary)]/60">404</span>
-          <p className="text-sm text-[var(--text-secondary)]">未知的分析类型</p>
+          <p className="text-sm text-[var(--text-secondary)]">Unknown analysis type</p>
         </main>
       </div>
     );
@@ -171,7 +171,7 @@ export default function AgentDetailPage() {
           className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]/70 hover:text-[var(--text-primary)] transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回投资委员会工作台
+          Back to Investment Committee
         </button>
 
         {/* Hero 标题区 */}
@@ -182,10 +182,10 @@ export default function AgentDetailPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-[var(--text-primary)]">
-                {cfg.name} · 完整分析报告
+                {cfg.name} · Full Analysis Report
               </h1>
               <p className="text-[10px] text-[var(--text-secondary)]/60 mt-0.5 font-mono">
-                {ticker} · {cfg.label}分析 · AI 智能体报告
+                {ticker} · {cfg.label} Analysis · AI Agent Report
               </p>
             </div>
           </div>
@@ -199,11 +199,11 @@ export default function AgentDetailPage() {
             </div>
             <h2 className="text-base font-semibold text-[var(--text-primary)]">{cfg.name}</h2>
             <p className="text-sm text-[var(--text-secondary)]/70 text-center max-w-md">
-              该分析智能体正在建设中，相关数据和分析报告即将上线。请稍后再来查看。
+              This analysis agent is under construction. Related data and reports will be available soon.
             </p>
             <div className="flex items-center gap-2 mt-2">
               <span className="w-2 h-2 rounded-full bg-[var(--amber)] pulse-amber" />
-              <span className="text-[10px] text-[var(--amber)]/80 font-mono">开发中</span>
+              <span className="text-[10px] text-[var(--amber)]/80 font-mono">In Development</span>
             </div>
           </div>
         ) : isRisk ? (
@@ -238,7 +238,7 @@ export default function AgentDetailPage() {
             {riskResults.every((r) => !r.isLoading && !r.data?.data?.content) && (
               <div className="card-terminal p-8 flex flex-col items-center justify-center gap-3">
                 <span className="text-4xl font-mono text-[var(--text-secondary)]/60">404</span>
-                <p className="text-sm text-[var(--text-secondary)]">未找到风险分析报告</p>
+                <p className="text-sm text-[var(--text-secondary)]">No risk analysis report found</p>
               </div>
             )}
           </div>
@@ -254,7 +254,7 @@ export default function AgentDetailPage() {
         ) : error || !data?.data ? (
           <div className="card-terminal p-8 flex flex-col items-center justify-center gap-3">
             <span className="text-4xl font-mono text-[var(--text-secondary)]/60">404</span>
-            <p className="text-sm text-[var(--text-secondary)]">未找到 {cfg.name} 的分析报告</p>
+            <p className="text-sm text-[var(--text-secondary)]">No analysis report found for {cfg.name}</p>
           </div>
         ) : (
           <div className={`card-terminal p-6 md:p-8 ${cfg.borderClass}`}>
@@ -266,7 +266,7 @@ export default function AgentDetailPage() {
       {/* 底部 */}
       <div className="text-center pt-4 pb-8">
         <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-          {cfg.name} 报告 · {ticker}
+          {cfg.name} Report · {ticker}
         </span>
       </div>
     </div>

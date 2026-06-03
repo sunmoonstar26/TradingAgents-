@@ -27,7 +27,7 @@ export async function GET(
   const data = getStockDetail(ticker);
   if (!data) {
     return NextResponse.json(
-      { success: false, error: `未找到股票 ${ticker}` },
+      { success: false, error: `Stock ${ticker} not found` },
       { status: 404 }
     );
   }

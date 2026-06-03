@@ -13,7 +13,7 @@ export function Header() {
   const { user, ready, logout } = useAuth();
 
   useEffect(() => {
-    const tick = () => setTime(new Date().toLocaleTimeString("zh-CN", TIME_FMT));
+    const tick = () => setTime(new Date().toLocaleTimeString("en-US", TIME_FMT));
     const elapsed = 1000 - (Date.now() % 1000);
     let interval: ReturnType<typeof setInterval> | null = null;
     const timeout = setTimeout(() => {
@@ -35,23 +35,23 @@ export function Header() {
             TradingAgents
           </span>
           <span className="hidden sm:inline text-xs text-[var(--text-secondary)] font-mono">
-            AI 交易终端
+            AI Trading Terminal
           </span>
         </Link>
 
         {/* 中间：AI 系统状态 */}
         <div className="hidden lg:flex items-center gap-3 text-[11px] font-mono">
-          <span className="text-[var(--text-secondary)]">智能体在线</span>
+          <span className="text-[var(--text-secondary)]">Agents online</span>
           <span className="text-[var(--green)] font-semibold">12</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
-          <span className="text-[var(--text-secondary)]">运行中</span>
+          <span className="text-[var(--text-secondary)]">Running</span>
           <span className="text-[var(--blue)] font-semibold pulse-blue">4</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
-          <span className="text-[var(--text-secondary)]">辩论中</span>
+          <span className="text-[var(--text-secondary)]">Debating</span>
           <span className="text-[var(--amber)] font-semibold">2</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
-          <span className="text-[var(--text-secondary)]">共识更新</span>
-          <span className="text-[var(--text-primary)]">14s 前</span>
+          <span className="text-[var(--text-secondary)]">Consensus update</span>
+          <span className="text-[var(--text-primary)]">14s ago</span>
         </div>
 
         {/* 右侧：登录态 / 未登录态 */}
@@ -65,13 +65,13 @@ export function Header() {
                 href="/workspace"
                 className="hidden sm:inline text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                我的工作台
+                Workspace
               </Link>
               <Link
                 href="/history"
                 className="hidden md:inline text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                历史记录
+                History
               </Link>
               {/* Credits */}
               <Link
@@ -96,7 +96,7 @@ export function Header() {
                 onClick={logout}
                 className="text-[var(--text-secondary)]/40 hover:text-[var(--red)] transition-colors text-[11px] font-mono"
               >
-                登出
+                Sign out
               </button>
             </>
           ) : (
@@ -106,7 +106,7 @@ export function Header() {
                 href="/login"
                 className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono text-[11px]"
               >
-                登录
+                Sign in
               </Link>
               <Link
                 href="/register"
@@ -119,7 +119,7 @@ export function Header() {
                 }}
               >
                 <Zap className="w-3 h-3" />
-                获取 Credits
+                Get Credits
               </Link>
             </>
           )}
@@ -127,7 +127,7 @@ export function Header() {
           {/* 系统状态 */}
           <span className="hidden md:flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--green)] pulse-green" />
-            <span className="text-[var(--text-primary)] font-mono text-[11px]">模型在线</span>
+            <span className="text-[var(--text-primary)] font-mono text-[11px]">Models online</span>
           </span>
           <span className="hidden sm:inline font-mono text-[11px] text-[var(--text-secondary)]/80">{time}</span>
         </div>

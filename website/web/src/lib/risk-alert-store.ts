@@ -12,9 +12,9 @@ const SEVERITY_LEVEL: Record<string, AlertLevel> = {
 };
 
 const AGENT_LABEL: Record<string, string> = {
-  aggressive: "激进分析师",
-  conservative: "保守分析师",
-  neutral: "中性分析师",
+  aggressive: "Aggressive Analyst",
+  conservative: "Conservative Analyst",
+  neutral: "Neutral Analyst",
 };
 
 /** 从 insights.risk_items 转换为 RiskAlert 格式并合并写入 localStorage */
@@ -40,7 +40,7 @@ export function upsertRiskAlertsFromInsights(
     type: item.risk_type,
     level: SEVERITY_LEVEL[item.severity] ?? AlertLevel.WATCH,
     source: ticker,
-    detail: `${item.why_matters}${item.potential_impact ? "。" + item.potential_impact : ""}`,
+    detail: `${item.why_matters}${item.potential_impact ? ". " + item.potential_impact : ""}`,
     timestamp: now,
     triggeredBy: [AGENT_LABEL[item.triggered_by] ?? item.triggered_by].filter(Boolean),
   }));

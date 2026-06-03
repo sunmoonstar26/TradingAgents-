@@ -13,11 +13,11 @@ function StatusBadge({ status }: { status: MarketIndicator["status"] }) {
     danger: "bg-[var(--red)]/15 text-[var(--red)]",
   };
   const labels: Record<string, string> = {
-    up: "看涨",
-    down: "看跌",
-    neutral: "平稳",
-    warning: "关注",
-    danger: "危险",
+    up: "Bullish",
+    down: "Bearish",
+    neutral: "Neutral",
+    warning: "Watch",
+    danger: "Danger",
   };
   return (
     <span
@@ -44,10 +44,10 @@ export function GlobalMarketState({ data, fetchDate }: Props) {
       transition={{ duration: 0.4 }}
     >
       <div className="flex items-center justify-between mb-3">
-        <h2 className="section-heading !mb-0">全球市场状态</h2>
+        <h2 className="section-heading !mb-0">Global Market State</h2>
         {fetchDate && (
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">
-            数据日期 {fetchDate}
+            Data as of {fetchDate}
           </span>
         )}
       </div>      {/* 桌面端：6 列紧凑卡片网格 */}

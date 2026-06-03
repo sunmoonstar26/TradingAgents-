@@ -91,7 +91,7 @@ export async function GET(
   const reportFolder = findReportFolder(ticker);
   if (!reportFolder) {
     return NextResponse.json(
-      { success: false, error: `未找到股票 ${ticker} 的报告数据` },
+      { success: false, error: `Report data not found for ${ticker}` },
       { status: 404 }
     );
   }
@@ -100,7 +100,7 @@ export async function GET(
   const sectionFolder = SECTION_MAP[section];
   if (!sectionFolder) {
     return NextResponse.json(
-      { success: false, error: `无效的分析类型: ${section}` },
+      { success: false, error: `Invalid analysis type: ${section}` },
       { status: 400 }
     );
   }
@@ -109,7 +109,7 @@ export async function GET(
   const subsectionMap = SUBSECTION_MAP[section];
   if (!subsectionMap) {
     return NextResponse.json(
-      { success: false, error: `无效的分析类型: ${section}` },
+      { success: false, error: `Invalid analysis type: ${section}` },
       { status: 400 }
     );
   }
@@ -117,7 +117,7 @@ export async function GET(
   const fileName = subsectionMap[subsection];
   if (!fileName) {
     return NextResponse.json(
-      { success: false, error: `无效的子类型: ${subsection}` },
+      { success: false, error: `Invalid subsection: ${subsection}` },
       { status: 400 }
     );
   }
@@ -128,7 +128,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: `未找到报告文件: ${section}/${subsection}`,
+        error: `Report file not found: ${section}/${subsection}`,
       },
       { status: 404 }
     );
@@ -147,7 +147,7 @@ export async function GET(
     });
   } catch {
     return NextResponse.json(
-      { success: false, error: "读取报告文件失败" },
+      { success: false, error: "Failed to read report file" },
       { status: 500 }
     );
   }

@@ -106,7 +106,7 @@ export function syncRadarFull(
       conviction: 50,
       risk: RiskLevel.MEDIUM,
       consensus: { ...EMPTY_CONSENSUS },
-      exposure: "低配",
+      exposure: "Underweight",
       agentAlignment: { fundamental: false, technical: false, sentiment: false, macro: false, risk: false },
       updatedAt: new Date().toISOString(),
     };

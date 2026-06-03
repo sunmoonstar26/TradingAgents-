@@ -6,21 +6,27 @@ const STORAGE_KEY = "tradingagents_livefeed";
 const MAX_ENTRIES = 30;
 
 const VERDICT_SIGNAL: Record<string, string> = {
-  看涨: "看涨", 看跌: "看跌", 中性: "中性",
-  多方胜出: "多方", 空方胜出: "空方", 势均力敌: "平局",
-  买入: "买入", 卖出: "卖出", 持有: "持有",
-  高: "高风险", 中: "中风险", 低: "低风险",
+  // Chinese backend values (legacy)
+  看涨: "Bullish", 看跌: "Bearish", 中性: "Neutral",
+  多方胜出: "Bull", 空方胜出: "Bear", 势均力敌: "Neutral",
+  买入: "Buy", 卖出: "Sell", 持有: "Hold",
+  高: "High Risk", 中: "Medium Risk", 低: "Low Risk",
+  // English backend values (new)
+  Bullish: "Bullish", Bearish: "Bearish", Neutral: "Neutral",
+  Buy: "Buy", Sell: "Sell", Hold: "Hold",
+  "Strong Buy": "Strong Buy", "Strong Sell": "Strong Sell",
+  high: "High Risk", medium: "Medium Risk", low: "Low Risk",
 };
 
 const AGENT_ZH: Record<string, string> = {
-  market: "技术面分析智能体",
-  sentiment: "情绪分析智能体",
-  news: "新闻分析智能体",
-  fundamentals: "基本面分析智能体",
-  macro: "宏观分析智能体",
-  "多方": "多方研究员",
-  "空方": "空方研究员",
-  "裁判": "研究主管",
+  market: "Technical Analyst",
+  sentiment: "Sentiment Analyst",
+  news: "News Analyst",
+  fundamentals: "Fundamental Analyst",
+  macro: "Macro Analyst",
+  "多方": "Bull Analyst",
+  "空方": "Bear Analyst",
+  "裁判": "Research Director",
 };
 
 export interface FeedItem {
@@ -79,19 +85,19 @@ export function upsertFeedFromInsights(
   // 辩论裁决
   const judge = insights.debate?.["裁判"];
   if (judge?.core_conflict) {
-    push("研究主管", judge.verdict ?? "", judge.core_conflict);
+    push("Research Director", judge.verdict ?? "", judge.core_conflict);
   }
 
   // 首条最高级风险
   const topRisk = insights.risk?.risk_items?.[0];
   if (topRisk) {
-    push("风险分析智能体", insights.risk?.overall_risk_level ?? "中",
-      `${topRisk.risk_type}：${topRisk.why_matters}`);
+    push("Risk Analyst", insights.risk?.overall_risk_level ?? "medium",
+      `${topRisk.risk_type}: ${topRisk.why_matters}`);
   }
 
   // 交易建议
   if (insights.trading?.allocation_rationale) {
-    push("交易员", insights.trading.action ?? "",
+    push("Trader", insights.trading.action ?? "",
       insights.trading.allocation_rationale);
   }
 

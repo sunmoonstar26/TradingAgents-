@@ -21,24 +21,24 @@ const DEBATE_CONFIG: Record<
   }
 > = {
   bull: {
-    name: "多方研究员",
-    label: "多方论据",
+    name: "Bull Analyst",
+    label: "Bull Case",
     icon: TrendingUp,
     iconColor: "text-[var(--green)]",
     borderClass: "agent-technical",
     mapping: "bull",
   },
   bear: {
-    name: "空方研究员",
-    label: "空方论据",
+    name: "Bear Analyst",
+    label: "Bear Case",
     icon: TrendingDown,
     iconColor: "text-[var(--red)]",
     borderClass: "agent-risk",
     mapping: "bear",
   },
   verdict: {
-    name: "研究主管",
-    label: "主持人裁决",
+    name: "Research Director",
+    label: "Moderator Verdict",
     icon: Scale,
     iconColor: "text-[var(--blue)]",
     borderClass: "agent-fundamental",
@@ -76,7 +76,7 @@ export default function DebateDetailPage() {
     queryKey: ["debate-report", ticker, side],
     queryFn: () =>
       fetch(`/api/stocks/${ticker}/report/research/${cfg?.mapping || side}`).then((r) => {
-        if (!r.ok) throw new Error("未找到辩论报告");
+        if (!r.ok) throw new Error("Debate report not found.");
         return r.json();
       }),
     enabled: !!cfg && stockStatus?.status !== "analyzing",
@@ -99,7 +99,7 @@ export default function DebateDetailPage() {
         <Header />
         <main className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <span className="text-5xl font-mono text-[var(--text-secondary)]/60">404</span>
-          <p className="text-sm text-[var(--text-secondary)]">未知的辩论类型</p>
+          <p className="text-sm text-[var(--text-secondary)]">Unknown debate type</p>
         </main>
       </div>
     );
@@ -118,7 +118,7 @@ export default function DebateDetailPage() {
           className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]/70 hover:text-[var(--text-primary)] transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回投资委员会工作台
+          Back to Investment Committee
         </button>
 
         {/* Hero 标题区 */}
@@ -129,10 +129,10 @@ export default function DebateDetailPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-[var(--text-primary)]">
-                {cfg.name} · 完整辩论记录
+                {cfg.name} · Full Debate Record
               </h1>
               <p className="text-[10px] text-[var(--text-secondary)]/60 mt-0.5 font-mono">
-                {ticker} · {cfg.label} · 多空辩论系统
+                {ticker} · {cfg.label} · Bull/Bear Debate System
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function DebateDetailPage() {
           <div className="card-terminal p-8 flex flex-col items-center justify-center gap-3">
             <span className="text-4xl font-mono text-[var(--text-secondary)]/60">404</span>
             <p className="text-sm text-[var(--text-secondary)]">
-              未找到 {cfg.name} 的辩论报告
+              No debate report found for {cfg.name}.
             </p>
           </div>
         ) : (
@@ -163,7 +163,7 @@ export default function DebateDetailPage() {
       {/* 底部 */}
       <div className="text-center pt-4 pb-8">
         <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-          {cfg.name} 辩论记录 · {ticker}
+          {cfg.name} Debate Record · {ticker}
         </span>
       </div>
     </div>

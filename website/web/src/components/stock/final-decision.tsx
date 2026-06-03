@@ -7,6 +7,13 @@ import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 import { useState } from "react";
 
 const signalConfig: Record<string, { bg: string; text: string; icon: typeof TrendingUp; glow: string }> = {
+  // English keys (forward-compatible with migrated backend)
+  "Strong Buy":  { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 40px rgba(34,197,94,0.3)" },
+  "Buy":         { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 30px rgba(34,197,94,0.2)" },
+  "Hold":        { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]", icon: Shield, glow: "0 0 20px rgba(245,158,11,0.15)" },
+  "Sell":        { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 30px rgba(239,68,68,0.2)" },
+  "Strong Sell": { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 40px rgba(239,68,68,0.3)" },
+  // Chinese keys (legacy backend compatibility)
   "强烈买入": { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 40px rgba(34,197,94,0.3)" },
   "买入": { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 30px rgba(34,197,94,0.2)" },
   "增持": { bg: "bg-[var(--blue)]/12", text: "text-[var(--blue)]", icon: TrendingUp, glow: "0 0 30px rgba(59,130,246,0.25)" },
@@ -16,6 +23,11 @@ const signalConfig: Record<string, { bg: string; text: string; icon: typeof Tren
 };
 
 const impactColors: Record<string, string> = {
+  // English keys (forward-compatible with migrated backend)
+  "High":   "text-[var(--red)]",
+  "Medium": "text-[var(--amber)]",
+  "Low":    "text-[var(--text-secondary)]",
+  // Chinese keys (legacy backend compatibility)
   "高": "text-[var(--red)]",
   "中": "text-[var(--amber)]",
   "低": "text-[var(--text-secondary)]",
@@ -49,7 +61,7 @@ export function FinalDecision({
   reportDate,
   thesis,
 }: Props) {
-  const cfg = signalConfig[signal] || signalConfig["持有"];
+  const cfg = signalConfig[signal] || signalConfig["Hold"] || signalConfig["持有"];
   const Icon = cfg.icon;
   const [expanded, setExpanded] = useState(false);
 
@@ -62,7 +74,7 @@ export function FinalDecision({
 
   // 格式化报告日期
   const formattedDate = reportDate
-    ? new Date(reportDate).toLocaleString("zh-CN", {
+    ? new Date(reportDate).toLocaleString("en-US", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -78,7 +90,7 @@ export function FinalDecision({
       transition={{ duration: 0.5, delay: 0.1 }}
     >
       <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest flex items-center justify-between">
-        <span>投资委员会决策</span>
+        <span>Investment Committee Decision</span>
         {formattedDate && (
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/50 tracking-normal normal-case">
             {formattedDate}
@@ -106,7 +118,7 @@ export function FinalDecision({
           </div>
           <div className="ml-auto shrink-0 flex items-center gap-3">
             <div className="text-center">
-              <div className="text-[10px] text-[var(--text-secondary)]/60 tracking-wider">置信度</div>
+              <div className="text-[10px] text-[var(--text-secondary)]/60 tracking-wider">Conviction</div>
               <div className="text-lg font-mono font-bold text-[var(--green)]">{thesisConviction}%</div>
             </div>
           </div>
@@ -116,7 +128,7 @@ export function FinalDecision({
         {reasons.length > 0 && (
           <div className="border-t border-[var(--border-custom)] pt-5 space-y-3">
             <div className="text-[11px] font-semibold text-[var(--text-secondary)]/80 uppercase tracking-wider">
-              核心决策依据
+              Key Decision Factors
             </div>
             {reasons.map((reason, idx) => (
               <motion.div
@@ -157,7 +169,7 @@ export function FinalDecision({
                     </div>
                     {/* Impact */}
                     <span className={`text-[10px] font-medium ${impactColors[reason.impact] || "text-[var(--text-secondary)]/60"}`}>
-                      {reason.impact}影响
+                      {reason.impact} impact
                     </span>
                   </div>
                 </div>
@@ -170,15 +182,15 @@ export function FinalDecision({
 
         {/* 底部元数据 */}
         <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]/60 pt-2 border-t border-[var(--border-custom)]">
-          <span>共识：{consensus}</span>
+          <span>Consensus: {consensus}</span>
           <span>·</span>
-          <span>建议仓位：{recommendedExposure}</span>
+          <span>Exposure: {recommendedExposure}</span>
           <span>·</span>
-          <span>时间框架：{thesisHorizon}</span>
+          <span>Horizon: {thesisHorizon}</span>
           {riskSummary && (
             <>
               <span>·</span>
-              <span className="text-[var(--red)]/70">风险：{riskSummary}</span>
+              <span className="text-[var(--red)]/70">Risk: {riskSummary}</span>
             </>
           )}
         </div>

@@ -57,11 +57,11 @@ function AnalysisLauncher({ ticker }: { ticker: string }) {
   const displayName = stockInfo?.name ?? ticker;
 
   const BOOT_STEPS = [
-    "连接市场数据",
-    "基本面分析智能体就绪",
-    "情绪分析引擎就绪",
-    "辩论系统在线",
-    "仓位引擎就绪",
+    "Connecting to market data",
+    "Fundamental analysis agent ready",
+    "Sentiment analysis engine ready",
+    "Debate system online",
+    "Position engine ready",
   ];
   const [bootStep, setBootStep] = useState(0);
 
@@ -120,10 +120,10 @@ function AnalysisLauncher({ ticker }: { ticker: string }) {
             )}
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mb-1">
-            尚未对该标的进行 AI 分析
+            No AI analysis for this ticker yet
           </p>
           <p className="text-[10px] font-mono text-[var(--text-secondary)]/50 mb-8">
-            8 个 AI 智能体将组成投资委员会 · 多维分析 · 生成完整研究报告
+            8 AI agents will form the Investment Committee · multi-dimensional analysis · full research report
           </p>
 
           {/* CTA 按钮 */}
@@ -142,12 +142,12 @@ function AnalysisLauncher({ ticker }: { ticker: string }) {
             {isStarting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                正在启动 AI 投资委员会...
+                Launching AI Investment Committee...
               </>
             ) : (
               <>
                 <Zap className="w-4 h-4" />
-                启动 AI 分析
+                Launch AI Analysis
               </>
             )}
           </motion.button>
@@ -158,7 +158,7 @@ function AnalysisLauncher({ ticker }: { ticker: string }) {
             className="flex items-center gap-1.5 mx-auto text-xs text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] transition-colors font-mono"
           >
             <ArrowLeft className="w-3 h-3" />
-            返回上一页
+            Go back
           </button>
         </motion.div>
       </main>
@@ -180,7 +180,7 @@ export default function StockDetailPage() {
     queryFn: () =>
       fetch(`/api/stocks/${ticker}`).then(async (r) => {
         if (r.status === 202) return r.json();
-        if (!r.ok) throw new Error("未找到");
+        if (!r.ok) throw new Error("Not found");
         return r.json();
       }),
     retry: false,
@@ -209,7 +209,7 @@ export default function StockDetailPage() {
       fundamental: false, technical: false, sentiment: false, macro: false, risk: false,
     };
     (d.agentAnalyses || []).forEach((a) => {
-      const bullish = ["强烈买入", "买入", "增持"].includes(a.signal);
+      const bullish = ["强烈买入", "买入", "增持", "Strong Buy", "Buy"].includes(a.signal);
       if (a.personality === "fundamental") agentAlignment.fundamental = bullish;
       if (a.personality === "technical") agentAlignment.technical = bullish;
       if (a.personality === "sentiment") agentAlignment.sentiment = bullish;
@@ -286,10 +286,10 @@ export default function StockDetailPage() {
       {/* 页面标题 */}
       <div className="px-4 md:px-6 pt-6 max-w-[1400px] mx-auto">
         <h1 className="text-lg font-bold text-[var(--text-primary)] tracking-wide">
-          ⚡ AI 投资委员会工作台
+          ⚡ AI Investment Committee
         </h1>
         <p className="text-[10px] text-[var(--text-secondary)]/60 mt-0.5 font-mono">
-          8 个 AI 智能体实时协作 · 多维分析 · 动态决策
+          8 AI agents collaborating · multi-dimensional analysis · dynamic decisions
         </p>
       </div>
 
@@ -347,7 +347,7 @@ export default function StockDetailPage() {
         {/* 更新时间 */}
         <div className="text-center pt-4 pb-8">
           <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-            数据更新 · {new Date(d.updatedAt).toLocaleString("zh-CN")}
+            Updated · {new Date(d.updatedAt).toLocaleString("en-US")}
           </span>
         </div>
       </main>

@@ -17,8 +17,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TradingAgents — AI 交易终端",
-  description: "Bloomberg Terminal × OpenAI 多智能体系统 × AI 对冲基金工作台",
+  title: "TradingAgents — AI Trading Terminal",
+  description: "Bloomberg Terminal × OpenAI Multi-Agent System × AI Hedge Fund Workbench",
 };
 
 export default function RootLayout({

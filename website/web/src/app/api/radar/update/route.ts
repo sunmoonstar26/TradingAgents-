@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     const { ticker } = await req.json();
     if (!ticker) {
-      return NextResponse.json({ success: false, error: "缺少 ticker" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Missing ticker" }, { status: 400 });
     }
 
     const tickerUpper = ticker.toUpperCase();
@@ -17,10 +17,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       session_id: session.session_id,
-      message: "分析已启动",
+      message: "Analysis started",
     });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "启动分析失败";
+    const msg = e instanceof Error ? e.message : "Failed to start analysis";
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

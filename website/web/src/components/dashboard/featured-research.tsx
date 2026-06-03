@@ -3,78 +3,79 @@
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { TrendingUp, Shield, AlertTriangle, Zap, ArrowRight } from "lucide-react";
+import { Signal } from "../../types/enums";
+import { SIGNAL_LABELS } from "../../content/labels";
 
 interface ResearchCard {
   ticker: string;
   name: string;
-  signal: "强烈买入" | "买入" | "增持" | "持有" | "减持" | "卖出";
+  signal: Signal;
   conviction: number;
   timeHorizon: string;
-  headline: string;       // 一句话核心观点
-  keyDriver: string;      // 核心驱动
-  primaryRisk: string;    // 主要风险
-  agentCount: number;     // 参与智能体数
+  headline: string;
+  keyDriver: string;
+  primaryRisk: string;
+  agentCount: number;
   updatedAt: string;
 }
 
 const FEATURED: ResearchCard[] = [
   {
-    ticker: "NVDA", name: "英伟达", signal: "强烈买入", conviction: 84,
-    timeHorizon: "中期 3-6月",
-    headline: "Blackwell 量产加速，AI 算力需求超预期",
-    keyDriver: "数据中心收入同比+122%，H200 供不应求",
-    primaryRisk: "估值 P/E 55x，地缘政治出口管制风险",
-    agentCount: 8, updatedAt: "2小时前",
+    ticker: "NVDA", name: "NVIDIA", signal: Signal.STRONG_BUY, conviction: 84,
+    timeHorizon: "Mid-term 3-6mo",
+    headline: "Blackwell ramp accelerates, AI compute demand beats",
+    keyDriver: "Data center revenue +122% YoY, H200 supply constrained",
+    primaryRisk: "Valuation P/E 55x, geopolitical export control risk",
+    agentCount: 8, updatedAt: "2h ago",
   },
   {
-    ticker: "META", name: "Meta", signal: "买入", conviction: 76,
-    timeHorizon: "中期 3-6月",
-    headline: "Llama 4 开源生态构建护城河，广告 AI 化提效",
-    keyDriver: "DAU 32亿创历史新高，AI 广告 CTR 提升 18%",
-    primaryRisk: "AI 资本开支 600 亿美元，回报周期不确定",
-    agentCount: 8, updatedAt: "3小时前",
+    ticker: "META", name: "Meta", signal: Signal.BUY, conviction: 76,
+    timeHorizon: "Mid-term 3-6mo",
+    headline: "Llama 4 open-source moat, AI-driven ad efficiency gains",
+    keyDriver: "DAU 3.2B record high, AI ad CTR +18%",
+    primaryRisk: "AI capex $60B, payback timeline uncertain",
+    agentCount: 8, updatedAt: "3h ago",
   },
   {
-    ticker: "TSLA", name: "特斯拉", signal: "增持", conviction: 72,
-    timeHorizon: "长期 6-12月",
-    headline: "FSD v13 商业化落地，能源业务成第二增长曲线",
-    keyDriver: "Megapack 订单积压 100GWh，储能毛利率 24%",
-    primaryRisk: "汽车交付量 Q1 同比-13%，品牌情绪持续恶化",
-    agentCount: 8, updatedAt: "5小时前",
+    ticker: "TSLA", name: "Tesla", signal: Signal.BUY, conviction: 72,
+    timeHorizon: "Long-term 6-12mo",
+    headline: "FSD v13 commercialization, energy as second growth engine",
+    keyDriver: "Megapack backlog 100GWh, storage gross margin 24%",
+    primaryRisk: "Auto deliveries Q1 -13% YoY, brand sentiment deteriorating",
+    agentCount: 8, updatedAt: "5h ago",
   },
   {
-    ticker: "PLTR", name: "Palantir", signal: "增持", conviction: 69,
-    timeHorizon: "中期 3-6月",
-    headline: "AIP 平台企业客户数翻倍，美国商业业务爆发",
-    keyDriver: "美国商业收入同比+71%，净收入留存率 120%",
-    primaryRisk: "政府合同占比 45%，预算削减直接冲击营收",
-    agentCount: 7, updatedAt: "6小时前",
+    ticker: "PLTR", name: "Palantir", signal: Signal.BUY, conviction: 69,
+    timeHorizon: "Mid-term 3-6mo",
+    headline: "AIP enterprise customers doubled, US commercial exploding",
+    keyDriver: "US commercial revenue +71% YoY, NRR 120%",
+    primaryRisk: "Government contracts 45% of revenue, budget cuts risk",
+    agentCount: 7, updatedAt: "6h ago",
   },
   {
-    ticker: "AMD", name: "AMD", signal: "持有", conviction: 52,
-    timeHorizon: "短期 1-3月",
-    headline: "MI300X 出货提速，但与 NVDA 差距仍在扩大",
-    keyDriver: "数据中心 GPU 收入 Q1 +80%，MI350 路线图清晰",
-    primaryRisk: "CUDA 生态壁垒难以撼动，客户迁移成本高",
-    agentCount: 7, updatedAt: "8小时前",
+    ticker: "AMD", name: "AMD", signal: Signal.HOLD, conviction: 52,
+    timeHorizon: "Short-term 1-3mo",
+    headline: "MI300X shipments ramping, but gap with NVDA widening",
+    keyDriver: "Data center GPU revenue Q1 +80%, MI350 roadmap clear",
+    primaryRisk: "CUDA ecosystem moat hard to overcome, high switching costs",
+    agentCount: 7, updatedAt: "8h ago",
   },
   {
-    ticker: "LI", name: "理想汽车", signal: "持有", conviction: 52,
-    timeHorizon: "短期 1-3月",
-    headline: "L9 AI 旗舰交付稳健，中东市场拓展超预期",
-    keyDriver: "5月交付量 3.2万辆，中东订单占比升至 12%",
-    primaryRisk: "自由现金流连续两季为负，价格战压缩利润空间",
-    agentCount: 6, updatedAt: "今天",
+    ticker: "LI", name: "Li Auto", signal: Signal.HOLD, conviction: 52,
+    timeHorizon: "Short-term 1-3mo",
+    headline: "L9 AI flagship deliveries steady, Middle East expansion beats",
+    keyDriver: "May deliveries 32K units, Middle East orders 12% of mix",
+    primaryRisk: "Free cash flow negative two quarters, price war compressing margins",
+    agentCount: 6, updatedAt: "Today",
   },
 ];
 
-const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
-  强烈买入: { color: "var(--green)", bg: "rgba(34,197,94,0.1)", icon: TrendingUp },
-  买入:     { color: "var(--green)", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
-  增持:     { color: "var(--blue)",  bg: "rgba(59,130,246,0.1)", icon: TrendingUp },
-  持有:     { color: "var(--amber)", bg: "rgba(245,158,11,0.1)", icon: Shield },
-  减持:     { color: "var(--red)",   bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
-  卖出:     { color: "var(--red)",   bg: "rgba(239,68,68,0.1)", icon: AlertTriangle },
+const signalConfig: Record<Signal, { color: string; bg: string; icon: typeof TrendingUp }> = {
+  [Signal.STRONG_BUY]:  { color: "var(--green)", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
+  [Signal.BUY]:         { color: "var(--green)", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
+  [Signal.HOLD]:        { color: "var(--amber)", bg: "rgba(245,158,11,0.1)", icon: Shield },
+  [Signal.SELL]:        { color: "var(--red)",   bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
+  [Signal.STRONG_SELL]: { color: "var(--red)",   bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
 };
 
 export function FeaturedResearch() {
@@ -84,16 +85,16 @@ export function FeaturedResearch() {
     <section>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">热门研究</h2>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">AI 投资委员会精选分析摘要</p>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Featured Research</h2>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Curated analysis from the AI Investment Committee</p>
         </div>
-        <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">公开 · 无需登录</span>
+        <span className="text-[10px] font-mono text-[var(--text-secondary)]/40">Public · No login required</span>
       </div>
 
-      {/* 桌面端：3列网格 */}
+      {/* Desktop: 3-column grid */}
       <div className="hidden md:grid md:grid-cols-3 gap-3">
         {FEATURED.map((card, idx) => {
-          const cfg = signalConfig[card.signal] ?? signalConfig["持有"];
+          const cfg = signalConfig[card.signal] ?? signalConfig[Signal.HOLD];
           const Icon = cfg.icon;
           return (
             <motion.div
@@ -105,11 +106,11 @@ export function FeaturedResearch() {
               className="card-terminal !p-0 overflow-hidden cursor-pointer group"
               whileHover={{ y: -2, transition: { duration: 0.2 } }}
             >
-              {/* 顶部信号色线 */}
+              {/* signal color bar */}
               <div className="h-0.5 w-full" style={{ background: `var(${cfg.color.replace("var(", "").replace(")", "")})` }} />
 
               <div className="p-4">
-                {/* 头部 */}
+                {/* header */}
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <span className="font-mono font-bold text-[13px] text-[var(--text-primary)]">{card.ticker}</span>
@@ -120,34 +121,34 @@ export function FeaturedResearch() {
                     style={{ background: cfg.bg, color: `var(${cfg.color.replace("var(", "").replace(")", "")})` }}
                   >
                     <Icon className="w-2.5 h-2.5" />
-                    {card.signal}
+                    {SIGNAL_LABELS[card.signal]}
                   </span>
                 </div>
 
-                {/* 核心观点 */}
+                {/* headline */}
                 <p className="text-[12px] text-[var(--text-primary)] font-medium leading-snug mb-3 line-clamp-2">
                   {card.headline}
                 </p>
 
-                {/* 核心驱动 */}
+                {/* Key Driver */}
                 <div className="p-2.5 rounded-lg bg-[var(--panel2)]/60 border border-[var(--border-custom)] mb-2">
                   <p className="text-[10px] text-[var(--text-secondary)]/50 mb-0.5 flex items-center gap-1">
                     <Zap className="w-2.5 h-2.5" style={{ color: "#00c8ff" }} />
-                    核心驱动
+                    Key Driver
                   </p>
                   <p className="text-[11px] text-[var(--text-primary)] leading-snug line-clamp-2">{card.keyDriver}</p>
                 </div>
 
-                {/* 主要风险 */}
+                {/* Primary Risk */}
                 <div className="p-2.5 rounded-lg bg-[var(--red)]/5 border border-[var(--red)]/10 mb-3">
                   <p className="text-[10px] text-[var(--red)]/50 mb-0.5 flex items-center gap-1">
                     <AlertTriangle className="w-2.5 h-2.5" />
-                    主要风险
+                    Primary Risk
                   </p>
                   <p className="text-[11px] text-[var(--text-secondary)] leading-snug line-clamp-2">{card.primaryRisk}</p>
                 </div>
 
-                {/* 底部元数据 */}
+                {/* footer metadata */}
                 <div className="flex items-center justify-between text-[10px] font-mono">
                   <div className="flex items-center gap-2 text-[var(--text-secondary)]/50">
                     <span className="font-semibold" style={{ color: `var(${cfg.color.replace("var(", "").replace(")", "")})` }}>
@@ -156,16 +157,16 @@ export function FeaturedResearch() {
                     <span>·</span>
                     <span>{card.timeHorizon}</span>
                     <span>·</span>
-                    <span>{card.agentCount} 智能体</span>
+                    <span>{card.agentCount} agents</span>
                   </div>
                   <span className="text-[var(--text-secondary)]/30">{card.updatedAt}</span>
                 </div>
               </div>
 
-              {/* hover 查看详情 */}
+              {/* hover: view details */}
               <div className="px-4 pb-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: "#00c8ff" }}>
-                  查看完整分析
+                  View full analysis
                   <ArrowRight className="w-3 h-3" />
                 </div>
               </div>
@@ -174,10 +175,10 @@ export function FeaturedResearch() {
         })}
       </div>
 
-      {/* 移动端：横向滚动 */}
+      {/* Mobile: horizontal scroll */}
       <div className="flex md:hidden gap-3 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none">
         {FEATURED.map((card) => {
-          const cfg = signalConfig[card.signal] ?? signalConfig["持有"];
+          const cfg = signalConfig[card.signal] ?? signalConfig[Signal.HOLD];
           const Icon = cfg.icon;
           return (
             <div
@@ -197,7 +198,7 @@ export function FeaturedResearch() {
                     style={{ background: cfg.bg, color: `var(${cfg.color.replace("var(", "").replace(")", "")})` }}
                   >
                     <Icon className="w-2.5 h-2.5" />
-                    {card.signal}
+                    {SIGNAL_LABELS[card.signal]}
                   </span>
                 </div>
                 <p className="text-[11px] text-[var(--text-primary)] font-medium leading-snug mb-2 line-clamp-2">{card.headline}</p>

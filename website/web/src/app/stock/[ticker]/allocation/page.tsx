@@ -90,7 +90,7 @@ export default function AllocationDetailPage() {
           className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]/70 hover:text-[var(--text-primary)] transition-colors mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          返回投资委员会工作台
+          Back to Investment Committee
         </button>
 
         {/* Hero 标题区 */}
@@ -101,10 +101,10 @@ export default function AllocationDetailPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-[var(--text-primary)]">
-                仓位分配引擎 · 完整交易计划
+                Position Allocation Engine · Complete Trading Plan
               </h1>
               <p className="text-[10px] text-[var(--text-secondary)]/60 mt-0.5 font-mono">
-                {ticker} · 交易决策 + 组合配置 · 完整报告
+                {ticker} · Trade Decision + Portfolio Allocation · Full Report
               </p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function AllocationDetailPage() {
           <div className="card-terminal p-8 flex flex-col items-center justify-center gap-3">
             <span className="text-4xl font-mono text-[var(--text-secondary)]/60">404</span>
             <p className="text-sm text-[var(--text-secondary)]">
-              未找到 {ticker} 的仓位分配数据
+              No position allocation data found for {ticker}
             </p>
           </div>
         ) : (
@@ -140,10 +140,10 @@ export default function AllocationDetailPage() {
               <div className="card-terminal p-6 md:p-8 agent-technical">
                 <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--border-custom)]">
                   <span className="text-[10px] font-semibold text-[var(--green)] uppercase tracking-wider">
-                    交易员决策
+                    Trader Decision
                   </span>
                   <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-                    交易执行层
+                    Trade Execution Layer
                   </span>
                 </div>
                 <MarkdownContent content={traderResult.data.data.content} />
@@ -155,10 +155,10 @@ export default function AllocationDetailPage() {
               <div className="card-terminal p-6 md:p-8 agent-fundamental">
                 <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--border-custom)]">
                   <span className="text-[10px] font-semibold text-[var(--blue)] uppercase tracking-wider">
-                    组合决策
+                    Portfolio Decision
                   </span>
                   <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-                    仓位配置层
+                    Position Allocation Layer
                   </span>
                 </div>
                 <MarkdownContent content={decisionResult.data.data.content} />
@@ -171,7 +171,7 @@ export default function AllocationDetailPage() {
       {/* 底部 */}
       <div className="text-center pt-4 pb-8">
         <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-          仓位分配引擎报告 · {ticker}
+          Position Allocation Engine Report · {ticker}
         </span>
       </div>
     </div>

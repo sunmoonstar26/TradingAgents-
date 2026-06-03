@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { X, Zap, CheckCircle2 } from "lucide-react";
 
 const FEATURES = [
-  "多 Agent 实时辩论",
-  "AI 深度研究报告",
-  "风险动态推演",
-  "AI 机会雷达",
-  "历史分析记录",
-  "自定义投资组合",
+  "Multi-agent real-time debate",
+  "AI deep research reports",
+  "Dynamic risk modeling",
+  "AI opportunity radar",
+  "Analysis history",
+  "Custom portfolio",
 ];
 
 interface Props {
@@ -71,11 +71,11 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                   <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
                 </div>
                 <h2 className="text-base font-bold text-white tracking-wide">
-                  解锁 AI 投资委员会
+                  Unlock AI Investment Committee
                 </h2>
               </div>
               <p className="text-xs text-white/40 mb-6 ml-[42px]">
-                使用 TradingAgents 多智能体系统进行深度投资研究
+                Deep investment research powered by TradingAgents multi-agent system
               </p>
 
               {/* 功能列表 */}
@@ -97,7 +97,7 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                 }}
               >
                 <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: "#00c8ff" }} />
-                <span style={{ color: "#00c8ff" }}>首次注册赠送 5 Credits，立即开始 AI 分析</span>
+                <span style={{ color: "#00c8ff" }}>Get 5 free Credits on signup — start AI analysis now</span>
               </div>
 
               {/* 按钮组 */}
@@ -111,13 +111,13 @@ export function LoginUnlockModal({ open, onClose }: Props) {
                     color: "#fff",
                   }}
                 >
-                  免费注册 · 获取 5 Credits
+                  Sign up free · Get 5 Credits
                 </button>
                 <button
                   onClick={goLogin}
                   className="w-full py-2.5 rounded-xl text-xs font-mono text-white/40 hover:text-white/60 hover:bg-white/[0.03] transition-all border border-white/[0.06]"
                 >
-                  已有账号，直接登录
+                  Already have an account? Sign in
                 </button>
               </div>
             </div>

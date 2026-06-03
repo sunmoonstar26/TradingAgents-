@@ -40,11 +40,16 @@ function FlowBadge({ flow }: { flow: SectorFlow["flow"] }) {
     "→ 平稳": "text-[var(--text-secondary)] bg-[var(--text-secondary)]/10",
     "↘ 走弱": "text-[var(--amber)] bg-[var(--amber)]/10",
     "↓ 流出": "text-[var(--red)] bg-[var(--red)]/10",
+    "↑ Strong":    "text-[var(--green)] bg-[var(--green)]/10",
+    "↗ Improving": "text-[var(--blue)] bg-[var(--blue)]/10",
+    "→ Stable":    "text-[var(--text-secondary)] bg-[var(--text-secondary)]/10",
+    "↘ Weakening": "text-[var(--amber)] bg-[var(--amber)]/10",
+    "↓ Outflow":   "text-[var(--red)] bg-[var(--red)]/10",
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${styles[flow] || styles["→ 平稳"]}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${styles[flow] || styles["→ Stable"] || styles["→ 平稳"]}`}
     >
       {flow}
     </span>
@@ -62,17 +67,17 @@ export function SectorHeatmap({ data }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.35 }}
     >
-      <h2 className="section-heading">板块资金流向</h2>
+      <h2 className="section-heading">Sector Capital Flow</h2>
 
       {/* 桌面端：列表/表格 */}
       <div className="hidden md:block card-terminal overflow-hidden !p-0">
         <div className="divide-y divide-[var(--border-custom)]">
           {/* 表头 */}
           <div className="flex items-center px-6 py-3 text-[11px] font-medium text-[var(--text-secondary)]">
-            <span className="w-32 shrink-0">板块</span>
-            <span className="w-28 shrink-0">资金流向</span>
-            <span className="flex-1">动量指数</span>
-            <span className="w-20 shrink-0 text-right">变化</span>
+            <span className="w-32 shrink-0">Sector</span>
+            <span className="w-28 shrink-0">Capital Flow</span>
+            <span className="flex-1">Momentum</span>
+            <span className="w-20 shrink-0 text-right">Change</span>
           </div>
           {/* 数据行 */}
           {data.map((sector, idx) => (

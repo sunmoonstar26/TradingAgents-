@@ -28,16 +28,16 @@ export function PortfolioDecision({ data, ticker, tradingInsight }: Props) {
       transition={{ duration: 0.4, delay: 0.3 }}
     >
       <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-        仓位决策框架
+        Position Decision Framework
       </h2>
 
       <div className="card-terminal !p-0 overflow-hidden h-[320px] md:h-[400px] flex flex-col">
         {/* 头部 */}
         <div className="px-4 py-3 border-b border-[var(--border-custom)] flex items-center gap-2 shrink-0">
           <Target className="w-4 h-4 text-[var(--blue)]" />
-          <span className="text-[13px] font-semibold text-[var(--text-primary)]">仓位决策</span>
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">Position Decision</span>
           <span className="ml-auto text-[10px] font-mono text-[var(--text-secondary)]/60">
-            {confidence}% 置信度
+            {confidence}% confidence
           </span>
         </div>
 
@@ -45,7 +45,7 @@ export function PortfolioDecision({ data, ticker, tradingInsight }: Props) {
           {/* 建议仓位 + 核心理由 */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="text-center p-3 rounded-xl bg-[var(--blue)]/5 border border-[var(--blue)]/10">
-              <div className="text-[10px] text-[var(--text-secondary)]/60 mb-1">建议仓位</div>
+              <div className="text-[10px] text-[var(--text-secondary)]/60 mb-1">Suggested Exposure</div>
               <div className="text-2xl font-mono font-bold text-[var(--blue)]">{suggested}</div>
             </div>
             <div className="sm:col-span-2 flex flex-col justify-center">
@@ -72,9 +72,9 @@ export function PortfolioDecision({ data, ticker, tradingInsight }: Props) {
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--green)] mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-[var(--text-secondary)]/60 mb-0.5">持仓理由</p>
+                <p className="text-[11px] text-[var(--text-secondary)]/60 mb-0.5">Thesis</p>
                 <p className="text-[12px] text-[var(--text-primary)] font-medium leading-snug">
-                  {increaseConds[0] || data.sizingFactors.positive[0] || "AI 趋势仍占主导"}
+                  {increaseConds[0] || data.sizingFactors.positive[0] || "AI trend remains dominant"}
                 </p>
               </div>
             </motion.div>
@@ -88,9 +88,9 @@ export function PortfolioDecision({ data, ticker, tradingInsight }: Props) {
             >
               <AlertTriangle className="w-3.5 h-3.5 text-[var(--amber)] mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-[var(--text-secondary)]/60 mb-0.5">风险回报</p>
+                <p className="text-[11px] text-[var(--text-secondary)]/60 mb-0.5">Risk / Reward</p>
                 <p className="text-[12px] text-[var(--text-primary)] font-medium leading-snug">
-                  {reduceConds[0] || data.sizingFactors.negative[0] || "风险回报尚可接受"}
+                  {reduceConds[0] || data.sizingFactors.negative[0] || "Risk/reward acceptable"}
                 </p>
               </div>
             </motion.div>
@@ -104,9 +104,9 @@ export function PortfolioDecision({ data, ticker, tradingInsight }: Props) {
             >
               <Shield className="w-3.5 h-3.5 text-[var(--blue)] mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-[var(--text-secondary)]/60 mb-0.5">防御策略</p>
+                <p className="text-[11px] text-[var(--text-secondary)]/60 mb-0.5">Hedge Strategy</p>
                 <p className="text-[12px] text-[var(--text-primary)] font-medium leading-snug">
-                  {hedgeConds[0] || "保持充足现金储备"}
+                  {hedgeConds[0] || "Maintain adequate cash reserves"}
                 </p>
               </div>
             </motion.div>
@@ -118,7 +118,7 @@ export function PortfolioDecision({ data, ticker, tradingInsight }: Props) {
           className="flex items-center justify-center gap-1.5 py-2.5 border-t border-[var(--border-custom)] text-[11px] text-[var(--blue)]/70 hover:text-[var(--blue)] hover:bg-[var(--blue)]/5 transition-colors font-medium shrink-0"
         >
           <FileText className="w-3 h-3" />
-          查看完整交易计划
+          View Full Trading Plan
           <ChevronRight className="w-3 h-3" />
         </Link>
       </div>
