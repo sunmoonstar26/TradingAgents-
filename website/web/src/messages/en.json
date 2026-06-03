@@ -100,7 +100,20 @@
     "feature1": "Multi-Agent Real-time Debate",
     "feature2": "AI Deep Research Report",
     "feature3": "Dynamic Risk Simulation",
-    "feature4": "Historical Analysis Records"
+    "feature4": "Historical Analysis Records",
+    "resetTitle": "Reset Password",
+    "resetSubtitle": "Set your new password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "newPasswordPlaceholder": "At least 6 characters",
+    "confirmPasswordPlaceholder": "Re-enter password",
+    "updating": "Updating...",
+    "updatePassword": "Update Password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "resetFailed": "Reset failed, please try again",
+    "resetSuccess": "Password updated, redirecting to sign in...",
+    "verifyingLink": "Verifying link..."
   },
   "settings": {
     "pageTitle": "Settings",

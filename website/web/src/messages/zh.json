@@ -100,7 +100,20 @@
     "feature1": "多 Agent 实时辩论",
     "feature2": "AI 深度研究报告",
     "feature3": "风险动态推演",
-    "feature4": "历史分析记录"
+    "feature4": "历史分析记录",
+    "resetTitle": "重置密码",
+    "resetSubtitle": "设置你的新密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认密码",
+    "newPasswordPlaceholder": "至少 6 位",
+    "confirmPasswordPlaceholder": "再次输入密码",
+    "updating": "更新中...",
+    "updatePassword": "更新密码",
+    "passwordMismatch": "两次密码不一致",
+    "passwordTooShort": "密码至少 6 位",
+    "resetFailed": "重置失败，请重试",
+    "resetSuccess": "密码已更新，正在跳转登录...",
+    "verifyingLink": "正在验证链接..."
   },
   "settings": {
     "pageTitle": "设置",

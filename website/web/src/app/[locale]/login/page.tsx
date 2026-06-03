@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "../../components/layout/header";
+import { Header } from "../../../components/layout/header";
 import { Zap, ArrowRight } from "lucide-react";
-import { useAuth } from "../../lib/auth";
+import { useAuth } from "../../../lib/auth";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoggedIn } = useAuth();
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,7 +30,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "登录失败，请检查邮箱和密码");
+      setError(err instanceof Error ? err.message : t("signingIn"));
     } finally {
       setLoading(false);
     }
@@ -59,13 +61,13 @@ export default function LoginPage() {
             <div className="px-8 py-8">
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
-                <h1 className="text-base font-bold text-white">登录 TradingAgents</h1>
+                <h1 className="text-base font-bold text-white">{t("loginTitle")}</h1>
               </div>
-              <p className="text-xs text-white/40 font-mono mb-7">AI 投资委员会工作台</p>
+              <p className="text-xs text-white/40 font-mono mb-7">{t("loginSubtitle")}</p>
 
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">邮箱</label>
+                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("email")}</label>
                   <input
                     type="email"
                     value={email}
@@ -80,7 +82,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">密码</label>
+                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("password")}</label>
                   <input
                     type="password"
                     value={password}
@@ -103,7 +105,7 @@ export default function LoginPage() {
                     boxShadow: "0 0 20px rgba(0,200,255,0.2)",
                   }}
                 >
-                  {loading ? "登录中..." : "登录"}
+                  {loading ? t("signingIn") : t("signIn")}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
                 {error && (
@@ -112,13 +114,13 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-5 pt-5 border-t border-white/[0.06] text-center">
-                <span className="text-[11px] text-white/30 font-mono">还没有账号？</span>
+                <span className="text-[11px] text-white/30 font-mono">{t("hasAccount")}</span>
                 <button
                   onClick={() => router.push("/register")}
                   className="ml-1.5 text-[11px] font-mono transition-colors"
                   style={{ color: "#00c8ff" }}
                 >
-                  免费注册 · 赠 5 Credits
+                  {t("registerLink")}
                 </button>
               </div>
             </div>

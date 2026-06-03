@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Header } from "../../components/layout/header";
+import { Header } from "../../../components/layout/header";
 import { Zap, ArrowRight } from "lucide-react";
-import { createClient } from "../../lib/supabase";
+import { createClient } from "../../../lib/supabase";
+import { useTranslations } from "next-intl";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const t = useTranslations("auth");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -34,11 +36,11 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError("");
     if (password !== confirm) {
-      setError("两次密码不一致");
+      setError(t("passwordMismatch"));
       return;
     }
     if (password.length < 6) {
-      setError("密码至少 6 位");
+      setError(t("passwordTooShort"));
       return;
     }
     setLoading(true);
@@ -49,7 +51,7 @@ export default function ResetPasswordPage() {
       setDone(true);
       setTimeout(() => router.push("/login"), 2000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "重置失败，请重试");
+      setError(err instanceof Error ? err.message : t("resetFailed"));
     } finally {
       setLoading(false);
     }
@@ -80,39 +82,39 @@ export default function ResetPasswordPage() {
             <div className="px-8 py-8">
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
-                <h1 className="text-base font-bold text-white">重置密码</h1>
+                <h1 className="text-base font-bold text-white">{t("resetTitle")}</h1>
               </div>
-              <p className="text-xs text-white/40 font-mono mb-7">设置你的新密码</p>
+              <p className="text-xs text-white/40 font-mono mb-7">{t("resetSubtitle")}</p>
 
               {done ? (
                 <p className="text-sm font-mono text-center" style={{ color: "#00c8ff" }}>
-                  ✓ 密码已更新，正在跳转登录...
+                  ✓ {t("resetSuccess")}
                 </p>
               ) : !ready ? (
                 <p className="text-xs text-white/40 font-mono text-center">
-                  正在验证链接...
+                  {t("verifyingLink")}
                 </p>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div>
-                    <label className="block text-[11px] text-white/40 font-mono mb-1.5">新密码</label>
+                    <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("newPassword")}</label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="至少 6 位"
+                      placeholder={t("newPasswordPlaceholder")}
                       className="w-full h-11 px-4 rounded-xl text-sm font-mono text-white placeholder:text-white/15 focus:outline-none transition-all"
                       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-white/40 font-mono mb-1.5">确认密码</label>
+                    <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("confirmPassword")}</label>
                     <input
                       type="password"
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
-                      placeholder="再次输入密码"
+                      placeholder={t("confirmPasswordPlaceholder")}
                       className="w-full h-11 px-4 rounded-xl text-sm font-mono text-white placeholder:text-white/15 focus:outline-none transition-all"
                       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                       required
@@ -127,7 +129,7 @@ export default function ResetPasswordPage() {
                       boxShadow: "0 0 20px rgba(0,200,255,0.2)",
                     }}
                   >
-                    {loading ? "更新中..." : "更新密码"}
+                    {loading ? t("updating") : t("updatePassword")}
                     {!loading && <ArrowRight className="w-4 h-4" />}
                   </button>
                   {error && (
