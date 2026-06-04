@@ -28,7 +28,10 @@ export function AIResearchConsole() {
   const t = useTranslations("dashboard");
   const tMarket = useTranslations("market");
   const marketLabels: Record<Market, string> = { US: tMarket("usStocks"), HK: tMarket("hkStocks"), CN: tMarket("aShares") };
-  const modeLabels: Record<AnalysisMode, string> = { standard: "标准分析", deep: "深度研究" };
+  const modeLabels: Record<AnalysisMode, string> = {
+    standard: t("analysisMode.standard"),
+    deep: t("analysisMode.deep"),
+  };
   const { isLoggedIn, ready, user, deductCredit } = useAuth();  const [query, setQuery] = useState("");
   const [selectedStock, setSelectedStock] = useState<StockEntry | null>(null);
   const [market, setMarket] = useState<Market>("US");
@@ -190,7 +193,7 @@ export function AIResearchConsole() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[var(--green)] pulse-green" />
             <span className="text-[10px] text-[var(--green)]/80 font-mono">
-              AI 智能体就绪
+              {t("agentsReady")}
             </span>
           </div>
         </div>
