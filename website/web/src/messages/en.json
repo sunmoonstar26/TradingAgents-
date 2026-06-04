@@ -10,7 +10,9 @@
     "logout": "Sign Out",
     "modelOnline": "Model Online",
     "login": "Sign In",
-    "getCredits": "Get Credits"
+    "getCredits": "Get Credits",
+    "brandTagline": "AI Trading Terminal",
+    "secsAgo": "{n}s ago"
   },
   "dashboard": {
     "marketStatus": "Global Market Status",
@@ -61,7 +63,12 @@
     "colRisk": "Risk",
     "colConsensus": "Consensus",
     "colPosition": "Position",
-    "colUpdated": "Updated"
+    "colUpdated": "Updated",
+    "analysisMode": {
+      "standard": "Standard Analysis",
+      "deep": "Deep Research"
+    },
+    "agentsReady": "AI Agents Ready"
   },
   "market": {
     "usStocks": "US Stocks",

@@ -10,7 +10,9 @@
     "logout": "登出",
     "modelOnline": "模型在线",
     "login": "登录",
-    "getCredits": "获取 Credits"
+    "getCredits": "获取 Credits",
+    "brandTagline": "AI 交易终端",
+    "secsAgo": "{n}s 前"
   },
   "dashboard": {
     "marketStatus": "全球市场状态",
@@ -61,7 +63,12 @@
     "colRisk": "风险",
     "colConsensus": "共识",
     "colPosition": "建议仓位",
-    "colUpdated": "更新"
+    "colUpdated": "更新",
+    "analysisMode": {
+      "standard": "标准分析",
+      "deep": "深度研究"
+    },
+    "agentsReady": "AI 智能体就绪"
   },
   "market": {
     "usStocks": "美股",
