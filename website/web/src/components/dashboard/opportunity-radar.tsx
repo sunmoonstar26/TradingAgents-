@@ -192,7 +192,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     fundamental: false, technical: false, sentiment: false, macro: false, risk: false,
                   };
                   (d.agentAnalyses || []).forEach((a: { personality: string; signal: string }) => {
-                    const bullish = ["强烈买入", "买入", "增持"].includes(a.signal);
+                    const bullish = [Signal.STRONG_BUY, Signal.BUY].includes(a.signal as Signal);
                     if (a.personality === "fundamental") agentAlignment.fundamental = bullish;
                     if (a.personality === "technical") agentAlignment.technical = bullish;
                     if (a.personality === "sentiment") agentAlignment.sentiment = bullish;
@@ -340,7 +340,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     if (d) {
                       const agentAlignment = { fundamental: false, technical: false, sentiment: false, macro: false, risk: false };
                       (d.agentAnalyses || []).forEach((a: { personality: string; signal: string }) => {
-                        const bullish = ["强烈买入", "买入", "增持"].includes(a.signal);
+                        const bullish = [Signal.STRONG_BUY, Signal.BUY].includes(a.signal as Signal);
                         if (a.personality === "fundamental") agentAlignment.fundamental = bullish;
                         if (a.personality === "technical") agentAlignment.technical = bullish;
                         if (a.personality === "sentiment") agentAlignment.sentiment = bullish;
