@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState, useRef } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "../../lib/auth";
 import { Zap } from "lucide-react";
 
@@ -11,23 +11,30 @@ const TIME_FMT: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit
 /** 顶部导航栏 — AI 对冲基金操作系统风格 */
 export function Header() {
   const [time, setTime] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+  const lastUpdateRef = useRef(Date.now());
   const { user, ready, logout } = useAuth();
   const t = useTranslations("nav");
   const td = useTranslations("dashboard");
+  const locale = useLocale();
 
   useEffect(() => {
-    const tick = () => setTime(new Date().toLocaleTimeString("zh-CN", TIME_FMT));
-    const elapsed = 1000 - (Date.now() % 1000);
+    const intlLocale = locale === "zh" ? "zh-CN" : "en-US";
+    const tick = () => {
+      setTime(new Date().toLocaleTimeString(intlLocale, TIME_FMT));
+      setElapsed(Math.floor((Date.now() - lastUpdateRef.current) / 1000));
+    };
+    const delay = 1000 - (Date.now() % 1000);
     let interval: ReturnType<typeof setInterval> | null = null;
     const timeout = setTimeout(() => {
       tick();
       interval = setInterval(tick, 1000);
-    }, elapsed);
+    }, delay);
     return () => {
       clearTimeout(timeout);
       if (interval) clearInterval(interval);
     };
-  }, []);
+  }, [locale]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border-custom)] bg-[var(--bg)]/95 backdrop-blur-md">
@@ -38,7 +45,7 @@ export function Header() {
             TradingAgents
           </span>
           <span className="hidden sm:inline text-xs text-[var(--text-secondary)] font-mono">
-            AI 交易终端
+            {t("brandTagline")}
           </span>
         </Link>
 
@@ -54,7 +61,7 @@ export function Header() {
           <span className="text-[var(--amber)] font-semibold">2</span>
           <span className="w-px h-3 bg-[var(--border-custom)]" />
           <span className="text-[var(--text-secondary)]">{td("consensusUpdate")}</span>
-          <span className="text-[var(--text-primary)]">14s 前</span>
+          <span className="text-[var(--text-primary)]">{t("secsAgo", { n: elapsed })}</span>
         </div>
 
         {/* 右侧：登录态 / 未登录态 */}
