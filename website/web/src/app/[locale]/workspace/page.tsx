@@ -9,21 +9,21 @@ import { ArrowLeft, Zap, Star, Clock, TrendingUp, Shield, AlertTriangle, Lock, B
 import { useAuth } from "../../../lib/auth";
 import { getCustomRadarEntries } from "../../../lib/radar-store";
 import { OpportunityEntry } from "../../../types";
+import { Signal } from "../../../types/enums";
 
-const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
-  强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
-  买入:     { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
-  增持:     { color: "#3b82f6", bg: "rgba(59,130,246,0.1)", icon: TrendingUp },
-  持有:     { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
-  减持:     { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
-  卖出:     { color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
+const signalConfig: Record<Signal, { color: string; bg: string; icon: typeof TrendingUp }> = {
+  [Signal.STRONG_BUY]: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
+  [Signal.BUY]:        { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
+  [Signal.HOLD]:       { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
+  [Signal.SELL]:       { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
+  [Signal.STRONG_SELL]:{ color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
 };
 
 const RECENT_ANALYSES = [
-  { ticker: "NVDA", name: "NVIDIA",    signal: "强烈买入", conviction: 84, analyzedAt: "Today 09:15" },
-  { ticker: "TSLA", name: "Tesla",     signal: "增持",     conviction: 72, analyzedAt: "Today 08:42" },
-  { ticker: "META", name: "Meta",      signal: "买入",     conviction: 76, analyzedAt: "Yesterday 15:30" },
-  { ticker: "PLTR", name: "Palantir",  signal: "增持",     conviction: 69, analyzedAt: "Yesterday 11:05" },
+  { ticker: "NVDA", name: "NVIDIA",   signal: Signal.STRONG_BUY, conviction: 84, analyzedAt: "Today 09:15" },
+  { ticker: "TSLA", name: "Tesla",    signal: Signal.BUY,        conviction: 72, analyzedAt: "Today 08:42" },
+  { ticker: "META", name: "Meta",     signal: Signal.BUY,        conviction: 76, analyzedAt: "Yesterday 15:30" },
+  { ticker: "PLTR", name: "Palantir", signal: Signal.BUY,        conviction: 69, analyzedAt: "Yesterday 11:05" },
 ];
 
 export default function WorkspacePage() {
@@ -38,7 +38,7 @@ export default function WorkspacePage() {
     }
   }, [ready, isLoggedIn]);
 
-  const bullishCount = radarEntries.filter(e => ["强烈买入", "买入", "增持"].includes(e.signal)).length;
+  const bullishCount = radarEntries.filter(e => [Signal.STRONG_BUY, Signal.BUY].includes(e.signal as Signal)).length;
   const avgConviction = radarEntries.length
     ? Math.round(radarEntries.reduce((s, e) => s + e.conviction, 0) / radarEntries.length)
     : 0;
@@ -146,7 +146,7 @@ export default function WorkspacePage() {
                 </div>
                 <ul className="space-y-2.5">
                   {RECENT_ANALYSES.map((a) => {
-                    const cfg = signalConfig[a.signal] ?? signalConfig["持有"];
+                    const cfg = signalConfig[a.signal as Signal] ?? signalConfig[Signal.HOLD];
                     const Icon = cfg.icon;
                     return (
                       <li key={a.ticker}
@@ -198,7 +198,7 @@ export default function WorkspacePage() {
                 ) : (
                   <ul className="space-y-2.5">
                     {radarEntries.slice(0, 4).map((e) => {
-                      const cfg = signalConfig[e.signal] ?? signalConfig["持有"];
+                      const cfg = signalConfig[e.signal as Signal] ?? signalConfig[Signal.HOLD];
                       const Icon = cfg.icon;
                       return (
                         <li key={e.ticker}
