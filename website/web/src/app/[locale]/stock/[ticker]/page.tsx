@@ -1,6 +1,6 @@
 "use client";
 
-import { RiskLevel } from "@/types/enums";
+import { RiskLevel, Signal } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
@@ -213,7 +213,7 @@ export default function StockDetailPage() {
       fundamental: false, technical: false, sentiment: false, macro: false, risk: false,
     };
     (d.agentAnalyses || []).forEach((a) => {
-      const bullish = ["强烈买入", "买入", "增持"].includes(a.signal);
+      const bullish = [Signal.STRONG_BUY, Signal.BUY].includes(a.signal as Signal);
       if (a.personality === "fundamental") agentAlignment.fundamental = bullish;
       if (a.personality === "technical") agentAlignment.technical = bullish;
       if (a.personality === "sentiment") agentAlignment.sentiment = bullish;
