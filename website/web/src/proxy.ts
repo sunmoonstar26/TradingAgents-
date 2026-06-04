@@ -4,6 +4,10 @@ export function middleware(req: NextRequest) {
   const locale = process.env.LOCALE ?? "en";
   const validLocale = ["en", "zh"].includes(locale) ? locale : "en";
 
+  if (req.nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL(`/${validLocale}/`, req.url));
+  }
+
   const res = NextResponse.next();
   res.cookies.set("NEXT_LOCALE", validLocale, {
     path: "/",
