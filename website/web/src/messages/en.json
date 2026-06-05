@@ -41,6 +41,7 @@
     "memoPrimaryRisk": "Primary Risk",
     "memoAddPlaceholder": "Add stock...",
     "memoSearchHint": "Search stock to add",
+    "memoCount": "{count} holdings",
     "featuredTitle": "Featured Research",
     "featuredSubtitle": "AI Investment Committee curated analysis summaries",
     "featuredPublic": "Public · No login required",
@@ -68,7 +69,18 @@
       "standard": "Standard Analysis",
       "deep": "Deep Research"
     },
-    "agentsReady": "AI Agents Ready"
+    "agentsReady": "AI Agents Ready",
+    "bootStarting": "Starting AI Investment Committee...",
+    "bootStep1": "Connecting to market data",
+    "bootStep2": "Fundamental analysis agent ready",
+    "bootStep3": "Sentiment analysis engine ready",
+    "bootStep4": "Debate system online",
+    "bootStep5": "Position engine ready",
+    "insufficientCredits": "Insufficient Credits",
+    "insufficientCreditsMsg": "Insufficient credits, cannot start analysis",
+    "rechargeNow": "Top Up →",
+    "trending": "Trending",
+    "costNote": "{credits} Credits · -{cost} this run"
   },
   "market": {
     "usStocks": "US Stocks",
@@ -77,6 +89,10 @@
     "aiVolume": "AI Sector Volume",
     "marketRisk": "Market Risk",
     "stable": "Stable",
+    "bullish": "Bullish",
+    "bearish": "Bearish",
+    "caution": "Caution",
+    "danger": "Danger",
     "globalMarketStatus": "Global Market Status",
     "dataDate": "Data Date"
   },

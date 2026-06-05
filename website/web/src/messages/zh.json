@@ -41,6 +41,7 @@
     "memoPrimaryRisk": "主要风险",
     "memoAddPlaceholder": "添加股票...",
     "memoSearchHint": "搜索股票添加",
+    "memoCount": "{count} 只标的",
     "featuredTitle": "热门研究",
     "featuredSubtitle": "AI 投资委员会精选分析摘要",
     "featuredPublic": "公开 · 无需登录",
@@ -68,7 +69,18 @@
       "standard": "标准分析",
       "deep": "深度研究"
     },
-    "agentsReady": "AI 智能体就绪"
+    "agentsReady": "AI 智能体就绪",
+    "bootStarting": "正在启动 AI 投资委员会...",
+    "bootStep1": "连接市场数据",
+    "bootStep2": "基本面分析智能体就绪",
+    "bootStep3": "情绪分析引擎就绪",
+    "bootStep4": "辩论系统在线",
+    "bootStep5": "仓位引擎就绪",
+    "insufficientCredits": "Credits 不足",
+    "insufficientCreditsMsg": "Credits 不足，无法启动分析",
+    "rechargeNow": "立即充值 →",
+    "trending": "热门",
+    "costNote": "{credits} Credits · 本次 -{cost}"
   },
   "market": {
     "usStocks": "美股",
@@ -77,6 +89,10 @@
     "aiVolume": "AI 板块动量",
     "marketRisk": "市场风险",
     "stable": "平稳",
+    "bullish": "看涨",
+    "bearish": "看跌",
+    "caution": "关注",
+    "danger": "危险",
     "globalMarketStatus": "全球市场状态",
     "dataDate": "数据日期"
   },
