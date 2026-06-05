@@ -2,22 +2,21 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { motion } from "framer-motion";
 import { Header } from "../../../components/layout/header";
 import { ArrowLeft, Star, TrendingUp, Shield, AlertTriangle, Trash2, Plus, Lock } from "lucide-react";
 import { useAuth } from "../../../lib/auth";
 import { getCustomRadarEntries, removeFromRadar } from "../../../lib/radar-store";
 import { OpportunityEntry } from "../../../types";
-import { RiskLevel } from "@/types/enums";
+import { RiskLevel, Signal } from "@/types/enums";
 
 const signalConfig: Record<string, { color: string; bg: string; icon: typeof TrendingUp }> = {
-  强烈买入: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
-  买入:     { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
-  增持:     { color: "#3b82f6", bg: "rgba(59,130,246,0.1)", icon: TrendingUp },
-  持有:     { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
-  减持:     { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
-  卖出:     { color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
+  [Signal.STRONG_BUY]: { color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: TrendingUp },
+  [Signal.BUY]:        { color: "#22c55e", bg: "rgba(34,197,94,0.08)", icon: TrendingUp },
+  [Signal.HOLD]:       { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Shield },
+  [Signal.SELL]:       { color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: AlertTriangle },
+  [Signal.STRONG_SELL]:{ color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: AlertTriangle },
 };
 
 function formatDate(iso?: string): string {
@@ -158,7 +157,7 @@ export default function WatchlistPage() {
                   </thead>
                   <tbody>
                     {entries.map((item, idx) => {
-                      const cfg = signalConfig[item.signal] ?? signalConfig["持有"];
+                      const cfg = signalConfig[item.signal] ?? signalConfig[Signal.HOLD];
                       const Icon = cfg.icon;
                       return (
                         <motion.tr
@@ -208,7 +207,7 @@ export default function WatchlistPage() {
             {/* Mobile cards */}
             <div className="flex md:hidden flex-col gap-2">
               {entries.map((item, idx) => {
-                const cfg = signalConfig[item.signal] ?? signalConfig["持有"];
+                const cfg = signalConfig[item.signal] ?? signalConfig[Signal.HOLD];
                 const Icon = cfg.icon;
                 return (
                   <motion.div

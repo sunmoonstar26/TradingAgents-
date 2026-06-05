@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { motion } from "framer-motion";
 import { Header } from "../../../components/layout/header";
 import { ArrowLeft, Zap, Star, Clock, TrendingUp, Shield, AlertTriangle, Lock, BarChart2, Cpu } from "lucide-react";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { motion } from "framer-motion";
 import { Header } from "../../../components/layout/header";
 import { ArrowLeft, TrendingUp, Shield, AlertTriangle, Cpu, Clock, ArrowRight, Lock } from "lucide-react";

@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
 import { Header } from "../../../../../../components/layout/header";
 import { MarkdownContent } from "../../../../../../components/ui/MarkdownContent";

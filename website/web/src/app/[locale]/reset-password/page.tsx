@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { motion } from "framer-motion";
 import { Header } from "../../../components/layout/header";
 import { Zap, ArrowRight } from "lucide-react";
