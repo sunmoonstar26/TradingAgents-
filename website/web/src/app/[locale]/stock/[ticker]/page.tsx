@@ -2,7 +2,8 @@
 
 import { RiskLevel, Signal } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -87,10 +88,10 @@ function AnalysisLauncher({ ticker }: { ticker: string }) {
       });
       const data: AnalysisStartResponse = await res.json();
       if (data.success) {
-        router.push(`/${locale}/analysis/${data.session_id}`);
+        router.push(`/analysis/${data.session_id}`);
       }
     } catch {
-      router.push(`/${locale}/analysis/sess_${ticker.toLowerCase()}_${Date.now()}`);
+      router.push(`/analysis/sess_${ticker.toLowerCase()}_${Date.now()}`);
     }
   }, [ticker, router, stockInfo, BOOT_STEPS, locale]);
 
@@ -241,7 +242,8 @@ export default function StockDetailPage() {
       updatedAt: d.updatedAt || new Date().toISOString(),
     };
 
-    const judgeConfidence: number | undefined = insights.debate?.["裁判"]?.confidence;
+    const judgeDebate = insights.debate?.["judge"] ?? insights.debate?.["裁判"];
+    const judgeConfidence: number | undefined = judgeDebate?.confidence;
     if (judgeConfidence && judgeConfidence > 0) overrides.conviction = judgeConfidence;
 
     const suggestedExposure: string | undefined = insights.trading?.suggested_exposure;
@@ -249,12 +251,12 @@ export default function StockDetailPage() {
 
     if (insights.analysts) {
       const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
-      const bull = analystVerdicts.filter(v => v?.verdict === "看涨").length;
-      const bear = analystVerdicts.filter(v => v?.verdict === "看跌").length;
+      const bull = analystVerdicts.filter(v => v?.verdict === "Bullish" || v?.verdict === "看涨").length;
+      const bear = analystVerdicts.filter(v => v?.verdict === "Bearish" || v?.verdict === "看跌").length;
       const neutral = analystVerdicts.length - bull - bear;
-      const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
-      const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
-      const judgeBear = judgeVerdict.includes("空方") ? 1 : 0;
+      const judgeVerdict = judgeDebate?.verdict ?? "";
+      const judgeBull = (judgeVerdict === "Bull Wins" || judgeVerdict.includes("多方")) ? 1 : 0;
+      const judgeBear = (judgeVerdict === "Bear Wins" || judgeVerdict.includes("空方")) ? 1 : 0;
       const judgeNeutral = 1 - judgeBull - judgeBear;
       overrides.consensus = {
         bullish: bull + judgeBull,
