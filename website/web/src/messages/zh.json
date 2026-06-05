@@ -76,6 +76,7 @@
     "bootStep3": "情绪分析引擎就绪",
     "bootStep4": "辩论系统在线",
     "bootStep5": "仓位引擎就绪",
+    "launchingSession": "启动分析会话...",
     "insufficientCredits": "Credits 不足",
     "insufficientCreditsMsg": "Credits 不足，无法启动分析",
     "rechargeNow": "立即充值 →",

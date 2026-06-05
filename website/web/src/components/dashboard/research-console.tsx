@@ -510,7 +510,7 @@ export function AIResearchConsole() {
                   className="mt-7 pt-5 border-t border-[rgba(80,120,255,0.1)] text-center"
                 >
                   <span className="text-xs text-[var(--green)]/80 font-mono">
-                    启动分析会话...
+                    {t("launchingSession")}
                   </span>
                 </motion.div>
               )}

@@ -76,6 +76,7 @@
     "bootStep3": "Sentiment analysis engine ready",
     "bootStep4": "Debate system online",
     "bootStep5": "Position engine ready",
+    "launchingSession": "Launching analysis session...",
     "insufficientCredits": "Insufficient Credits",
     "insufficientCreditsMsg": "Insufficient credits, cannot start analysis",
     "rechargeNow": "Top Up →",
