@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
 import { TrendingUp, Shield, AlertTriangle, Zap, ArrowRight } from "lucide-react";
 import { Signal } from "../../types/enums";

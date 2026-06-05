@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
 import { OpportunityEntry, StockEntry, ConsensusBreakdown } from "../../types";
 import { Signal, RiskLevel } from "../../types/enums";
@@ -230,18 +230,19 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 const insightsData = await insightsRes.json();
                 const insights = insightsData?.data;
                 // 从 insights 计算真实共识、置信度、建议仓位
-                const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                const judgeDebate = insights?.debate?.["judge"] ?? insights?.debate?.["裁判"];
+                const judgeConfidence: number | undefined = judgeDebate?.confidence;
                 const suggestedExposure: string | undefined = insights?.trading?.suggested_exposure;
                 let realConsensus: ConsensusBreakdown | undefined;
                 if (insights?.analysts) {
                   const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
-                  const bull = analystVerdicts.filter(v => v?.verdict === "看涨").length;
-                  const bear = analystVerdicts.filter(v => v?.verdict === "看跌").length;
+                  const bull = analystVerdicts.filter(v => v?.verdict === "Bullish" || v?.verdict === "看涨").length;
+                  const bear = analystVerdicts.filter(v => v?.verdict === "Bearish" || v?.verdict === "看跌").length;
                   const neutral = analystVerdicts.length - bull - bear;
                   // 裁判方向
-                  const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
-                  const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
-                  const judgeBear = judgeVerdict.includes("空方") ? 1 : 0;
+                  const judgeVerdict = judgeDebate?.verdict ?? "";
+                  const judgeBull = (judgeVerdict === "Bull Wins" || judgeVerdict.includes("多方")) ? 1 : 0;
+                  const judgeBear = (judgeVerdict === "Bear Wins" || judgeVerdict.includes("空方")) ? 1 : 0;
                   const judgeNeutral = 1 - judgeBull - judgeBear;
                   realConsensus = {
                     bullish: bull + judgeBull,
@@ -378,17 +379,18 @@ export function OpportunityRadar({ data, onSave }: Props) {
                     const insightsData = await insightsRes.json();
                     const insights = insightsData?.data;
                     // 从 insights 计算真实共识、置信度、建议仓位
-                    const judgeConfidence: number | undefined = insights?.debate?.["裁判"]?.confidence;
+                    const judgeDebate2 = insights?.debate?.["judge"] ?? insights?.debate?.["裁判"];
+                    const judgeConfidence: number | undefined = judgeDebate2?.confidence;
                     const suggestedExposure: string | undefined = insights?.trading?.suggested_exposure;
                     let realConsensus: ConsensusBreakdown | undefined;
                     if (insights?.analysts) {
                       const analystVerdicts = Object.values(insights.analysts) as { verdict?: string }[];
-                      const bull = analystVerdicts.filter(v => v?.verdict === "看涨").length;
-                      const bear = analystVerdicts.filter(v => v?.verdict === "看跌").length;
+                      const bull = analystVerdicts.filter(v => v?.verdict === "Bullish" || v?.verdict === "看涨").length;
+                      const bear = analystVerdicts.filter(v => v?.verdict === "Bearish" || v?.verdict === "看跌").length;
                       const neutral = analystVerdicts.length - bull - bear;
-                      const judgeVerdict = insights.debate?.["裁判"]?.verdict ?? "";
-                      const judgeBull = judgeVerdict.includes("多方") ? 1 : 0;
-                      const judgeBear = judgeVerdict.includes("空方") ? 1 : 0;
+                      const judgeVerdict = judgeDebate2?.verdict ?? "";
+                      const judgeBull = (judgeVerdict === "Bull Wins" || judgeVerdict.includes("多方")) ? 1 : 0;
+                      const judgeBear = (judgeVerdict === "Bear Wins" || judgeVerdict.includes("空方")) ? 1 : 0;
                       const judgeNeutral = 1 - judgeBull - judgeBear;
                       realConsensus = {
                         bullish: bull + judgeBull,
@@ -582,10 +584,10 @@ export function OpportunityRadar({ data, onSave }: Props) {
                         <Plus className="w-3.5 h-3.5 text-[var(--text-secondary)]/30 shrink-0" />
                         <input
                           type="text" value={addQuery} onChange={(e) => handleAddSearch(e.target.value)}
-                          placeholder="添加股票..."
+                          placeholder="Add stock..."
                           className="flex-1 bg-transparent text-xs font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/20 focus:outline-none"
                         />
-                        {editing && <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">{editData.length} 只标的</span>}
+                        {editing && <span className="text-[10px] font-mono text-[var(--text-secondary)]/30">{editData.length} holdings</span>}
                       </div>
                       {addSuggestions.length > 0 && (
                         <div className="absolute top-full mt-1 left-6 right-0 bg-[var(--panel)] border border-[var(--border-custom)] rounded-lg shadow-lg overflow-hidden z-50">
