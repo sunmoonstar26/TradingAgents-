@@ -168,7 +168,12 @@
     "passwordTooShort": "Password must be at least 6 characters",
     "resetFailed": "Reset failed, please try again",
     "resetSuccess": "Password updated, redirecting to sign in...",
-    "verifyingLink": "Verifying link..."
+    "verifyingLink": "Verifying link...",
+    "verifyEmailTitle": "Check your inbox",
+    "verifyEmailSubtitle": "Verification email sent",
+    "verifyEmailBody": "Click the link in the email to activate your account. Check your spam folder if you don't see it.",
+    "verifyEmailHint": "The link expires in 24 hours",
+    "goToSignIn": "Go to Sign In"
   },
   "settings": {
     "pageTitle": "Settings",

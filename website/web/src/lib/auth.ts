@@ -54,9 +54,9 @@ export function useAuth() {
     if (error) throw error;
   }, []);
 
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string): Promise<{ needsVerification: boolean }> => {
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -64,6 +64,8 @@ export function useAuth() {
       },
     });
     if (error) throw error;
+    // session is non-null when email confirmation is disabled in Supabase
+    return { needsVerification: !data.session };
   }, []);
 
   const logout = useCallback(async () => {

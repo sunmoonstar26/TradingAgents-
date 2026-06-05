@@ -168,7 +168,12 @@
     "passwordTooShort": "密码至少 6 位",
     "resetFailed": "重置失败，请重试",
     "resetSuccess": "密码已更新，正在跳转登录...",
-    "verifyingLink": "正在验证链接..."
+    "verifyingLink": "正在验证链接...",
+    "verifyEmailTitle": "查收验证邮件",
+    "verifyEmailSubtitle": "验证邮件已发送",
+    "verifyEmailBody": "点击邮件中的链接激活您的账号。如未收到，请检查垃圾邮件文件夹。",
+    "verifyEmailHint": "链接 24 小时内有效",
+    "goToSignIn": "前往登录"
   },
   "settings": {
     "pageTitle": "设置",
