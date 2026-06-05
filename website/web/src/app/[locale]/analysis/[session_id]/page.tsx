@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -154,7 +155,7 @@ export default function AnalysisPage() {
   useEffect(() => {
     if (isComplete) {
       const timer = setTimeout(() => {
-        router.push(`/${locale}/stock/${tickerFromSession}`);
+        router.push(`/stock/${tickerFromSession}`);
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -184,7 +185,7 @@ export default function AnalysisPage() {
 
       <main className="px-4 md:px-6 py-8 max-w-[900px] mx-auto">
         <button
-          onClick={() => router.push(`/${locale}`)}
+          onClick={() => router.push("/")}
           className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6 font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -241,7 +242,7 @@ export default function AnalysisPage() {
                   {t("analysisFailedDesc")}
                 </p>
                 <button
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push("/")}
                   className="mt-4 px-4 py-1.5 text-xs rounded-lg bg-[var(--red)]/10 text-[var(--red)] hover:bg-[var(--red)]/20 transition-colors"
                 >
                   {t("analysisBackHomeBtn")}
