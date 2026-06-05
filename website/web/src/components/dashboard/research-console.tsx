@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
 import { searchStocks, isValidTickerFormat, inferMarket } from "../../data/stocks";
 import { AnalysisMode, AnalysisStartResponse, Market, StockEntry } from "../../types";
@@ -15,17 +15,17 @@ const MODE_LABELS: Record<AnalysisMode, string> = { standard: "standard", deep: 
 
 const TRENDING = ["NVDA", "TSLA", "META", "PLTR", "AMD"];
 
-const BOOT_STEPS = [
-  "连接市场数据",
-  "基本面分析智能体就绪",
-  "情绪分析引擎就绪",
-  "辩论系统在线",
-  "仓位引擎就绪",
-];
 
 export function AIResearchConsole() {
   const router = useRouter();
   const t = useTranslations("dashboard");
+  const BOOT_STEPS = [
+    t("bootStep1"),
+    t("bootStep2"),
+    t("bootStep3"),
+    t("bootStep4"),
+    t("bootStep5"),
+  ];
   const tMarket = useTranslations("market");
   const marketLabels: Record<Market, string> = { US: tMarket("usStocks"), HK: tMarket("hkStocks"), CN: tMarket("aShares") };
   const modeLabels: Record<AnalysisMode, string> = {
@@ -371,7 +371,7 @@ export function AIResearchConsole() {
                 style={{ height: 48, paddingLeft: 24, paddingRight: 24, minWidth: 160 }}
               >
                 <Zap className="w-3.5 h-3.5" />
-                {!hasEnoughCredits ? "Credits 不足" : t("startAnalysis")}
+                {!hasEnoughCredits ? t("insufficientCredits") : t("startAnalysis")}
               </motion.button>
               {/* Credits 余额提示 */}
               {isLoggedIn && user && (
@@ -384,7 +384,7 @@ export function AIResearchConsole() {
                   <Zap className="w-2.5 h-2.5 shrink-0" style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }} />
                   <span className="text-[10px] font-mono font-medium"
                     style={{ color: !hasEnoughCredits ? "#f59e0b" : "#00c8ff" }}>
-                    {user.credits} Credits · 本次 -{cost}
+                    {t("costNote", { credits: user.credits, cost })}
                   </span>
                 </div>
               )}
@@ -404,13 +404,13 @@ export function AIResearchConsole() {
                   border: "1px solid rgba(245,158,11,0.2)",
                 }}
               >
-                <span style={{ color: "#f59e0b" }}>Credits 不足，无法启动分析</span>
+                <span style={{ color: "#f59e0b" }}>{t("insufficientCreditsMsg")}</span>
                 <button
                   onClick={() => router.push("/billing")}
                   className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all"
                   style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b" }}
                 >
-                  立即充值 →
+                  {t("rechargeNow")}
                 </button>
               </motion.div>
             )}
@@ -418,14 +418,14 @@ export function AIResearchConsole() {
 
           {/* 热门快捷入口 */}
           <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-            <span className="text-[9px] text-white/12 font-mono mr-1">热门</span>
-            {TRENDING.map((t) => (
+            <span className="text-[9px] text-white/12 font-mono mr-1">{t("trending")}</span>
+            {TRENDING.map((ticker) => (
               <button
-                key={t}
-                onClick={() => handleTrending(t)}
+                key={ticker}
+                onClick={() => handleTrending(ticker)}
                 className="px-2.5 py-1 rounded text-[10px] font-mono font-semibold text-white/30 hover:text-[var(--blue)] hover:bg-[var(--blue)]/6 border border-white/[0.03] hover:border-[var(--blue)]/20 transition-all"
               >
-                {t}
+                {ticker}
               </button>
             ))}
           </div>
@@ -466,7 +466,7 @@ export function AIResearchConsole() {
               <div className="flex items-center gap-3 mb-8">
                 <span className="w-2.5 h-2.5 rounded-full bg-[var(--blue)] pulse-blue" />
                 <h2 className="text-sm font-semibold text-white tracking-wider">
-                  正在启动 AI 投资委员会...
+                  {t("bootStarting")}
                 </h2>
               </div>
 
