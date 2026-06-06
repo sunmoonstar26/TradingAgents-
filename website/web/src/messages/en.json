@@ -173,7 +173,16 @@
     "verifyEmailSubtitle": "Verification email sent",
     "verifyEmailBody": "Click the link in the email to activate your account. Check your spam folder if you don't see it.",
     "verifyEmailHint": "The link expires in 24 hours",
-    "goToSignIn": "Go to Sign In"
+    "goToSignIn": "Go to Sign In",
+    "forgotPassword": "Forgot password?",
+    "forgotTitle": "Reset Password",
+    "forgotSubtitle": "Enter your email and we'll send a reset link",
+    "forgotEmail": "Email Address",
+    "forgotSubmit": "Send Reset Link",
+    "forgotSubmitting": "Sending...",
+    "forgotSuccess": "Reset link sent! Check your inbox (and spam folder).",
+    "forgotError": "Failed to send reset link, please try again",
+    "backToSignIn": "Back to Sign In"
   },
   "settings": {
     "pageTitle": "Settings",

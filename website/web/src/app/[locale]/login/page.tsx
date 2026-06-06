@@ -82,7 +82,17 @@ export default function LoginPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("password")}</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] text-white/40 font-mono">{t("password")}</label>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/forgot-password")}
+                      className="text-[11px] font-mono transition-colors"
+                      style={{ color: "#00c8ff" }}
+                    >
+                      {t("forgotPassword")}
+                    </button>
+                  </div>
                   <input
                     type="password"
                     value={password}

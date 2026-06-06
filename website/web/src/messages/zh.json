@@ -173,7 +173,16 @@
     "verifyEmailSubtitle": "验证邮件已发送",
     "verifyEmailBody": "点击邮件中的链接激活您的账号。如未收到，请检查垃圾邮件文件夹。",
     "verifyEmailHint": "链接 24 小时内有效",
-    "goToSignIn": "前往登录"
+    "goToSignIn": "前往登录",
+    "forgotPassword": "忘记密码？",
+    "forgotTitle": "重置密码",
+    "forgotSubtitle": "输入邮箱，我们将发送重置链接",
+    "forgotEmail": "邮箱地址",
+    "forgotSubmit": "发送重置链接",
+    "forgotSubmitting": "发送中...",
+    "forgotSuccess": "重置链接已发送！请查收邮件（也检查垃圾邮件文件夹）。",
+    "forgotError": "发送失败，请重试",
+    "backToSignIn": "返回登录"
   },
   "settings": {
     "pageTitle": "设置",
