@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, isLoggedIn } = useAuth();
+  const { register, login, isLoggedIn } = useAuth();
   const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,13 +36,10 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      const { needsVerification } = await register(email, password);
-      if (needsVerification) {
-        setRegisteredEmail(email);
-        setDone(true);
-      } else {
-        router.replace("/login");
-      }
+      await register(email, password);
+      // 注册成功后直接登录
+      await login(email, password);
+      router.replace("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("registerError"));
     } finally {

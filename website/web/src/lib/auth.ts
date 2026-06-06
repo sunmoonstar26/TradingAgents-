@@ -55,17 +55,14 @@ export function useAuth() {
   }, []);
 
   const register = useCallback(async (email: string, password: string): Promise<{ needsVerification: boolean }> => {
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/en/reset-password`,
-      },
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
-    if (error) throw error;
-    // session is non-null when email confirmation is disabled in Supabase
-    return { needsVerification: !data.session };
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Registration failed");
+    return { needsVerification: false };
   }, []);
 
   const logout = useCallback(async () => {
