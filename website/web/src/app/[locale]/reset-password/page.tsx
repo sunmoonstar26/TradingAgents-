@@ -39,7 +39,6 @@ export default function ResetPasswordPage() {
       const refreshToken = hash.get("refresh_token");
       if (accessToken && refreshToken) {
         const { data: sessionData, error: sessionError } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-        console.log("[reset] setSession result:", sessionData?.session?.user?.email, sessionError?.message);
         if (!sessionError && sessionData.session) { setReady(true); return; }
       }
 
@@ -67,8 +66,6 @@ export default function ResetPasswordPage() {
     setLoading(true);
     try {
       const supabase = supabaseRef.current ?? createClient();
-      const { data: check } = await supabase.auth.getSession();
-      console.log("[reset] session before updateUser:", check?.session?.user?.email ?? "NONE");
       const { error: err } = await supabase.auth.updateUser({ password });
       if (err) throw err;
       setDone(true);
