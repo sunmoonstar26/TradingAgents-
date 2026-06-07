@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,8 +14,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
+  // 用请求的 host 动态构造 redirectTo，避免 localhost 在生产环境导致 Supabase 拒绝跳转
+  const headersList = headers();
+  const host = headersList.get("host") ?? "localhost:3001";
+  const proto = headersList.get("x-forwarded-proto") ?? "http";
+  const origin = `${proto}://${host}`;
+
   const lang = locale === "zh" ? "zh" : "en";
-  const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001"}/${lang}/reset-password`;
+  const redirectTo = `${origin}/${lang}/reset-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo,
