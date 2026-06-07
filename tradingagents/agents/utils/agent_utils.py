@@ -71,8 +71,8 @@ def create_msg_delete():
         # Remove all messages
         removal_operations = [RemoveMessage(id=m.id) for m in messages]
 
-        # Add a minimal placeholder message
-        placeholder = HumanMessage(content="Continue")
+        # Add a minimal placeholder message (空格而非 "Continue"，避免 LLM 将其输出到报告中)
+        placeholder = HumanMessage(content=" ")
 
         return {"messages": removal_operations + [placeholder]}
 
