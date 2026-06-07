@@ -47,13 +47,13 @@ UVICORN_PID=$!
 
 # 等待后端就绪
 echo "   Waiting for backend..."
-for i in $(seq 1 15); do
+for i in $(seq 1 30); do
   if curl -s http://localhost:8000/health > /dev/null 2>&1; then
     echo "   ✅ Backend ready"
     break
   fi
   sleep 1
-  if [[ $i -eq 15 ]]; then
+  if [[ $i -eq 30 ]]; then
     echo "   ❌ Backend failed to start"
     exit 1
   fi

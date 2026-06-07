@@ -10,12 +10,21 @@ import os
 import sys
 import threading
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+# 分析线程日志单独写文件，不混入 uvicorn stdout
+_analysis_log = logging.getLogger("tradingagents.analysis")
+_analysis_log.setLevel(logging.INFO)
+_log_handler = logging.FileHandler("/tmp/tradingagents-analysis.log")
+_log_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+_analysis_log.addHandler(_log_handler)
+_analysis_log.propagate = False  # 不传播到 root logger，避免混入 uvicorn 输出
 
 # ── 路径配置 ──
 API_SERVER_DIR = Path(__file__).resolve().parent
@@ -194,7 +203,8 @@ def _run_analysis_thread(
     except Exception as exc:
         import traceback
         err_msg = f"{type(exc).__name__}: {exc}"
-        traceback.print_exc()
+        _analysis_log.error("Analysis thread failed for session %s: %s\n%s",
+                            session_id, err_msg, traceback.format_exc())
         _update_session(session_id,
             status="failed",
             current_step="Analysis failed",
