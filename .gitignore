@@ -229,3 +229,4 @@ reports/
 website/.next/
 website/node_modules/
 website/data/analysis_results/
+.vercel
