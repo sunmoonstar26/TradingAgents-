@@ -1,5 +1,5 @@
 // 内存中的分析会话存储
-// 调用真实 TradingAgents Python 子进程
+// 通过 HTTP 调用 FastAPI 后端（PYTHON_BACKEND_URL）触发分析
 import {
   AnalysisMode,
   AnalysisProgress,
@@ -13,16 +13,13 @@ import {
   clearAnalyzing,
 } from "../lib/result-cache";
 import { mapTAResultToStockDetail, TARawResult } from "../lib/ta-mapper";
-import { exec } from "child_process";
-import path from "path";
-import fs from "fs";
 
 const sessions = new Map<string, AnalysisSession>();
 const activeByTicker = new Map<string, string>();
-const processStarted = new Set<string>(); // session_id → Python 进程已启动
+const processStarted = new Set<string>();
 
-const WEB_DIR = process.cwd();
-const LAUNCH_SCRIPT = path.resolve(WEB_DIR, "..", "scripts", "launch_analysis.sh");
+const BACKEND_URL =
+  process.env.PYTHON_BACKEND_URL ?? "http://localhost:8000";
 
 function defaultProgress(): AnalysisProgress {
   return {
@@ -49,8 +46,6 @@ export function createSession(
   mode: AnalysisMode
 ): AnalysisSession {
   const tickerUpper = ticker.toUpperCase();
-
-  // 同 ticker 已有进行中的 session，直接复用，不重复启动分析进程
   const existing = getActiveSessionByTicker(tickerUpper);
   if (existing) return existing;
 
@@ -146,16 +141,12 @@ function simulateProgress(session_id: string) {
     if (!s || s.status === "completed" || s.status === "failed") return;
 
     if (idx < AGENTS.length) {
-      if (idx > 0) {
-        s.progress[AGENTS[idx - 1]] = "completed";
-      }
+      if (idx > 0) s.progress[AGENTS[idx - 1]] = "completed";
       s.progress[AGENTS[idx]] = "running";
       idx++;
       setTimeout(step, 2000 + Math.random() * 2000);
     } else {
-      for (const agent of AGENTS) {
-        s.progress[agent] = "completed";
-      }
+      for (const agent of AGENTS) s.progress[agent] = "completed";
       s.progress.report = "running";
     }
   };
@@ -169,142 +160,93 @@ export function startRealAnalysis(
 ): void {
   const session = sessions.get(session_id);
   if (!session) return;
-
-  // 幂等：同一 session 不重复启动 Python 进程
   if (processStarted.has(session_id)) return;
   processStarted.add(session_id);
 
   const now = new Date();
-  const analysisDate = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
-  const outputDir = path.resolve(WEB_DIR, "data/analysis_results");
-  const outputFile = path.join(outputDir, `${session_id}.json`);
+  const analysisDate = new Date(now.getTime() - 86400000)
+    .toISOString()
+    .slice(0, 10);
 
-  try {
-    fs.mkdirSync(outputDir, { recursive: true });
-  } catch {}
+  const outputPath = `data/analysis_results/${session_id}.json`;
 
   simulateProgress(session_id);
 
-  const cmd = `bash "${LAUNCH_SCRIPT}" "${ticker}" "${analysisDate}" "${market}" "${outputFile}"`;
-  console.log(`[TradingAgents] 启动: ${cmd}`);
-
-  exec(cmd, { cwd: path.resolve(WEB_DIR, "..") }, (error, stdout, stderr) => {
-    if (stdout) console.log(`[TradingAgents] stdout: ${stdout}`);
-    if (stderr) console.error(`[TradingAgents] stderr: ${stderr}`);
-
-    if (error) {
-      console.warn(`[TradingAgents] launch_analysis.sh 非零退出（可能是 disown 信号，检查 log 文件）:`, error.message);
-      // disown / nohup 在 macOS 下有时让 bash 以非 0 退出，但 Python 进程已在后台运行
-      // 只有在 log 文件也不存在时才真正失败
-      const logFile = outputFile + ".log";
-      if (!fs.existsSync(logFile)) {
-        failSession(session_id, `启动失败: ${error.message}`);
-        return;
-      }
-      console.log(`[TradingAgents] log 文件存在，继续轮询...`);
-    }
-
-    pollForResult(session_id, outputFile, ticker);
-  });
+  fetch(`${BACKEND_URL}/health`)
+    .then((r) => {
+      if (!r.ok) throw new Error(`health check failed: ${r.status}`);
+    })
+    .then(() =>
+      fetch(`${BACKEND_URL}/analysis/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticker,
+          date: analysisDate,
+          market,
+          session_id,
+          output_path: outputPath,
+        }),
+      })
+    )
+    .then((r) => r.json())
+    .then(() => {
+      console.log(`[TradingAgents] 后端已接受分析请求: ${session_id}`);
+      pollForResult(session_id, ticker);
+    })
+    .catch((err: unknown) => {
+      const msg =
+        err instanceof Error ? err.message : String(err);
+      console.error(`[TradingAgents] 后端连接失败:`, msg);
+      failSession(
+        session_id,
+        `Python backend not available (${BACKEND_URL}): ${msg}`
+      );
+    });
 }
 
-function readLogStep(outputFile: string): { step: string; message: string } | null {
-  const logFile = outputFile + ".log";
-  try {
-    if (!fs.existsSync(logFile)) return null;
-    const content = fs.readFileSync(logFile, "utf-8");
-    const lines = content.trim().split("\n");
-    for (let i = lines.length - 1; i >= 0; i--) {
-      try {
-        const obj = JSON.parse(lines[i]);
-        if (obj.type === "status" && obj.step) {
-          return { step: obj.step, message: obj.message || "" };
-        }
-        if (obj.type === "warning") {
-          return { step: "warning", message: obj.message || "" };
-        }
-        if (obj.type === "error") {
-          return { step: "error", message: obj.message || "" };
-        }
-        if (obj.type === "env_check") {
-          return { step: "env_check", message: obj.message || "" };
-        }
-      } catch { continue; }
-    }
-  } catch {}
-  return null;
-}
-
-function stepToMessage(step: string, rawMessage: string): string {
-  const MAP: Record<string, string> = {
-    init: "Initializing analysis engine",
-    started: "Launching multi-agent analysis",
-    running: "Agents analyzing",
-    completed: "Agents done, generating report",
-    extracting_insights: "Extracting AI insights",
-    insights_ready: "Insights ready, writing report",
-    env_check: rawMessage,
-    warning: rawMessage,
-    error: rawMessage,
-  };
-  return MAP[step] || rawMessage || step;
-}
-
-function pollForResult(session_id: string, outputFile: string, ticker: string) {
+function pollForResult(session_id: string, ticker: string) {
   let attempts = 0;
   const maxAttempts = 120;
 
-  const check = () => {
+  const check = async () => {
     attempts++;
     if (attempts > maxAttempts) {
-      const lastStep = readLogStep(outputFile);
-      const detail = lastStep ? `（最后阶段：${stepToMessage(lastStep.step, lastStep.message)}）` : "";
-      const reason = `分析超时（10 分钟未返回）${detail}`;
-      console.error(`[TradingAgents] 超时: ${ticker} ${detail}`);
-      failSession(session_id, reason);
+      failSession(session_id, "Analysis timed out (10 minutes)");
       return;
     }
 
-    const logStep = readLogStep(outputFile);
-    if (logStep) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/analysis/${session_id}`);
+      if (!res.ok) {
+        setTimeout(check, 5000);
+        return;
+      }
+      const data = await res.json();
+
       const s = sessions.get(session_id);
       if (s) {
-        s.current_step = stepToMessage(logStep.step, logStep.message);
-      }
-    }
-
-    try {
-      if (fs.existsSync(outputFile)) {
-        const raw = fs.readFileSync(outputFile, "utf-8");
-        if (raw.trim()) {
-          const result = JSON.parse(raw);
-          if (result.status === "failed" || result.error) {
-            const reason = result.error || "Analysis process returned a failure status";
-            failSession(session_id, reason);
-            console.error(`[TradingAgents] 会话 ${session_id} 失败: ${reason}`);
-            return;
-          }
-          completeSession(session_id, JSON.stringify(result));
-          console.log(`[TradingAgents] 会话 ${session_id} 完成, 信号: ${result.signal}`);
-          return;
+        if (data.current_step) s.current_step = data.current_step;
+        if (data.progress) {
+          s.progress = { ...s.progress, ...data.progress };
         }
       }
+
+      if (data.status === "failed") {
+        failSession(session_id, data.error ?? "Analysis failed");
+        return;
+      }
+
+      if (data.status === "completed" && data.result) {
+        completeSession(session_id, JSON.stringify(data.result));
+        console.log(`[TradingAgents] 完成: ${ticker} ${session_id}`);
+        return;
+      }
+
+      setTimeout(check, 5000);
     } catch {
-      // 文件还在写入中，继续轮询
+      setTimeout(check, 5000);
     }
-
-    const logFile = outputFile + ".log";
-    try {
-      if (fs.existsSync(logFile)) {
-        const logContent = fs.readFileSync(logFile, "utf-8");
-        if (logContent.includes('"step": "completed"')) {
-          setTimeout(() => check(), 1000);
-          return;
-        }
-      }
-    } catch {}
-
-    setTimeout(check, 5000);
   };
 
   setTimeout(check, 2000);
