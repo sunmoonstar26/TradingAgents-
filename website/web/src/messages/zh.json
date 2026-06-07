@@ -166,6 +166,7 @@
     "updatePassword": "更新密码",
     "passwordMismatch": "两次密码不一致",
     "passwordTooShort": "密码至少 6 位",
+    "resetLinkInvalid": "重置链接无效或已过期，请重新申请。",
     "resetFailed": "重置失败，请重试",
     "resetSuccess": "密码已更新，正在跳转登录...",
     "verifyingLink": "正在验证链接...",

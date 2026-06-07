@@ -21,29 +21,147 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
-        setReady(true);
+    async function bootstrap() {
+      // PKCE flow: Supabase 把 code 放在 query string
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) { setReady(true); return; }
       }
-    });
 
-    // getSession 兜底：hash token 已被 createBrowserClient 自动兑换时直接拿到 session
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-    });
+      // Implicit flow: access_token 在 URL hash
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        if (!error) { setReady(true); return; }
+      }
 
-    // 超时兜底：URL hash 里有 token 但事件未触发时，1.5s 后强制显示表单
-    const hash = window.location.hash;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    if (hash.includes("type=recovery") || hash.includes("access_token")) {
-      timer = setTimeout(() => setReady(true), 1500);
+      // 兜底：已有 session（用户在同一浏览器里已登录）
+      const { data } = await supabase.auth.getSession();
+      if (data.session) { setReady(true); return; }
+
+      setError(t("resetLinkInvalid"));
     }
 
-    return () => {
-      subscription.unsubscribe();
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
+    bootstrap();
+  }, [t]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (password !== confirm) {
+      setError(t("passwordMismatch"));
+      return;
+    }
+    if (password.length < 6) {
+      setError(t("passwordTooShort"));
+      return;
+    }
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.updateUser({ password });
+      if (err) throw err;
+      setDone(true);
+      setTimeout(() => router.push("/login"), 2000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("resetFailed"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main className="flex items-center justify-center min-h-[85vh] px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="w-full max-w-sm"
+        >
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{
+              background: "linear-gradient(180deg, rgba(10,18,40,0.98), rgba(5,10,25,0.99))",
+              border: "1px solid rgba(0,140,255,0.15)",
+              boxShadow: "0 0 60px rgba(0,140,255,0.08), 0 4px 32px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div
+              className="w-full h-px"
+              style={{ background: "linear-gradient(90deg, transparent, rgba(0,200,255,0.35), transparent)" }}
+            />
+            <div className="px-8 py-8">
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-4 h-4" style={{ color: "#00c8ff" }} />
+                <h1 className="text-base font-bold text-white">{t("resetTitle")}</h1>
+              </div>
+              <p className="text-xs text-white/40 font-mono mb-7">{t("resetSubtitle")}</p>
+
+              {done ? (
+                <p className="text-sm font-mono text-center" style={{ color: "#00c8ff" }}>
+                  ✓ {t("resetSuccess")}
+                </p>
+              ) : !ready ? (
+                <p className="text-xs text-white/40 font-mono text-center">
+                  {error || t("verifyingLink")}
+                </p>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("newPassword")}</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("newPasswordPlaceholder")}
+                      className="w-full h-11 px-4 rounded-xl text-sm font-mono text-white placeholder:text-white/15 focus:outline-none transition-all"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] text-white/40 font-mono mb-1.5">{t("confirmPassword")}</label>
+                    <input
+                      type="password"
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      placeholder={t("confirmPasswordPlaceholder")}
+                      className="w-full h-11 px-4 rounded-xl text-sm font-mono text-white placeholder:text-white/15 focus:outline-none transition-all"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2 transition-all mt-2 disabled:opacity-60"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(0,140,255,0.9), rgba(0,200,255,0.8))",
+                      boxShadow: "0 0 20px rgba(0,200,255,0.2)",
+                    }}
+                  >
+                    {loading ? t("updating") : t("updatePassword")}
+                    {!loading && <ArrowRight className="w-4 h-4" />}
+                  </button>
+                  {error && (
+                    <p className="text-[11px] text-red-400 font-mono text-center pt-1">{error}</p>
+                  )}
+                </form>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </main>
+    </div>
+  );
+}
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

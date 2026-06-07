@@ -166,6 +166,7 @@
     "updatePassword": "Update Password",
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
+    "resetLinkInvalid": "Reset link is invalid or expired. Please request a new one.",
     "resetFailed": "Reset failed, please try again",
     "resetSuccess": "Password updated, redirecting to sign in...",
     "verifyingLink": "Verifying link...",
