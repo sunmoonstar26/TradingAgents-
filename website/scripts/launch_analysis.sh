@@ -40,3 +40,6 @@ disown $PID 2>/dev/null || true
 echo "{\"pid\": $PID, \"ticker\": \"$TICKER\", \"output\": \"$OUTPUT\"}"
 echo "Started TradingAgents for $TICKER (PID: $PID)" >> "$LOG_FILE"
 exit 0
+
+# DEPRECATED: replaced by website/api-server/main.py (FastAPI HTTP backend)
+# This script is no longer called by analysis-store.ts
