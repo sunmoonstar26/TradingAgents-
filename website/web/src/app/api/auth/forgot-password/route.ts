@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,19 +7,15 @@ const supabase = createClient(
 );
 
 export async function POST(req: Request) {
-  const { email, locale } = await req.json();
+  const { email, locale, origin: clientOrigin } = await req.json();
 
   if (!email) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  // 用请求的 host 动态构造 redirectTo，避免 localhost 在生产环境导致 Supabase 拒绝跳转
-  const headersList = headers();
-  const host = headersList.get("host") ?? "localhost:3001";
-  const proto = headersList.get("x-forwarded-proto") ?? "http";
-  const origin = `${proto}://${host}`;
-
   const lang = locale === "zh" ? "zh" : "en";
+  // 优先用客户端传来的 origin（浏览器 window.location.origin），确保和 Supabase 白名单精确匹配
+  const origin = clientOrigin ?? `https://tradingagents-en.vercel.app`;
   const redirectTo = `${origin}/${lang}/reset-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
