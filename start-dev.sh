@@ -42,7 +42,7 @@ fi
 # 启动 FastAPI
 echo "🚀 Starting Python backend (port 8000)..."
 cd "$API_DIR"
-"$VENV_UVICORN" main:app --port 8000 --reload &
+"$VENV_UVICORN" main:app --port 8000 &
 UVICORN_PID=$!
 
 # 等待后端就绪
