@@ -32,6 +32,13 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# 清理已占用的端口
+if lsof -ti:8000 > /dev/null 2>&1; then
+  echo "⚠️  Port 8000 in use, clearing..."
+  lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+  sleep 1
+fi
+
 # 启动 FastAPI
 echo "🚀 Starting Python backend (port 8000)..."
 cd "$API_DIR"
