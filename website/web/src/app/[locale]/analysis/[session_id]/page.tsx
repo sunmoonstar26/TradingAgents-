@@ -121,6 +121,7 @@ export default function AnalysisPage() {
       fetch(`/api/analysis/${sessionId}`).then((r) => r.json()),
     refetchInterval: (query) => {
       const d = query.state.data;
+      if (!d?.success) return false;
       if (d?.data?.status === "completed" || d?.data?.status === "failed")
         return false;
       return 3000;
