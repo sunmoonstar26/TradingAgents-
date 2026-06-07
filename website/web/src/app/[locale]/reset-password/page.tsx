@@ -19,17 +19,26 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Supabase 把 token 放在 URL hash，需要等客户端解析
     const supabase = createClient();
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+
+    // URL hash 里有 recovery token 时直接标记就绪
+    const hash = window.location.hash;
+    if (hash.includes("type=recovery") || hash.includes("access_token")) {
+      setReady(true);
+      return;
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         setReady(true);
       }
     });
-    // 如果已经有 session（hash token 自动处理）
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setReady(true);
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
