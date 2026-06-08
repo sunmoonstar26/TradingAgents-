@@ -8,7 +8,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /build
 COPY . .
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir . && \
+    pip install --no-cache-dir -r website/api-server/requirements.txt
 
 FROM python:3.12-slim
 
@@ -25,4 +26,4 @@ WORKDIR /home/appuser/app
 
 COPY --from=builder --chown=appuser:appuser /build .
 
-ENTRYPOINT ["tradingagents"]
+CMD ["uvicorn", "main:app", "--app-dir", "website/api-server", "--host", "0.0.0.0", "--port", "8000"]
