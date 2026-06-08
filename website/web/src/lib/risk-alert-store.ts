@@ -9,6 +9,9 @@ const SEVERITY_LEVEL: Record<string, AlertLevel> = {
   high: AlertLevel.DANGER,
   medium: AlertLevel.WARNING,
   low: AlertLevel.WATCH,
+  "高": AlertLevel.DANGER,
+  "中": AlertLevel.WARNING,
+  "低": AlertLevel.WATCH,
 };
 
 const AGENT_LABEL: Record<string, string> = {
@@ -66,9 +69,18 @@ export function getRiskAlerts(): RiskAlert[] {
   }
 }
 
-/** 用 /api/dashboard 的静态数据作为初始种子（仅在 localStorage 为空时写入） */
-export function seedRiskAlertsFromApi(alerts: RiskAlert[]): void {
-  if (typeof window === "undefined") return;
-  if (localStorage.getItem(STORAGE_KEY)) return;
+/** 用 /api/dashboard 的静态数据作为初始种子（localStorage 为空或为空数组时写入）。返回是否实际写入 */
+export function seedRiskAlertsFromApi(alerts: RiskAlert[]): boolean {
+  if (typeof window === "undefined") return false;
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try {
+      const existing = JSON.parse(raw) as RiskAlert[];
+      if (existing.length > 0) return false;
+    } catch {
+      // 解析失败则覆盖
+    }
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(alerts));
+  return true;
 }

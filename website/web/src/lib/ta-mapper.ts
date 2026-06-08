@@ -10,6 +10,68 @@ function stripMarkdownLabels(text: string): string {
   return text.replace(/\*\*[A-Za-z][A-Za-z ]+\*\*\s*[:：]\s*/g, "");
 }
 
+/**
+ * 从 LLM 报告文本中提取 key points 和 risk factors。
+ * 优先查找明确的"Key Points"/"Risks"章节，
+ * 回退到提取前 N 个非空句子。
+ */
+function extractKeyPointsFromReport(text: string, maxPoints = 2, maxRisks = 1): {
+  keyPoints: string[];
+  riskFactors: string[];
+} {
+  if (!text) return { keyPoints: [], riskFactors: [] };
+
+  const cleanLine = (s: string) =>
+    s.replace(/^\s*[-*•#>]+\s*/, "").replace(/\*\*/g, "").trim();
+
+  // 尝试提取 "Key Points" / "Key Findings" / "Key Insights" 章节
+  const keySection = text.match(
+    /(?:key\s+(?:points?|findings?|insights?|takeaways?))[:\s\n]+([\s\S]*?)(?=\n#{1,3}\s|\n\n[A-Z]|risks?[:\s]|\*\*[A-Z]|$)/i
+  );
+
+  // 尝试提取 "Risk" 章节
+  const riskSection = text.match(
+    /(?:(?:key\s+)?risks?|risk\s+factors?|downside)[:\s\n]+([\s\S]*?)(?=\n#{1,3}\s|\n\n[A-Z]|\*\*[A-Z]|$)/i
+  );
+
+  const linesFromSection = (section: RegExpMatchArray | null, max: number): string[] => {
+    if (!section?.[1]) return [];
+    return section[1]
+      .split(/\n/)
+      .map(cleanLine)
+      .filter(l => l.length > 15 && l.length < 200)
+      .slice(0, max);
+  };
+
+  let keyPoints = linesFromSection(keySection, maxPoints);
+  let riskFactors = linesFromSection(riskSection, maxRisks);
+
+  // 回退：从纯文本提取非空句子
+  if (keyPoints.length === 0) {
+    const sentences = text
+      .replace(/\*\*/g, "")
+      .split(/[.。!！]\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 20 && s.length < 180 && /[a-zA-Z]/.test(s));
+    keyPoints = sentences.slice(0, maxPoints);
+  }
+
+  if (riskFactors.length === 0) {
+    // 找含 risk/concern/headwind/downside/challenge 的句子
+    const riskSentences = text
+      .replace(/\*\*/g, "")
+      .split(/[.。!！]\s+/)
+      .map(s => s.trim())
+      .filter(s =>
+        s.length > 20 && s.length < 180 &&
+        /risk|concern|headwind|downside|challenge|uncertainty|volatil/i.test(s)
+      );
+    riskFactors = riskSentences.slice(0, maxRisks);
+  }
+
+  return { keyPoints, riskFactors };
+}
+
 /** TradingAgents Python 脚本输出的原始 JSON */
 export interface TARawResult {
   ticker: string;
@@ -125,69 +187,78 @@ export function mapTAResultToStockDetail(raw: TARawResult): StockDetail {
       },
       conflictMatrix: [],
     },
-    agentAnalyses: [
-      {
-        agentName: AGENTS[AgentPersonality.FUNDAMENTAL].name,
-        role:      AGENTS[AgentPersonality.FUNDAMENTAL].role,
-        personality: AgentPersonality.FUNDAMENTAL,
-        signal: SignalEnum.HOLD,
-        conviction: 55,
-        summary: stripMarkdownLabels(raw.fundamentals_report?.slice(0, 200) || "") || "Fundamental analysis in progress",
-        keyPoints: [],
-        riskFactors: [],
-      },
-      {
-        agentName: AGENTS[AgentPersonality.TECHNICAL].name,
-        role:      AGENTS[AgentPersonality.TECHNICAL].role,
-        personality: AgentPersonality.TECHNICAL,
-        signal: SignalEnum.HOLD,
-        conviction: 55,
-        summary: stripMarkdownLabels(raw.market_report?.slice(0, 200) || "") || "Technical analysis in progress",
-        keyPoints: [],
-        riskFactors: [],
-      },
-      {
-        agentName: AGENTS[AgentPersonality.SENTIMENT].name,
-        role:      AGENTS[AgentPersonality.SENTIMENT].role,
-        personality: AgentPersonality.SENTIMENT,
-        signal: SignalEnum.HOLD,
-        conviction: 55,
-        summary: stripMarkdownLabels(raw.sentiment_report?.slice(0, 200) || "") || "Sentiment analysis in progress",
-        keyPoints: [],
-        riskFactors: [],
-        sentimentPulse: 50,
-      },
-      {
-        agentName: AGENTS[AgentPersonality.RISK].name,
-        role:      AGENTS[AgentPersonality.RISK].role,
-        personality: AgentPersonality.RISK,
-        signal: SignalEnum.HOLD,
-        conviction: 50,
-        summary: stripMarkdownLabels(raw.risk_debate_state?.judge_decision?.slice(0, 200) || "") || "Risk analysis in progress",
-        keyPoints: [],
-        riskFactors: [],
-      },
-      {
-        agentName: AGENTS[AgentPersonality.NEWS].name,
-        role:      AGENTS[AgentPersonality.NEWS].role,
-        personality: AgentPersonality.NEWS,
-        signal: SignalEnum.HOLD,
-        conviction: 55,
-        summary: stripMarkdownLabels(raw.news_report?.slice(0, 200) || "") || "News analysis in progress",
-        keyPoints: [],
-        riskFactors: [],
-      },
-      {
-        agentName: AGENTS[AgentPersonality.MACRO].name,
-        role:      AGENTS[AgentPersonality.MACRO].role,
-        personality: AgentPersonality.MACRO,
-        signal: SignalEnum.HOLD,
-        conviction: 50,
-        summary: "Macro environment analysis complete. See full report for details.",
-        keyPoints: [],
-        riskFactors: [],
-      },
-    ],
+    agentAnalyses: (() => {
+      const fund   = extractKeyPointsFromReport(raw.fundamentals_report || "");
+      const tech   = extractKeyPointsFromReport(raw.market_report || "");
+      const sent   = extractKeyPointsFromReport(raw.sentiment_report || "");
+      const risk   = extractKeyPointsFromReport(raw.risk_debate_state?.judge_decision || "");
+      const news   = extractKeyPointsFromReport(raw.news_report || "");
+      // macro 降级：从 investment_plan 提取
+      const macro  = extractKeyPointsFromReport(raw.investment_plan || "");
+      return [
+        {
+          agentName: AGENTS[AgentPersonality.FUNDAMENTAL].name,
+          role:      AGENTS[AgentPersonality.FUNDAMENTAL].role,
+          personality: AgentPersonality.FUNDAMENTAL,
+          signal: SignalEnum.HOLD,
+          conviction: 55,
+          summary: stripMarkdownLabels(raw.fundamentals_report?.slice(0, 200) || "") || "Fundamental analysis in progress",
+          keyPoints:   fund.keyPoints,
+          riskFactors: fund.riskFactors,
+        },
+        {
+          agentName: AGENTS[AgentPersonality.TECHNICAL].name,
+          role:      AGENTS[AgentPersonality.TECHNICAL].role,
+          personality: AgentPersonality.TECHNICAL,
+          signal: SignalEnum.HOLD,
+          conviction: 55,
+          summary: stripMarkdownLabels(raw.market_report?.slice(0, 200) || "") || "Technical analysis in progress",
+          keyPoints:   tech.keyPoints,
+          riskFactors: tech.riskFactors,
+        },
+        {
+          agentName: AGENTS[AgentPersonality.SENTIMENT].name,
+          role:      AGENTS[AgentPersonality.SENTIMENT].role,
+          personality: AgentPersonality.SENTIMENT,
+          signal: SignalEnum.HOLD,
+          conviction: 55,
+          summary: stripMarkdownLabels(raw.sentiment_report?.slice(0, 200) || "") || "Sentiment analysis in progress",
+          keyPoints:   sent.keyPoints,
+          riskFactors: sent.riskFactors,
+          sentimentPulse: 50,
+        },
+        {
+          agentName: AGENTS[AgentPersonality.RISK].name,
+          role:      AGENTS[AgentPersonality.RISK].role,
+          personality: AgentPersonality.RISK,
+          signal: SignalEnum.HOLD,
+          conviction: 50,
+          summary: stripMarkdownLabels(raw.risk_debate_state?.judge_decision?.slice(0, 200) || "") || "Risk analysis in progress",
+          keyPoints:   risk.keyPoints,
+          riskFactors: risk.riskFactors,
+        },
+        {
+          agentName: AGENTS[AgentPersonality.NEWS].name,
+          role:      AGENTS[AgentPersonality.NEWS].role,
+          personality: AgentPersonality.NEWS,
+          signal: SignalEnum.HOLD,
+          conviction: 55,
+          summary: stripMarkdownLabels(raw.news_report?.slice(0, 200) || "") || "News analysis in progress",
+          keyPoints:   news.keyPoints,
+          riskFactors: news.riskFactors,
+        },
+        {
+          agentName: AGENTS[AgentPersonality.MACRO].name,
+          role:      AGENTS[AgentPersonality.MACRO].role,
+          personality: AgentPersonality.MACRO,
+          signal: SignalEnum.HOLD,
+          conviction: 50,
+          summary: "Macro environment analysis complete. See full report for details.",
+          keyPoints:   macro.keyPoints,
+          riskFactors: macro.riskFactors,
+        },
+      ];
+    })(),
     riskExposures: [
       {
         label: "Volatility Risk",

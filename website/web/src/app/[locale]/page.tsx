@@ -94,13 +94,15 @@ export default function DashboardPage() {
     return () => window.removeEventListener("ta_feed_change", onFeedChange);
   }, []);
 
-  // 首次 API 数据到达时，种子化 localStorage（仅当 localStorage 为空）
+  // 首次 API 数据到达时，种子化 localStorage（仅当 localStorage 为空或全为占位符）
   useEffect(() => {
     if (data?.data?.memos?.length) {
-      seedMemosFromApi(data.data.memos);
+      const seeded = seedMemosFromApi(data.data.memos);
+      if (seeded) setMemoKey((k) => k + 1);
     }
     if (data?.data?.riskAlerts?.length) {
-      seedRiskAlertsFromApi(data.data.riskAlerts);
+      const seeded = seedRiskAlertsFromApi(data.data.riskAlerts);
+      if (seeded) setRiskKey((k) => k + 1);
     }
     if (data?.data?.liveFeed?.length) {
       seedFeedFromMock(data.data.liveFeed);
@@ -119,8 +121,20 @@ export default function DashboardPage() {
   const mergedMemos = useMemo(() => {
     const apiMemos = data?.data?.memos ?? [];
     const custom = getCustomMemoEntries();
-    if (custom.length > 0) return custom;
-    return apiMemos;
+    if (custom.length === 0) return apiMemos;
+    // 用 API 数据补全分析字段，保留用户自定义排序/添加的标的
+    const apiMap = new Map(apiMemos.map((m) => [m.ticker, m]));
+    return custom.map((c) => {
+      const api = apiMap.get(c.ticker);
+      if (!api) return c;
+      return {
+        ...api,
+        // 保留用户可能手动编辑过的字段（非默认占位符才保留）
+        keyDriver: c.keyDriver && c.keyDriver !== "—" ? c.keyDriver : api.keyDriver,
+        primaryRisk: c.primaryRisk && c.primaryRisk !== "—" ? c.primaryRisk : api.primaryRisk,
+        timeHorizon: c.timeHorizon && c.timeHorizon !== "—" ? c.timeHorizon : api.timeHorizon,
+      };
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.data?.memos, memoKey]);
 

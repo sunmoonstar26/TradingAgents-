@@ -128,23 +128,33 @@ def get_analysis(session_id: str):
         "error": data["error"],
     }
 
-_AGENT_TO_FIELD: dict[str, str] = {
-    "fundamentals_analyst": "fundamental",
-    "market_analyst":       "technical",
-    "sentiment_analyst":    "sentiment",
-    "macro_analyst":        "macro",
-    "news_analyst":         "news",
-    "risk_manager":         "risk",
-    "portfolio_manager":    "report",
+# graph.stream() 节点名 → (progress field, event)
+# "start": 节点开始执行时设为 running
+# "done":  节点完成后设为 completed（用 clear 节点作为完成信号）
+_NODE_EVENTS: dict[str, tuple[str, str]] = {
+    # 分析师节点：出现即为开始
+    "Market Analyst":        ("technical",   "start"),
+    "Sentiment Analyst":     ("sentiment",   "start"),
+    "News Analyst":          ("news",        "start"),
+    "Fundamentals Analyst":  ("fundamental", "start"),
+    # Clear 节点：出现代表对应分析师完成
+    "Msg Clear Market":       ("technical",   "done"),
+    "Msg Clear Sentiment":    ("sentiment",   "done"),
+    "Msg Clear News":         ("news",        "done"),
+    "Msg Clear Fundamentals": ("fundamental", "done"),
+    # risk debate 节点
+    "Aggressive Analyst":    ("risk",   "start"),
+    "Conservative Analyst":  ("risk",   "start"),
+    "Neutral Analyst":       ("risk",   "start"),
+    # Portfolio Manager 出现：risk 结束 + report 开始
+    "Portfolio Manager":     ("report",  "start"),
 }
 
-def _progress_callback(session_id: str, agent: str, status: str, step_msg: str = "") -> None:
-    field = _AGENT_TO_FIELD.get(agent)
+def _set_progress(session_id: str, field: str, status: str, step_msg: str = "") -> None:
     with _sessions_lock:
         if session_id not in _sessions:
             return
-        if field:
-            _sessions[session_id]["progress"][field] = status
+        _sessions[session_id]["progress"][field] = status
         if step_msg:
             _sessions[session_id]["current_step"] = step_msg
 
@@ -167,26 +177,65 @@ def _run_analysis_thread(
         config["data_cache_dir"] = str(TA_ROOT / "cache")
 
         _update_session(session_id, current_step=f"Launching multi-agent analysis for {ticker}")
-        graph = TradingAgentsGraph(debug=False, config=config)
+        ta_graph = TradingAgentsGraph(debug=False, config=config)
 
-        agent_sequence = [
-            "fundamentals_analyst",
-            "market_analyst",
-            "sentiment_analyst",
-            "macro_analyst",
-            "news_analyst",
-            "risk_manager",
-            "portfolio_manager",
-        ]
-        for ag in agent_sequence[:-1]:
-            _progress_callback(session_id, ag, "running", f"Running {ag.replace('_', ' ')}")
+        # 用 stream 模式（updates）执行，逐节点更新进度
+        # updates 模式：每个 chunk 是 {node_name: state_delta}
+        # propagate() 会设置 self.ticker，绕过它需手动设置，_log_state 依赖此值
+        ta_graph.ticker = ticker
+        ta_graph._resolve_pending_entries(ticker)
+        past_context = ta_graph.memory_log.get_past_context(ticker)
+        init_state = ta_graph.propagator.create_initial_state(
+            ticker, analysis_date, asset_type=asset_type, past_context=past_context
+        )
+        # 用 updates 模式获取节点名；config 沿用 propagator 的 recursion_limit
+        stream_config = {"recursion_limit": ta_graph.propagator.max_recur_limit}
 
-        final_state, decision = graph.propagate(ticker, analysis_date, asset_type=asset_type)
+        _risk_started = False
+        # init_state 를 기본값으로 복사 — company_of_interest 등 초기 키 보존
+        # updates 모드에서는 각 node 가 변경한 key 만 delta 에 포함되므로
+        # init_state 키가 없으면 _log_state 에서 KeyError 발생
+        final_state: dict = dict(init_state)
 
-        for ag in agent_sequence:
-            _progress_callback(session_id, ag, "completed", "Generating final report")
+        for chunk in ta_graph.graph.stream(init_state, stream_mode="updates", config=stream_config):
+            for node_name, node_delta in chunk.items():
+                # 合并 delta 到 final_state
+                if isinstance(node_delta, dict):
+                    final_state.update(node_delta)
+
+                event = _NODE_EVENTS.get(node_name)
+                if not event:
+                    continue
+                field, ev_type = event
+
+                if ev_type == "start":
+                    if field == "risk":
+                        if not _risk_started:
+                            _risk_started = True
+                            _set_progress(session_id, "risk", "running", "Running risk analysis")
+                    elif field == "report":
+                        # Portfolio Manager 开始：risk 标记完成
+                        _set_progress(session_id, "risk", "completed", "Risk analysis done")
+                        _set_progress(session_id, "report", "running", "Generating final report")
+                    else:
+                        _set_progress(session_id, field, "running", f"Running {node_name}")
+
+                elif ev_type == "done":
+                    _set_progress(session_id, field, "completed", f"{node_name.replace('Msg Clear ', '')} done")
+
+        # stream 结束，确保所有字段都是 completed
+        for f in ["fundamental", "technical", "sentiment", "news", "risk", "report"]:
+            _set_progress(session_id, f, "completed")
 
         _update_session(session_id, current_step="Extracting insights")
+
+        decision = ta_graph.process_signal(final_state.get("final_trade_decision", ""))
+        ta_graph._log_state(analysis_date, final_state)
+        ta_graph.memory_log.store_decision(
+            ticker=ticker,
+            trade_date=analysis_date,
+            final_trade_decision=final_state.get("final_trade_decision", ""),
+        )
 
         result = _build_result(ticker, analysis_date, final_state, decision)
 

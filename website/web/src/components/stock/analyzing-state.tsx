@@ -26,13 +26,12 @@ const AGENT_LABELS: Record<string, string> = {
   fundamental: "agentLabelFundamental",
   technical: "agentLabelTechnical",
   sentiment: "agentLabelSentiment",
-  macro: "agentLabelMacro",
   news: "agentLabelNews",
   risk: "agentLabelRisk",
 };
 
 // report 单独展示，不参与 6 个智能体的进度计算
-const AGENT_KEYS = ["fundamental", "technical", "sentiment", "macro", "news", "risk"];
+const AGENT_KEYS = ["fundamental", "technical", "sentiment", "news", "risk"];
 
 interface Props {
   ticker: string;
@@ -70,7 +69,13 @@ export function AnalyzingState({ ticker, sessionId, invalidateKeys, compact }: P
     queryKey: ["analysis-session", sessionId],
     queryFn: () =>
       fetch(`/api/analysis/${sessionId}`).then((r) => r.json()),
-    refetchInterval: 3000,
+    refetchInterval: (query) => {
+      const d = query.state.data as SessionStatusResponse | undefined;
+      if (!d?.success) return false;
+      const s = d?.data?.status;
+      if (s === "completed" || s === "failed") return false;
+      return 3000;
+    },
     refetchIntervalInBackground: true,
   });
 

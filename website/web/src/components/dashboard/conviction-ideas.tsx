@@ -21,7 +21,7 @@ function makeMemo(s: StockEntry): InvestmentMemo {
   return {
     ticker: s.ticker, name: s.name, signal: Signal.HOLD, conviction: 50,
     agentAlignment: { fundamental: true, technical: true, sentiment: false, macro: true, risk: false },
-    timeHorizon: "中期 3-6月", primaryRisk: "待评估", consensus: "4/8 看涨", exposure: "低配", keyDriver: "待评估"
+    timeHorizon: "—", primaryRisk: "—", consensus: "—", exposure: "—", keyDriver: "—"
   };
 }
 
@@ -83,7 +83,7 @@ export function ConvictionIdeas({ data, onSave }: Props) {
     <motion.section ref={containerRef} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
       <div className="section-heading justify-between">
         <span>{t("memoTitle")}</span>
-        <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title="编辑">
+        <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title={t("editTitle")}>
           <Pencil className="w-3.5 h-3.5" />
         </button>
       </div>

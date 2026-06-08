@@ -2,83 +2,74 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
 
-// 报告根目录
-const REPORTS_DIR = join(
+// JSON 结果目录（api-server 写入位置）
+const RESULTS_DIR = join(
   process.cwd(),
   "..",
-  "..",
-  "reports"
+  "api-server",
+  "data",
+  "analysis_results"
 );
 
-// section 到文件夹名的映射
-const SECTION_MAP: Record<string, string> = {
-  analysts: "1_analysts",
-  research: "2_research",
-  trading: "3_trading",
-  risk: "4_risk",
-  portfolio: "5_portfolio",
-};
+// section/subsection → JSON 字段路径（字符串=顶层字段，数组=嵌套路径）
+type FieldPath = string | string[];
 
-// subsection 到文件名的映射（各 section 下）
-const SUBSECTION_MAP: Record<string, Record<string, string>> = {
+const FIELD_MAP: Record<string, Record<string, FieldPath>> = {
   analysts: {
-    fundamental: "fundamentals",
-    fundamentals: "fundamentals",
-    technical: "market",
-    market: "market",
-    sentiment: "sentiment",
-    news: "news",
-    risk: "risk",
-    macro: "macro",
+    fundamental:  "fundamentals_report",
+    fundamentals: "fundamentals_report",
+    technical:    "market_report",
+    market:       "market_report",
+    sentiment:    "sentiment_report",
+    news:         "news_report",
   },
   research: {
-    bull: "bull",
-    bear: "bear",
-    verdict: "manager",
-    manager: "manager",
+    bull:     ["investment_debate_state", "bull_history"],
+    bear:     ["investment_debate_state", "bear_history"],
+    verdict:  ["investment_debate_state", "judge_decision"],
+    manager:  "investment_plan",
   },
   trading: {
-    trader: "trader",
+    trader: "trader_investment_plan",
   },
   risk: {
-    aggressive: "aggressive",
-    conservative: "conservative",
-    neutral: "neutral",
+    aggressive:   ["risk_debate_state", "aggressive_history"],
+    conservative: ["risk_debate_state", "conservative_history"],
+    neutral:      ["risk_debate_state", "neutral_history"],
   },
   portfolio: {
-    decision: "decision",
+    decision: "final_trade_decision",
   },
 };
 
-/**
- * 根据 ticker 在 reports 目录查找对应报告文件夹
- * 返回文件夹路径或 null
- */
-function findReportFolder(ticker: string): string | null {
-  if (!existsSync(REPORTS_DIR)) return null;
+function getNestedValue(obj: Record<string, unknown>, path: FieldPath): string {
+  if (typeof path === "string") return (obj[path] as string) ?? "";
+  let cur: unknown = obj;
+  for (const key of path) {
+    if (cur == null || typeof cur !== "object") return "";
+    cur = (cur as Record<string, unknown>)[key];
+  }
+  return (cur as string) ?? "";
+}
 
-  const upperTicker = ticker.toUpperCase();
-  const entries = readdirSync(REPORTS_DIR, { withFileTypes: true });
+/** 找到 ticker 最新的 sess_*.json 文件路径，没有则返回 null */
+function findLatestResultFile(ticker: string): string | null {
+  if (!existsSync(RESULTS_DIR)) return null;
 
-  let bestMatch: string | null = null;
-  let bestTimestamp = "";
+  const lower = ticker.toLowerCase();
+  let bestFile: string | null = null;
+  let bestKey = "";
 
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    // 文件夹格式: TICKER_TIMESTAMP，如 LI_20260519_101446
-    const parts = entry.name.split("_");
-    const folderTicker = parts[0]?.toUpperCase();
-    if (folderTicker !== upperTicker) continue;
-
-    // 选择时间戳最新的文件夹
-    const ts = parts.slice(1).join("_");
-    if (ts > bestTimestamp) {
-      bestTimestamp = ts;
-      bestMatch = join(REPORTS_DIR, entry.name);
-    }
+  for (const name of readdirSync(RESULTS_DIR)) {
+    if (!name.endsWith(".json")) continue;
+    // 格式: sess_{ticker}_{YYYYMMDD}_{seq}.json
+    const match = name.match(/^sess_([a-z0-9]+)_(\d{8}_\d+)\.json$/i);
+    if (!match || match[1].toLowerCase() !== lower) continue;
+    const key = match[2];
+    if (key > bestKey) { bestKey = key; bestFile = join(RESULTS_DIR, name); }
   }
 
-  return bestMatch;
+  return bestFile;
 }
 
 export async function GET(
@@ -87,63 +78,48 @@ export async function GET(
 ) {
   const { ticker, section, subsection } = await params;
 
-  // 1. 查找报告文件夹
-  const reportFolder = findReportFolder(ticker);
-  if (!reportFolder) {
+  // 1. 找到最新 JSON 文件
+  const filePath = findLatestResultFile(ticker);
+  if (!filePath) {
     return NextResponse.json(
-      { success: false, error: `Report data not found for ${ticker}` },
+      { success: false, error: `Report data not found for ${ticker.toUpperCase()}` },
       { status: 404 }
     );
   }
 
-  // 2. 映射 section → 文件夹
-  const sectionFolder = SECTION_MAP[section];
-  if (!sectionFolder) {
+  // 2. 验证 section / subsection
+  const sectionMap = FIELD_MAP[section];
+  if (!sectionMap) {
     return NextResponse.json(
       { success: false, error: `Invalid analysis type: ${section}` },
       { status: 400 }
     );
   }
 
-  // 3. 映射 subsection → 文件名
-  const subsectionMap = SUBSECTION_MAP[section];
-  if (!subsectionMap) {
-    return NextResponse.json(
-      { success: false, error: `Invalid analysis type: ${section}` },
-      { status: 400 }
-    );
-  }
-
-  const fileName = subsectionMap[subsection];
-  if (!fileName) {
+  const fieldPath = sectionMap[subsection];
+  if (!fieldPath) {
     return NextResponse.json(
       { success: false, error: `Invalid subsection: ${subsection}` },
       { status: 400 }
     );
   }
 
-  // 4. 读取文件
-  const filePath = join(reportFolder, sectionFolder, `${fileName}.md`);
-  if (!existsSync(filePath)) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: `Report file not found: ${section}/${subsection}`,
-      },
-      { status: 404 }
-    );
-  }
-
+  // 3. 读 JSON，提取对应字段
   try {
-    const content = readFileSync(filePath, "utf-8");
+    const raw = readFileSync(filePath, "utf-8");
+    const data = JSON.parse(raw) as Record<string, unknown>;
+    const content = getNestedValue(data, fieldPath);
+
+    if (!content) {
+      return NextResponse.json(
+        { success: false, error: `Report not available: ${section}/${subsection}` },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      data: {
-        content,
-        ticker: ticker.toUpperCase(),
-        section,
-        subsection,
-      },
+      data: { content, ticker: ticker.toUpperCase(), section, subsection },
     });
   } catch {
     return NextResponse.json(

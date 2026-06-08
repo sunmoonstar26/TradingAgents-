@@ -24,7 +24,7 @@ def get_language_instruction() -> str:
     """Return a prompt instruction for the configured output language."""
     from tradingagents.dataflows.config import get_config
     lang = get_config().get("output_language", "English")
-    if lang.strip().lower() == "english":
+    if lang.strip().lower() in ("english", "en"):
         return ""
 
     # 对中文明确要求简体，避免 DeepSeek 等模型输出繁体

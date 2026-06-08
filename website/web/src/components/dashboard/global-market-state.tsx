@@ -15,11 +15,11 @@ function StatusBadge({ status }: { status: MarketIndicator["status"] }) {
     danger: "bg-[var(--red)]/15 text-[var(--red)]",
   };
   const labels: Record<string, string> = {
-    up: "看涨",
-    down: "看跌",
+    up: t("bullish"),
+    down: t("bearish"),
     neutral: t("stable"),
-    warning: "关注",
-    danger: "危险",
+    warning: t("caution"),
+    danger: t("danger"),
   };
   return (
     <span

@@ -2,24 +2,25 @@
 
 import { motion } from "framer-motion";
 import { Signal, ReasonCapsule } from "../../types";
-import { Shield, TrendingUp, AlertTriangle, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import { Signal as SignalEnum } from "../../types/enums";
+import { SIGNAL_LABELS } from "../../content/labels";
+import { Shield, TrendingUp, AlertTriangle, Zap } from "lucide-react";
 import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
-const signalConfig: Record<string, { bg: string; text: string; icon: typeof TrendingUp; glow: string }> = {
-  "强烈买入": { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 40px rgba(34,197,94,0.3)" },
-  "买入": { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 30px rgba(34,197,94,0.2)" },
-  "增持": { bg: "bg-[var(--blue)]/12", text: "text-[var(--blue)]", icon: TrendingUp, glow: "0 0 30px rgba(59,130,246,0.25)" },
-  "持有": { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]", icon: Shield, glow: "0 0 20px rgba(245,158,11,0.15)" },
-  "减持": { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 30px rgba(239,68,68,0.2)" },
-  "卖出": { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 40px rgba(239,68,68,0.3)" },
+const signalConfig: Record<SignalEnum, { bg: string; text: string; icon: typeof TrendingUp; glow: string }> = {
+  [SignalEnum.STRONG_BUY]:  { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 40px rgba(34,197,94,0.3)" },
+  [SignalEnum.BUY]:         { bg: "bg-[var(--blue)]/12",  text: "text-[var(--blue)]",  icon: TrendingUp, glow: "0 0 30px rgba(59,130,246,0.25)" },
+  [SignalEnum.HOLD]:        { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]", icon: Shield, glow: "0 0 20px rgba(245,158,11,0.15)" },
+  [SignalEnum.SELL]:        { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 30px rgba(239,68,68,0.2)" },
+  [SignalEnum.STRONG_SELL]: { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 40px rgba(239,68,68,0.3)" },
 };
 
 const impactColors: Record<string, string> = {
-  "高": "text-[var(--red)]",
-  "中": "text-[var(--amber)]",
-  "低": "text-[var(--text-secondary)]",
+  "high":   "text-[var(--red)]",
+  "medium": "text-[var(--amber)]",
+  "low":    "text-[var(--text-secondary)]",
 };
 
 interface Props {
@@ -51,7 +52,8 @@ export function FinalDecision({
   thesis,
 }: Props) {
   const t = useTranslations("stockComponents");
-  const cfg = signalConfig[signal] || signalConfig["持有"];
+  const locale = useLocale();
+  const cfg = signalConfig[signal as SignalEnum] || signalConfig[SignalEnum.HOLD];
   const Icon = cfg.icon;
   const [expanded, setExpanded] = useState(false);
 
@@ -64,7 +66,7 @@ export function FinalDecision({
 
   // 格式化报告日期
   const formattedDate = reportDate
-    ? new Date(reportDate).toLocaleString("zh-CN", {
+    ? new Date(reportDate).toLocaleString(locale === "zh" ? "zh-CN" : "en-US", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -100,7 +102,7 @@ export function FinalDecision({
           </div>
           <div className="min-w-0">
             <div className={`text-xl md:text-2xl font-bold ${cfg.text} tracking-tight`}>
-              {signal}
+              {SIGNAL_LABELS[signal as SignalEnum] ?? signal}
             </div>
             <div className="text-[13px] md:text-sm text-[var(--text-secondary)] leading-relaxed mt-1 line-clamp-2">
               {thesisText}
@@ -172,15 +174,15 @@ export function FinalDecision({
 
         {/* 底部元数据 */}
         <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]/60 pt-2 border-t border-[var(--border-custom)]">
-          <span>{t("consensus")}：{consensus}</span>
+          <span>{t("consensus")}: {consensus}</span>
           <span>·</span>
-          <span>{t("suggestedExposure")}：{recommendedExposure}</span>
+          <span>{t("suggestedExposure")}: {recommendedExposure}</span>
           <span>·</span>
-          <span>{t("timeframe")}：{thesisHorizon}</span>
+          <span>{t("timeframe")}: {thesisHorizon}</span>
           {riskSummary && (
             <>
               <span>·</span>
-              <span className="text-[var(--red)]/70">{t("risk")}：{riskSummary}</span>
+              <span className="text-[var(--red)]/70">{t("risk")}: {riskSummary}</span>
             </>
           )}
         </div>

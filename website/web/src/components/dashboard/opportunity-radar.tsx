@@ -27,17 +27,17 @@ const riskColors: Record<string, string> = {
   [RiskLevel.HIGH]: "text-[var(--red)]",
 };
 
-/** ISO 日期转紧凑中文显示 */
-function formatDate(iso?: string): string {
+/** ISO date to compact display — locale-aware via t() passed from component */
+function formatDate(iso: string | undefined, t: (key: string, values?: Record<string, string>) => string): string {
   if (!iso) return "—";
   const d = new Date(iso);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const diff = (today.getTime() - target.getTime()) / 86400000;
-  const time = d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-  if (diff === 0) return `今天 ${time}`;
-  if (diff === 1) return `昨天 ${time}`;
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  if (diff === 0) return t("dateToday", { time });
+  if (diff === 1) return t("dateYesterday", { time });
   return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
@@ -75,7 +75,7 @@ function ConsensusDots({ consensus }: { consensus: ConsensusBreakdown | undefine
 function makeEntry(s: StockEntry): OpportunityEntry {
   return {
     ticker: s.ticker, name: s.name, signal: Signal.HOLD, conviction: 50, risk: RiskLevel.MEDIUM,
-    consensus: { bullish: 0, neutral: 0, bearish: 0 }, exposure: "待分析",
+    consensus: { bullish: 0, neutral: 0, bearish: 0 }, exposure: "—",
     agentAlignment: { fundamental: true, technical: true, sentiment: false, macro: true, risk: false },
     updatedAt: new Date().toISOString(),
   };
@@ -457,7 +457,7 @@ export function OpportunityRadar({ data, onSave }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title="编辑">
+          <button onClick={toggleEdit} className={`p-1.5 rounded-lg transition-colors ${editing ? "text-[var(--blue)] bg-[var(--blue)]/10" : "text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] hover:bg-[var(--panel2)]"}`} title={t("editTitle")}>
             <Pencil className="w-3.5 h-3.5" />
           </button>
           <button
@@ -467,11 +467,11 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 ? "text-[var(--amber)] bg-[var(--amber)]/10 hover:bg-[var(--amber)]/20"
                 : "text-[var(--blue)] hover:bg-[var(--blue)]/10"
             }`}
-            title={bulkUpdating ? "点击取消" : "更新全部股票分析"}
+            title={bulkUpdating ? t("cancelUpdate") : t("bulkUpdateTooltip")}
           >
             <RefreshCw className={`w-3 h-3 ${bulkUpdating && !bulkAborting ? "animate-spin" : ""}`} />
             {bulkUpdating
-              ? `更新中 ${bulkUpdating.done}/${bulkUpdating.total}`
+              ? t("bulkUpdatingStatus", { done: String(bulkUpdating.done), total: String(bulkUpdating.total) })
               : t("updateAll")}
           </button>
         </div>
@@ -546,25 +546,25 @@ export function OpportunityRadar({ data, onSave }: Props) {
                       <div className="flex items-center justify-end gap-2">
                         {updateState?.status === "completed" ? (
                           <span className="text-[10px] font-mono text-[var(--green)] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />已完成
+                            <CheckCircle2 className="w-3 h-3" />{t("statusCompleted")}
                           </span>
                         ) : updateState?.status === "analyzing" ? (
                           <span className="text-[10px] font-mono text-[var(--blue)] flex items-center gap-1">
-                            <RefreshCw className="w-3 h-3 animate-spin" />分析中 {updateState.completedCount}/6
+                            <RefreshCw className="w-3 h-3 animate-spin" />{t("statusAnalyzing", { completed: String(updateState.completedCount) })}
                           </span>
                         ) : updateState?.status === "failed" ? (
-                          <span className="text-[10px] font-mono text-[var(--red)] flex items-center gap-1" title={updateState.errorMessage || "分析失败"}>
-                            <XCircle className="w-3 h-3" />失败
+                          <span className="text-[10px] font-mono text-[var(--red)] flex items-center gap-1" title={updateState.errorMessage || t("statusAnalysisFailed")}>
+                            <XCircle className="w-3 h-3" />{t("statusFailed")}
                           </span>
                         ) : (
                           <>
                             <span className="text-[10px] font-mono text-[var(--text-secondary)]/70">
-                              {formatDate(item.updatedAt)}
+                              {formatDate(item.updatedAt, t)}
                             </span>
                             <button
                               onClick={(e) => handleRefresh(item.ticker, e)}
                               className="p-1 rounded text-[var(--text-secondary)]/30 hover:text-[var(--blue)] hover:bg-[var(--blue)]/10 transition-all"
-                              title="重新分析"
+                              title={t("reanalyze")}
                             >
                               <RefreshCw className="w-3 h-3" />
                             </button>
@@ -620,26 +620,26 @@ export function OpportunityRadar({ data, onSave }: Props) {
                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${style.bg} ${style.text}`}>{item.signal}</span>
               </div>
               <div className="flex items-center gap-3 text-[10px] text-[var(--text-secondary)] mb-2">
-                <span>置信度 <span className="font-mono text-[var(--text-primary)]">{item.conviction}%</span></span>
-                <span>风险 <span className={`font-mono ${riskColors[item.risk]}`}>{item.risk}</span></span>
-                <span>仓位 <span className="font-mono text-[var(--blue)]">{item.exposure}</span></span>
+                <span>{t("mobileConfidence")} <span className="font-mono text-[var(--text-primary)]">{item.conviction}%</span></span>
+                <span>{t("mobileRisk")} <span className={`font-mono ${riskColors[item.risk]}`}>{item.risk}</span></span>
+                <span>{t("mobilePosition")} <span className="font-mono text-[var(--blue)]">{item.exposure}</span></span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[10px]"><ConsensusDots consensus={item.consensus} /></div>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-secondary)]/70">
                   {updateState?.status === "completed" ? (
-                    <span className="text-[var(--green)] flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5" />已完成</span>
+                    <span className="text-[var(--green)] flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5" />{t("statusCompleted")}</span>
                   ) : updateState?.status === "analyzing" ? (
-                    <span className="text-[var(--blue)] flex items-center gap-1"><RefreshCw className="w-2.5 h-2.5 animate-spin" />分析中 {updateState.completedCount}/6</span>
+                    <span className="text-[var(--blue)] flex items-center gap-1"><RefreshCw className="w-2.5 h-2.5 animate-spin" />{t("statusAnalyzing", { completed: String(updateState.completedCount) })}</span>
                   ) : updateState?.status === "failed" ? (
-                    <span className="text-[var(--red)] flex items-center gap-1" title={updateState.errorMessage || "分析失败"}><XCircle className="w-2.5 h-2.5" />失败</span>
+                    <span className="text-[var(--red)] flex items-center gap-1" title={updateState.errorMessage || t("statusAnalysisFailed")}><XCircle className="w-2.5 h-2.5" />{t("statusFailed")}</span>
                   ) : (
                     <>
-                      <span>{formatDate(item.updatedAt)}</span>
+                      <span>{formatDate(item.updatedAt, t)}</span>
                       <button
                         onClick={(e) => handleRefresh(item.ticker, e)}
                         className="p-0.5 rounded text-[var(--text-secondary)]/30 hover:text-[var(--blue)]"
-                        title="重新分析"
+                        title={t("reanalyze")}
                       >
                         <RefreshCw className="w-2.5 h-2.5" />
                       </button>

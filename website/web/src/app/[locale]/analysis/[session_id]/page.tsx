@@ -10,7 +10,7 @@ import { Header } from "../../../../components/layout/header";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import { ArrowLeft, Loader2, CheckCircle2, Cpu } from "lucide-react";
 
-const AGENT_KEYS = ["fundamental", "technical", "sentiment", "macro", "news", "risk"];
+const AGENT_KEYS = ["fundamental", "technical", "sentiment", "news", "risk"];
 
 function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
   const color =
@@ -101,7 +101,12 @@ export default function AnalysisPage() {
   const sessionId = params.session_id as string;
 
   const reportStartRef = useRef<number | null>(null);
+  const sessionStartRef = useRef<number | null>(null);
   const [reportElapsed, setReportElapsed] = useState(0);
+  const [sessionElapsed, setSessionElapsed] = useState(0);
+
+  // Timeout threshold: stop polling after 15 minutes
+  const SESSION_TIMEOUT_SECONDS = 900;
 
   const { data, isLoading } = useQuery<{
     success: boolean;
@@ -124,6 +129,14 @@ export default function AnalysisPage() {
       if (!d?.success) return false;
       if (d?.data?.status === "completed" || d?.data?.status === "failed")
         return false;
+      // Stop polling when session has been running too long (timeout)
+      // Use either the tracked start time or the created_at from server
+      const startTime = sessionStartRef.current
+        || (d?.data?.created_at ? new Date(d.data.created_at).getTime() : null);
+      if (startTime) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        if (elapsed >= SESSION_TIMEOUT_SECONDS) return false;
+      }
       return 3000;
     },
   });
@@ -131,17 +144,30 @@ export default function AnalysisPage() {
   const session = data?.data;
   const isComplete = session?.status === "completed";
   const isFailed = session?.status === "failed";
+  const isTimedOut = !isComplete && !isFailed && sessionElapsed >= SESSION_TIMEOUT_SECONDS;
   const tickerFromSession =
     session?.ticker || sessionId.split("_")[1]?.toUpperCase() || "???";
 
   const reportStatus = session?.progress?.report ?? "waiting";
   const isReportRunning = reportStatus === "running";
 
+  // record report start time
   useEffect(() => {
     if (isReportRunning && reportStartRef.current === null) {
       reportStartRef.current = Date.now();
     }
   }, [isReportRunning]);
+
+  // record overall session start time (once session data arrives)
+  useEffect(() => {
+    if (session && sessionStartRef.current === null) {
+      // use created_at if available, otherwise use now
+      const ts = session.created_at
+        ? new Date(session.created_at).getTime()
+        : Date.now();
+      sessionStartRef.current = Number.isFinite(ts) ? ts : Date.now();
+    }
+  }, [session]);
 
   useEffect(() => {
     if (!isReportRunning) return;
@@ -152,6 +178,18 @@ export default function AnalysisPage() {
     }, 1000);
     return () => clearInterval(id);
   }, [isReportRunning]);
+
+  // session-level elapsed timer (runs the whole time session is active, stops on timeout)
+  const isSessionActive = session && !isComplete && !isFailed && !isTimedOut;
+  useEffect(() => {
+    if (!isSessionActive) return;
+    const id = setInterval(() => {
+      if (sessionStartRef.current) {
+        setSessionElapsed(Math.floor((Date.now() - sessionStartRef.current) / 1000));
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isSessionActive]);
 
   useEffect(() => {
     if (isComplete) {
@@ -174,7 +212,6 @@ export default function AnalysisPage() {
     fundamental: "agentLabelFundamental",
     technical: "agentLabelTechnical",
     sentiment: "agentLabelSentiment",
-    macro: "agentLabelMacro",
     news: "agentLabelNews",
     risk: "agentLabelRisk",
     report: "agentLabelReport",
@@ -251,7 +288,26 @@ export default function AnalysisPage() {
               </motion.div>
             )}
 
-            {!isComplete && !isFailed && (
+            {isTimedOut && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="card-hero !p-8 text-center mb-6 border-[var(--amber)]/30"
+              >
+                <h2 className="text-sm font-semibold text-[var(--amber)]">{t("analysisTimedOut")}</h2>
+                <p className="text-xs text-[var(--text-secondary)] mt-2 max-w-md mx-auto">
+                  {t("analysisTimedOutDesc")}
+                </p>
+                <button
+                  onClick={() => router.push("/")}
+                  className="mt-4 px-4 py-1.5 text-xs rounded-lg bg-[var(--amber)]/10 text-[var(--amber)] hover:bg-[var(--amber)]/20 transition-colors"
+                >
+                  {t("analysisBackHomeBtn")}
+                </button>
+              </motion.div>
+            )}
+
+            {!isComplete && !isFailed && !isTimedOut && (
               <div className="card-hero !p-6 mb-5 text-center">
                 {isReportRunningOrDone ? (
                   <>
@@ -281,6 +337,11 @@ export default function AnalysisPage() {
                     </p>
                     <p className="text-xs text-[var(--text-secondary)]/60 font-mono">
                       {t("analysisAgentsProgress", { completed: completedCount, total: totalAgents })}
+                    </p>
+                    <p className="text-xs text-[var(--text-secondary)]/40 font-mono mt-1">
+                      {sessionElapsed > 0
+                        ? t("analysisSessionTimer", { elapsed: sessionElapsed })
+                        : t("analysisEstimate")}
                     </p>
                   </>
                 )}
@@ -350,16 +411,19 @@ export default function AnalysisPage() {
               <div className="mt-5 pt-4 border-t border-[var(--border-custom)]/50 flex items-center gap-2 text-[10px] font-mono text-[var(--text-secondary)]/50">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    session.status === "running"
-                      ? "bg-[var(--blue)] pulse-blue"
-                      : session.status === "completed"
-                        ? "bg-[var(--green)]"
-                        : session.status === "failed"
-                          ? "bg-[var(--red)]"
-                          : "bg-[var(--text-secondary)]/30"
+                    isTimedOut
+                      ? "bg-[var(--amber)]"
+                      : session.status === "running"
+                        ? "bg-[var(--blue)] pulse-blue"
+                        : session.status === "completed"
+                          ? "bg-[var(--green)]"
+                          : session.status === "failed"
+                            ? "bg-[var(--red)]"
+                            : "bg-[var(--text-secondary)]/30"
                   }`}
                 />
-                {session.status === "running" && t("sessionRunning")}
+                {isTimedOut && <span className="text-[var(--amber)]/90">{t("sessionTimedOut")}</span>}
+                {!isTimedOut && session.status === "running" && t("sessionRunning")}
                 {session.status === "completed" && t("sessionCompleted")}
                 {session.status === "failed" && (
                   <span className="text-[var(--red)]/90">

@@ -17,11 +17,28 @@ export function getCustomMemoEntries(): InvestmentMemo[] {
   }
 }
 
-/** 首次加载时用 API 数据初始化 localStorage（仅在 localStorage 为空时写入） */
-export function seedMemosFromApi(memos: InvestmentMemo[]): void {
-  if (typeof window === "undefined") return;
-  if (localStorage.getItem(STORAGE_KEY)) return; // 已有数据，不覆盖
+/** 检查条目是否为默认占位符状态（用户未真正编辑过） */
+function isUninitialized(entries: InvestmentMemo[]): boolean {
+  if (entries.length === 0) return true;
+  return entries.every(
+    (m) => m.keyDriver === "—" && m.primaryRisk === "—" && m.timeHorizon === "—"
+  );
+}
+
+/** 首次加载时用 API 数据初始化 localStorage；若存量数据全为占位符也重新写入。返回是否实际写入 */
+export function seedMemosFromApi(memos: InvestmentMemo[]): boolean {
+  if (typeof window === "undefined") return false;
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try {
+      const existing = JSON.parse(raw) as InvestmentMemo[];
+      if (!isUninitialized(existing)) return false; // 用户有真实数据，不覆盖
+    } catch {
+      // 解析失败则覆盖
+    }
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(memos));
+  return true;
 }
 
 /** 批量保存全部备忘录条目 */

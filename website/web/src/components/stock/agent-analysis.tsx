@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { AgentAnalysis, AnalystInsight, KeyInsight, StockInsights } from "../../types";
+import { Signal } from "../../types/enums";
 import {
   Brain, TrendingUp, MessageCircle, ShieldAlert, Newspaper, Globe,
   FileText, ChevronRight, Zap, CheckCircle2, AlertTriangle,
@@ -19,17 +20,30 @@ const personalityConfig: Record<string, { borderClass: string; icon: typeof Brai
   macro: { borderClass: "agent-macro", icon: Globe, iconColor: "text-[var(--purple)]", labelKey: "agentLabelMacro", mapKey: "__macro__" },
 };
 
-const verdictStyles: Record<string, { bg: string; text: string }> = {
-  "看涨": { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]" },
-  "看跌": { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]" },
-  "中性": { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]" },
-  "强烈买入": { bg: "bg-[var(--green)]/15", text: "text-[var(--green)]" },
-  "买入": { bg: "bg-[var(--green)]/10", text: "text-[var(--green)]" },
-  "增持": { bg: "bg-[var(--blue)]/15", text: "text-[var(--blue)]" },
-  "持有": { bg: "bg-[var(--amber)]/15", text: "text-[var(--amber)]" },
-  "减持": { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]" },
-  "卖出": { bg: "bg-[var(--red)]/15", text: "text-[var(--red)]" },
-};
+// 从 verdict 字符串（英文/中文均支持）派生样式
+function getVerdictStyle(verdict: string): { bg: string; text: string } {
+  const v = verdict.toLowerCase();
+  if (/(bullish|strong.?buy|看涨|强烈买入|买入)/.test(v))
+    return { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]" };
+  if (/(bearish|sell|看跌|卖出|减持)/.test(v))
+    return { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]" };
+  // overweight / 增持
+  if (/(overweight|增持)/.test(v))
+    return { bg: "bg-[var(--blue)]/15", text: "text-[var(--blue)]" };
+  // neutral / hold / 中性 / 持有
+  return { bg: "bg-[var(--amber)]/15", text: "text-[var(--amber)]" };
+}
+
+// Signal Enum → display label（英文产品界面）
+function signalLabel(signal: Signal): string {
+  switch (signal) {
+    case Signal.STRONG_BUY:  return "Strong Buy";
+    case Signal.BUY:         return "Buy";
+    case Signal.SELL:        return "Sell";
+    case Signal.STRONG_SELL: return "Strong Sell";
+    default:                 return "Hold";
+  }
+}
 
 interface Props {
   data: AgentAnalysis[];
@@ -227,9 +241,11 @@ function AgentCard({
   index: number;
 }) {
   const t = useTranslations("stockComponents");
-  const verdict = insight?.verdict || agent.signal;
+  // insight?.verdict 可能是英文（"Bullish"）或 Signal Enum（"HOLD"）
+  // 统一：有 insight verdict 优先用它，否则把 Signal Enum 转成展示文字
+  const verdictRaw: string = insight?.verdict || signalLabel(agent.signal);
   const confidence = insight?.confidence || agent.conviction;
-  const verdictCfg = verdictStyles[verdict] || verdictStyles["持有"];
+  const verdictCfg = getVerdictStyle(verdictRaw);
   const keyInsights = buildKeyInsights(insight, agent);
 
   return (
@@ -254,7 +270,7 @@ function AgentCard({
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono text-[var(--green)]">{confidence}%</span>
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${verdictCfg.bg} ${verdictCfg.text}`}>
-              {verdict}
+              {verdictRaw}
             </span>
           </div>
         </div>
