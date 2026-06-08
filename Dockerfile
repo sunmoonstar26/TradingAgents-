@@ -26,4 +26,4 @@ WORKDIR /home/appuser/app
 
 COPY --from=builder --chown=appuser:appuser /build .
 
-CMD ["uvicorn", "main:app", "--app-dir", "website/api-server", "--host", "0.0.0.0", "--port", "8000"]
+CMD uvicorn main:app --app-dir website/api-server --host 0.0.0.0 --port ${PORT:-8000}
