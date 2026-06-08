@@ -25,5 +25,6 @@ USER appuser
 WORKDIR /home/appuser/app
 
 COPY --from=builder --chown=appuser:appuser /build .
+RUN chmod +x start.sh
 
-CMD uvicorn main:app --app-dir website/api-server --host 0.0.0.0 --port ${PORT:-8000}
+CMD ["./start.sh"]

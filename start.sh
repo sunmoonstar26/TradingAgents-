@@ -1,0 +1,2 @@
+#!/bin/sh
+exec uvicorn main:app --app-dir website/api-server --host 0.0.0.0 --port "${PORT:-8000}"
