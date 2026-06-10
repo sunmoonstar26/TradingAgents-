@@ -114,6 +114,42 @@ def start_analysis(req: StartRequest):
     t.start()
     return StartResponse(session_id=session_id, status="running")
 
+@app.get("/analysis/latest/{ticker}")
+def get_latest_analysis(ticker: str):
+    """返回该 ticker 最新完成的分析结果（按 session 创建时间倒序）。"""
+    ticker_upper = ticker.upper()
+    with _sessions_lock:
+        completed = [
+            (sid, s) for sid, s in _sessions.items()
+            if s.get("status") == "completed"
+            and sid.split("_")[1].upper() == ticker_upper
+            and s.get("result") is not None
+        ]
+    if not completed:
+        # 内存里没有，尝试从磁盘读
+        results_dir = API_SERVER_DIR / "data" / "analysis_results"
+        if results_dir.exists():
+            ticker_lower = ticker_upper.lower()
+            candidates = sorted(
+                [f for f in results_dir.glob(f"sess_{ticker_lower}_*.json")],
+                key=lambda f: f.stem,
+                reverse=True,
+            )
+            for f in candidates:
+                try:
+                    data = json.loads(f.read_text())
+                    if data.get("status") == "failed" or data.get("error"):
+                        continue
+                    return {"session_id": f.stem, "status": "completed", "result": data}
+                except Exception:
+                    continue
+        raise HTTPException(status_code=404, detail="No completed analysis found for this ticker")
+
+    # 按 session_id 时间戳排序，取最新
+    completed.sort(key=lambda x: x[0], reverse=True)
+    sid, s = completed[0]
+    return {"session_id": sid, "status": "completed", "result": s["result"]}
+
 @app.get("/analysis/{session_id}")
 def get_analysis(session_id: str):
     data = _get_session(session_id)
