@@ -22,6 +22,13 @@ function formatUpdatedAt(iso: string): string {
   }
 }
 
+// company.updated_at 来自 LEFT JOIN company_dashboard，类型标注为 string，
+// 但公司还没有 dashboard 记录时运行期实际是 null，直接 new Date(null) 会显示 1970/01/01，
+// 这里按其他字段（如 rating ?? "暂无数据"）同样的兜底风格处理，而不改动共享类型。
+function formatUpdatedAtOrFallback(iso: string | null | undefined): string {
+  return iso ? formatUpdatedAt(iso) : "暂无数据";
+}
+
 function CompanyCard({ company }: { company: CompanyDashboardSnapshot }) {
   const router = useRouter();
   const riskLevel =
@@ -55,7 +62,7 @@ function CompanyCard({ company }: { company: CompanyDashboardSnapshot }) {
         <span>{company.score != null ? `评分 ${company.score}` : "—"}</span>
       </div>
       <div className="text-[10px] text-[var(--text-secondary)]/40 font-mono mt-1">
-        {formatUpdatedAt(company.updated_at)}
+        {formatUpdatedAtOrFallback(company.updated_at)}
       </div>
     </button>
   );

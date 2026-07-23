@@ -56,5 +56,15 @@ export async function persistAnalysisResult(
     raw,
     detail,
   };
-  await emit("analysis.completed", event);
+  // event-bus 会让全部订阅者都执行完毕（互不阻断），再把期间捕获的错误汇总返回；
+  // 只要有订阅者失败，就在这里聚合成一个 Error 抛出，
+  // 恢复调用方（analysis-store.ts）原本能看到失败的可观测性契约。
+  const errors = await emit("analysis.completed", event);
+  if (errors.length > 0) {
+    throw new Error(
+      `[persistAnalysisResult] ${errors.length} 个订阅者执行失败: ${errors
+        .map((e) => (e instanceof Error ? e.message : String(e)))
+        .join("; ")}`
+    );
+  }
 }
