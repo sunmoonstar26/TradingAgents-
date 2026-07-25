@@ -4,6 +4,7 @@
 import type {
   TimelineEvent,
   Thesis,
+  InvestmentRationale,
   ResearchHistoryEntry,
   CompanyDashboardSnapshot,
 } from "@/types";
@@ -125,3 +126,49 @@ export async function getAllCompanies(): Promise<CompanyDashboardSnapshot[]> {
   `;
   return rows;
 }
+
+export async function getInvestmentRationale(
+  ticker: string
+): Promise<InvestmentRationale | null> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return null;
+
+  const sql = getDb();
+  const [row] = await sql<InvestmentRationale[]>`
+    select id, content, created_at
+    from knowledge_entries
+    where company_id = ${companyId} and category = 'investment_rationale'
+    limit 1
+  `;
+  return row ?? null;
+}
+
+export async function saveInvestmentRationale(
+  ticker: string,
+  content: string
+): Promise<InvestmentRationale> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) throw new Error(`Company not found: ${ticker}`);
+
+  const sql = getDb();
+  const [existing] = await sql<{ id: string }[]>`
+    select id from knowledge_entries
+    where company_id = ${companyId} and category = 'investment_rationale'
+    limit 1
+  `;
+
+  const [row] = existing
+    ? await sql<InvestmentRationale[]>`
+        update knowledge_entries
+        set content = ${content}, created_at = now()
+        where id = ${existing.id}
+        returning id, content, created_at
+      `
+    : await sql<InvestmentRationale[]>`
+        insert into knowledge_entries (company_id, category, title, content)
+        values (${companyId}, 'investment_rationale', 'Investment Rationale', ${content})
+        returning id, content, created_at
+      `;
+  return row;
+}
+
