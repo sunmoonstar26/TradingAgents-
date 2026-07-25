@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { NotebookPen, Pencil } from "lucide-react";
+import { NotebookPen, Pencil, AlertTriangle } from "lucide-react";
 import { InvestmentRationale as InvestmentRationaleType } from "../../types";
 
 interface Props {
@@ -28,12 +28,20 @@ export function InvestmentRationale({ ticker }: Props) {
   const qc = useQueryClient();
   const queryKey = ["rationale", ticker];
 
-  const { data, isLoading } = useQuery<{ success: boolean; data: InvestmentRationaleType | null }>({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery<{
+    success: boolean;
+    data: InvestmentRationaleType | null;
+  }>({
     queryKey,
     queryFn: () => fetch(`/api/stocks/${ticker}/rationale`).then((r) => r.json()),
     retry: false,
   });
 
+  // Treat a thrown/network fetch failure as an error state. Also treat an
+  // explicit `success: false` body as an error, defensively, even though the
+  // current GET route always returns `success: true` — this keeps the UI
+  // correct if that ever changes without needing another audit here.
+  const isRationaleError = isError || (!!data && data.success === false);
   const rationale = data?.data ?? null;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -120,6 +128,20 @@ export function InvestmentRationale({ ticker }: Props) {
                 {"取消"}
               </button>
             </div>
+          </div>
+        ) : isRationaleError ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <AlertTriangle className="w-6 h-6 text-[var(--red)]/60 mb-3" />
+            <p className="text-[12px] text-[var(--text-secondary)]">
+              {"加载失败，暂时无法确认是否已有投资理由"}
+            </p>
+            <button
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              className="mt-3 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-50"
+            >
+              {isRefetching ? "重试中..." : "重试"}
+            </button>
           </div>
         ) : rationale ? (
           <div className="space-y-2">
