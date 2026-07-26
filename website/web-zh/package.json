@@ -9,7 +9,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --env-file=.env.local --test --test-force-exit \"src/**/*.test.ts\""
+    "test": "tsx --env-file=.env.local --test --test-force-exit \"src/**/*.test.ts\" \"scripts/**/*.test.ts\""
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
