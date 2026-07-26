@@ -4,12 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { AIResearchConsole } from "@/components/dashboard/research-console";
 import { CompanyCenter } from "@/components/dashboard/company-center";
-import { OpportunityRadar } from "@/components/dashboard/opportunity-radar";
+import { IndustryBriefingSection } from "@/components/dashboard/industry-briefing-section";
 import { PrivateZone } from "@/components/auth/PrivateZone";
 import { DashboardData } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCustomRadarEntries } from "@/lib/radar-store";
-import { useMemo, useState, useEffect } from "react";
 
 function DashboardSkeleton() {
   return (
@@ -34,25 +32,6 @@ export default function DashboardPage() {
     refetchInterval: 30_000,
   });
 
-  const [radarKey, setRadarKey] = useState(0);
-
-  useEffect(() => {
-    function onRadarChange() {
-      setRadarKey((k) => k + 1);
-    }
-    window.addEventListener("ta_radar_change", onRadarChange);
-    setRadarKey((k) => k + 1);
-    return () => window.removeEventListener("ta_radar_change", onRadarChange);
-  }, []);
-
-  const mergedOpportunities = useMemo(() => {
-    const apiOpportunities = data?.data?.opportunities ?? [];
-    const custom = getCustomRadarEntries();
-    if (custom !== null) return custom;
-    return apiOpportunities;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.data?.opportunities, radarKey]);
-
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data?.data) {
     return (
@@ -69,19 +48,16 @@ export default function DashboardPage() {
       <Header />
 
       <main className="px-4 md:px-6 py-6 max-w-[1600px] mx-auto space-y-10">
-        {/* 0. 已研究公司 */}
+        {/* 0. 新能源车产业资讯 */}
+        <IndustryBriefingSection />
+
+        {/* 1. 已研究公司 */}
         <CompanyCenter />
 
         {/* 1. AI 研究控制台 */}
         <PrivateZone label={"AI 研究控制台"}>
           <AIResearchConsole />
         </PrivateZone>
-
-        {/* 2. AI 机会雷达 */}
-        <OpportunityRadar
-          data={mergedOpportunities}
-          onSave={() => setRadarKey((k) => k + 1)}
-        />
 
         {/* 底部 */}
         <div className="text-center pt-4 pb-8">
