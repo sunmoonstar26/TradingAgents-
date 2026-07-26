@@ -231,3 +231,6 @@ website/.next/
 website/node_modules/
 website/data/analysis_results/
 .vercel
+
+# Local git worktrees (scratch, per-branch isolated workspaces)
+.worktrees/
