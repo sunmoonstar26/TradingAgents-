@@ -37,12 +37,21 @@ export function InvestmentRationale({ ticker }: Props) {
     retry: false,
   });
 
-  // Treat a thrown/network fetch failure as an error state. Also treat an
-  // explicit `success: false` body as an error, defensively, even though the
-  // current GET route always returns `success: true` — this keeps the UI
-  // correct if that ever changes without needing another audit here.
-  const isRationaleError = isError || (!!data && data.success === false);
   const rationale = data?.data ?? null;
+
+  // Only treat this as a blocking error state when we have no usable data to
+  // fall back on. `isError` can flip to true on a *background* refetch
+  // failure (e.g. window-refocus refetch, transient network blip) while
+  // `data`/`rationale` still holds the last successfully-fetched value —
+  // in that case the real content is still correct and should keep
+  // rendering normally (with "编辑" available), not get hidden behind an
+  // error screen. `isError && !rationale` covers the original bug (a failed
+  // *initial* load, with nothing to show yet). The `data.success === false`
+  // check is a separate, unrelated defensive case — the current GET route
+  // always returns `success: true`, but this keeps the UI correct if that
+  // ever changes without needing another audit here.
+  const isRationaleError =
+    (isError && !rationale) || (!!data && data.success === false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState("");
