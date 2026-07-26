@@ -114,8 +114,9 @@ test("POST 空 content 返回 400", async () => {
 });
 
 test("POST 在生产环境返回 403", async () => {
-  const original = process.env.NODE_ENV;
-  process.env.NODE_ENV = "production";
+  const env = process.env as Record<string, string | undefined>;
+  const original = env.NODE_ENV;
+  env.NODE_ENV = "production";
   try {
     const req = new Request("http://localhost/api/industry-news", {
       method: "POST",
@@ -124,7 +125,7 @@ test("POST 在生产环境返回 403", async () => {
     const res = await POST(req);
     assert.equal(res.status, 403);
   } finally {
-    process.env.NODE_ENV = original;
+    env.NODE_ENV = original;
   }
 });
 
@@ -172,8 +173,9 @@ test("DELETE 非法日期格式返回 400", async () => {
 });
 
 test("DELETE 在生产环境返回 403", async () => {
-  const original = process.env.NODE_ENV;
-  process.env.NODE_ENV = "production";
+  const env = process.env as Record<string, string | undefined>;
+  const original = env.NODE_ENV;
+  env.NODE_ENV = "production";
   try {
     const req = new Request("http://localhost/api/industry-news", {
       method: "DELETE",
@@ -182,7 +184,7 @@ test("DELETE 在生产环境返回 403", async () => {
     const res = await DELETE(req);
     assert.equal(res.status, 403);
   } finally {
-    process.env.NODE_ENV = original;
+    env.NODE_ENV = original;
   }
 });
 
