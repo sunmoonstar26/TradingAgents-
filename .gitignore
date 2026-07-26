@@ -234,3 +234,6 @@ website/data/analysis_results/
 
 # Local git worktrees (scratch, per-branch isolated workspaces)
 .worktrees/
+
+# Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+.superpowers/
