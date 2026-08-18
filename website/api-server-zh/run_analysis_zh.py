@@ -82,6 +82,14 @@ def run_analysis(ticker: str, analysis_date: str, market: str) -> dict:
     financial_statement_analysis = _extract_financial_statement_analysis(
         ticker, final_state.get("fundamentals_report", ""), llm=graph.quick_thinking_llm
     )
+    business_engine_scan = _extract_business_engines(
+        ticker,
+        company_name,
+        final_state.get("fundamentals_report", ""),
+        financial_statement_analysis,
+        news_items,
+        llm=graph.quick_thinking_llm,
+    )
 
     return {
         "ticker": ticker.upper(),
@@ -117,6 +125,7 @@ def run_analysis(ticker: str, analysis_date: str, market: str) -> dict:
         "model": model_label,
         "news_items": news_items,
         "financial_statement_analysis": financial_statement_analysis,
+        "business_engine_scan": business_engine_scan,
     }
 
 
@@ -183,6 +192,38 @@ def _extract_financial_statement_analysis(
     except Exception as e:
         emit({"type": "warning", "message": f"财报解读提取失败: {e}"})
         return ""
+
+
+def _extract_business_engines(
+    ticker: str,
+    company_name: str,
+    fundamentals_report: str,
+    financial_statement_analysis: str,
+    news_items: list[dict],
+    llm=None,
+) -> list[dict]:
+    if llm is None:
+        return []
+
+    try:
+        from tradingagents.dataflows.business_engine_extractor import (
+            extract_business_engines,
+        )
+        # 首次实现暂不查询已有 Business Engine 名称（该查询发生在 Node/Postgres 侧，
+        # Python 子进程不持有数据库连接）；known_engine_names 留空列表，LLM 仍能正常
+        # 识别业务，只是本次无法主动对齐历史命名——足够支撑第一阶段验收标准。
+        return extract_business_engines(
+            llm,
+            ticker,
+            company_name,
+            fundamentals_report,
+            financial_statement_analysis,
+            news_items,
+            known_engine_names=[],
+        )
+    except Exception as e:
+        emit({"type": "warning", "message": f"Business Engine 提取失败: {e}"})
+        return []
 
 
 def _save_report_files(ticker: str, final_state: dict, decision: str) -> Optional[Path]:
