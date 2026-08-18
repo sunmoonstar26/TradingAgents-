@@ -63,6 +63,34 @@ export const TARawResultSchema = z.object({
   // 利润表相关解读（简体中文），供财报解读版本历史使用；历史样本 JSON 文件
   // 没有这个字段，且提取失败时上游会兜底空字符串，设为可选并兜底空字符串
   financial_statement_analysis: z.string().optional().default(""),
+  // 每个 Business Engine 的完整状态（Python 端 business_engine_extractor.py 输出）。
+  // 历史样本 JSON 文件没有这个字段，且提取失败时上游兜底空数组，设为可选并兜底空数组。
+  business_engine_scan: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        customer_segment: z.array(z.string()),
+        product_or_service: z.string().nullable().optional(),
+        monetization_model: z.array(z.string()),
+        revenue_role: z.string(),
+        lifecycle_stage: z.string(),
+        trend: z.string(),
+        confidence: z.string(),
+        evidence: z.array(
+          z.object({
+            source: z.string(),
+            source_type: z.enum(["news", "financial_statement"]),
+            date: z.string(),
+            claim: z.string(),
+            direction: z.enum(["POSITIVE", "NEGATIVE", "NEUTRAL"]),
+            confidence: z.string(),
+          })
+        ),
+      })
+    )
+    .optional()
+    .default([]),
 });
 
 /** run_analysis_zh.py:225 失败分支写出的字段（子进程抛异常时的另一种 shape） */
