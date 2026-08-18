@@ -11,6 +11,7 @@ import "./analysis-subscribers/write-timeline-event";
 import "./analysis-subscribers/write-thesis";
 import "./analysis-subscribers/write-dashboard";
 import "./analysis-subscribers/write-research-history";
+import "./analysis-subscribers/write-business-engine";
 
 export async function persistAnalysisResult(
   raw: TARawResult,
