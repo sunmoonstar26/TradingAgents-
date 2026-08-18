@@ -13,7 +13,7 @@ financial_statement_extractor.py 的思路：一次 with_structured_output 调�
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -51,7 +51,7 @@ class BusinessEngineItem(BaseModel):
     name: str = Field(description="具体的赚钱路数名称，专有名词保留英文原文，如 Azure/AWS/iPhone，不使用过于宽泛的词如 Cloud/AI")
     description: str = Field(description="一句话简体中文说明这项业务如何赚钱")
     customer_segment: list[CustomerSegmentLiteral]
-    product_or_service: str | None = None
+    product_or_service: Optional[str] = None
     monetization_model: list[MonetizationModelLiteral]
     revenue_role: RevenueRoleLiteral
     lifecycle_stage: LifecycleStageLiteral
