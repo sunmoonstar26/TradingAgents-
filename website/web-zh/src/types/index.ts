@@ -1,5 +1,13 @@
-import { Signal, RiskLevel, AlertLevel, AgentPersonality } from "./enums";
-export { Signal, RiskLevel, AlertLevel, AgentPersonality };
+import {
+  Signal, RiskLevel, AlertLevel, AgentPersonality,
+  RevenueRole, LifecycleStage, EngineTrend, EngineConfidence,
+  EngineChangeType, CustomerSegment, MonetizationModel,
+} from "./enums";
+export {
+  Signal, RiskLevel, AlertLevel, AgentPersonality,
+  RevenueRole, LifecycleStage, EngineTrend, EngineConfidence,
+  EngineChangeType, CustomerSegment, MonetizationModel,
+};
 
 // ===== TradingAgents AI 对冲基金操作系统 — 前端类型 =====
 
@@ -448,4 +456,58 @@ export interface CompanyDashboardSnapshot {
   opportunity: string | null;
   summary: string | null;
   updated_at: string;
+}
+
+// ── Business Engine：公司赚钱路数追踪 ──
+
+export interface BusinessEngineEvidence {
+  source: string;
+  source_type: "news" | "financial_statement";
+  date: string;
+  claim: string;
+  direction: "POSITIVE" | "NEGATIVE" | "NEUTRAL";
+  confidence: EngineConfidence;
+}
+
+export interface BusinessEngine {
+  id: string;
+  name: string;
+  description: string;
+  customer_segment: CustomerSegment[];
+  product_or_service: string | null;
+  monetization_model: MonetizationModel[];
+  revenue_role: RevenueRole;
+  lifecycle_stage: LifecycleStage;
+  trend: EngineTrend;
+  confidence: EngineConfidence;
+  evidence: BusinessEngineEvidence[];
+  last_verified_at: string;
+  updated_at: string;
+}
+
+export interface BusinessEngineSnapshot {
+  id: string;
+  business_engine_id: string;
+  name: string;
+  revenue_role: RevenueRole;
+  lifecycle_stage: LifecycleStage;
+  trend: EngineTrend;
+  confidence: EngineConfidence;
+  change_type: EngineChangeType;
+  change_reason: string | null;
+  created_at: string;
+}
+
+/** Python 端 business_engine_extractor.py 输出的单条结果（尚未落库，无 id/时间戳） */
+export interface ExtractedBusinessEngine {
+  name: string;
+  description: string;
+  customer_segment: CustomerSegment[];
+  product_or_service: string | null;
+  monetization_model: MonetizationModel[];
+  revenue_role: RevenueRole;
+  lifecycle_stage: LifecycleStage;
+  trend: EngineTrend;
+  confidence: EngineConfidence;
+  evidence: BusinessEngineEvidence[];
 }
