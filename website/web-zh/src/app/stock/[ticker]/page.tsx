@@ -20,7 +20,7 @@ import { LiveRail } from "@/components/stock/live-rail";
 import { AnalyzingState } from "@/components/stock/analyzing-state";
 import { CompanyTimeline } from "@/components/stock/company-timeline";
 import { ThesisHistory } from "@/components/stock/thesis-history";
-import { CompanyOverview } from "@/components/stock/company-overview";
+import { BusinessEnginesSection } from "@/components/stock/business-engines";
 import { ResearchArchive } from "@/components/stock/research-archive";
 import { StockDetail, AnalysisStartResponse, StockInsights } from "@/types";
 import { findStock } from "@/data/stocks";
@@ -450,7 +450,7 @@ export default function StockDetailPage() {
 
         <ThesisHistory ticker={ticker} />
 
-        <CompanyOverview ticker={ticker} />
+        <BusinessEnginesSection ticker={ticker} />
 
         <ResearchArchive ticker={ticker} />
       </main>
