@@ -19,11 +19,25 @@ function compareRoleRank(previous: RevenueRole, incoming: RevenueRole): number {
   return REVENUE_ROLE_RANK[incoming] - REVENUE_ROLE_RANK[previous];
 }
 
+/**
+ * 判定单个 Business Engine 相对上一次记录状态发生的变化类型。
+ *
+ * @param previous 该业务在数据库中的上一条记录；为 null 表示这个名字还没有记录。
+ * @param incoming 本次分析新提取出的业务状态。
+ * @param companyHasBaseline 该公司是否已经有过任意 Business Engine 记录（公司级事实，
+ *   与具体某个 engine 无关）。用于区分 previous 为 null 的两种情况：
+ *   - false：公司从未有过任何业务记录 —— 真正的首次建立基线，判定为 BASELINE。
+ *   - true：公司已有其他业务记录，只是这个名字是新出现的 —— 判定为 NEW（新识别的赚钱路数）。
+ */
 export function detectChange(
   previous: BusinessEngine | null,
-  incoming: ExtractedBusinessEngine
+  incoming: ExtractedBusinessEngine,
+  companyHasBaseline: boolean
 ): { changeType: EngineChangeType; reason: string } {
   if (!previous) {
+    if (companyHasBaseline) {
+      return { changeType: EngineChangeType.NEW, reason: "新识别的赚钱路数" };
+    }
     return { changeType: EngineChangeType.BASELINE, reason: "首次建立业务基线" };
   }
 

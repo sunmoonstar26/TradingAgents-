@@ -279,6 +279,7 @@ export default function StockDetailPage() {
     qc.invalidateQueries({ queryKey: ["stock-theses", ticker] });
     qc.invalidateQueries({ queryKey: ["stock-research-history", ticker] });
     qc.invalidateQueries({ queryKey: ["stock-overview", ticker] });
+    qc.invalidateQueries({ queryKey: ["stock-business-engines", ticker] });
     qc.invalidateQueries({ queryKey: ["stock-memory", ticker] });
   }, [reanalyzeSessionStatus, reanalyzeSessionId, qc, ticker]);
 
@@ -367,6 +368,7 @@ export default function StockDetailPage() {
           ["stock-theses", ticker],
           ["stock-research-history", ticker],
           ["stock-overview", ticker],
+          ["stock-business-engines", ticker],
           ["stock-memory", ticker],
         ]}
       />

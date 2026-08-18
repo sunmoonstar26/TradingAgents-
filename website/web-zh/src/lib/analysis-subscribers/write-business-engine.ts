@@ -13,10 +13,11 @@ on<AnalysisCompletedEvent>("analysis.completed", async (event) => {
     select * from business_engines where company_id = ${event.companyId}
   `;
   const existingByName = new Map(existing.map((e) => [e.name, e]));
+  const companyHasBaseline = existing.length > 0;
 
   for (const item of scan) {
     const previous = existingByName.get(item.name) ?? null;
-    const { changeType, reason } = detectChange(previous, item as ExtractedBusinessEngine);
+    const { changeType, reason } = detectChange(previous, item as ExtractedBusinessEngine, companyHasBaseline);
 
     const [engine] = await sql`
       insert into business_engines (

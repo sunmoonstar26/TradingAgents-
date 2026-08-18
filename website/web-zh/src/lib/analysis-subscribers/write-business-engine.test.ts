@@ -154,3 +154,69 @@ test("write-business-engine 订阅者第二次分析时按历史状态比较并 
   assert.equal(snapshots[0].change_type, EngineChangeType.BASELINE);
   assert.equal(snapshots[1].change_type, EngineChangeType.PROMOTED);
 });
+
+test("write-business-engine 订阅者在已有基线的公司出现新业务时判定为 NEW，原有业务判定为 STABLE", async () => {
+  const sql = getDb();
+  const companyId = await createTestCompany("D");
+  const firstAnalysisId = await createTestAnalysisResult(companyId, "test-session-wbe-new-1");
+
+  await emit(
+    "analysis.completed",
+    makeEvent(companyId, firstAnalysisId, "test-session-wbe-new-1", [
+      {
+        name: "Azure",
+        description: "云服务收入",
+        customer_segment: ["ENTERPRISE"],
+        product_or_service: "Cloud Infrastructure",
+        monetization_model: ["USAGE_BASED"],
+        revenue_role: "CORE",
+        lifecycle_stage: "SCALING",
+        trend: "STABLE",
+        confidence: "HIGH",
+        evidence: [],
+      },
+    ])
+  );
+
+  const secondAnalysisId = await createTestAnalysisResult(companyId, "test-session-wbe-new-2");
+  await emit(
+    "analysis.completed",
+    makeEvent(companyId, secondAnalysisId, "test-session-wbe-new-2", [
+      {
+        name: "Azure",
+        description: "云服务收入",
+        customer_segment: ["ENTERPRISE"],
+        product_or_service: "Cloud Infrastructure",
+        monetization_model: ["USAGE_BASED"],
+        revenue_role: "CORE",
+        lifecycle_stage: "SCALING",
+        trend: "STABLE",
+        confidence: "HIGH",
+        evidence: [],
+      },
+      {
+        name: "Copilot",
+        description: "AI 助理订阅收入",
+        customer_segment: ["ENTERPRISE", "DEVELOPER"],
+        product_or_service: "AI Copilot",
+        monetization_model: ["SUBSCRIPTION"],
+        revenue_role: "EMERGING",
+        lifecycle_stage: "SCALING",
+        trend: "UP",
+        confidence: "MEDIUM",
+        evidence: [],
+      },
+    ])
+  );
+
+  const snapshots = await sql<{ name: string; change_type: string }[]>`
+    select be.name, s.change_type from business_engine_snapshots s
+    join business_engines be on be.id = s.business_engine_id
+    where s.company_id = ${companyId} and s.analysis_result_id = ${secondAnalysisId}
+  `;
+  const azureSnapshot = snapshots.find((s) => s.name === "Azure");
+  const copilotSnapshot = snapshots.find((s) => s.name === "Copilot");
+
+  assert.equal(azureSnapshot?.change_type, EngineChangeType.STABLE, "已有业务无变化应判定为 STABLE");
+  assert.equal(copilotSnapshot?.change_type, EngineChangeType.NEW, "已有基线公司的新业务应判定为 NEW");
+});
