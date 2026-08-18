@@ -8,6 +8,7 @@ import type {
   ProphetIndicator,
   ResearchHistoryEntry,
   CompanyDashboardSnapshot,
+  BusinessEngine,
 } from "@/types";
 import { getDb } from "./db";
 
@@ -263,5 +264,31 @@ export async function saveProphetIndicator(
         returning id, content, created_at
       `;
   return row;
+}
+
+export async function getBusinessEngines(ticker: string): Promise<BusinessEngine[]> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return [];
+
+  const sql = getDb();
+  const rows = await sql<BusinessEngine[]>`
+    select
+      id, name, description, customer_segment, product_or_service,
+      monetization_model, revenue_role, lifecycle_stage, trend, confidence,
+      evidence, last_verified_at, updated_at
+    from business_engines
+    where company_id = ${companyId}
+    order by
+      case revenue_role
+        when 'CORE' then 1
+        when 'MAJOR' then 2
+        when 'EMERGING' then 3
+        when 'EXPERIMENTAL' then 4
+        when 'DECLINING' then 5
+        else 6
+      end,
+      name
+  `;
+  return rows;
 }
 
