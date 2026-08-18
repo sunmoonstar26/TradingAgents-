@@ -35,3 +35,80 @@ export enum AgentPersonality {
   NEWS        = "news",
   MACRO       = "macro",
 }
+
+export enum RevenueRole {
+  CORE         = "CORE",
+  MAJOR        = "MAJOR",
+  EMERGING     = "EMERGING",
+  EXPERIMENTAL = "EXPERIMENTAL",
+  DECLINING    = "DECLINING",
+  UNKNOWN      = "UNKNOWN",
+}
+
+export enum LifecycleStage {
+  ANNOUNCED          = "ANNOUNCED",
+  LAUNCHED           = "LAUNCHED",
+  EARLY_ADOPTION     = "EARLY_ADOPTION",
+  REVENUE_GENERATING = "REVENUE_GENERATING",
+  SCALING            = "SCALING",
+  CORE               = "CORE",
+  DECLINING          = "DECLINING",
+  RESTRUCTURING      = "RESTRUCTURING",
+  ABANDONED          = "ABANDONED",
+  UNKNOWN            = "UNKNOWN",
+}
+
+export enum EngineTrend {
+  UP      = "UP",
+  STABLE  = "STABLE",
+  DOWN    = "DOWN",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum EngineConfidence {
+  HIGH   = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW    = "LOW",
+}
+
+export enum EngineChangeType {
+  BASELINE  = "BASELINE",
+  NEW       = "NEW",
+  GROWING   = "GROWING",
+  STABLE    = "STABLE",
+  WEAKENING = "WEAKENING",
+  DECLINING = "DECLINING",
+  PROMOTED  = "PROMOTED",
+  DEMOTED   = "DEMOTED",
+  ABANDONED = "ABANDONED",
+  UNCERTAIN = "UNCERTAIN",
+}
+
+export enum CustomerSegment {
+  CONSUMER               = "CONSUMER",
+  ENTERPRISE             = "ENTERPRISE",
+  DEVELOPER              = "DEVELOPER",
+  ADVERTISER             = "ADVERTISER",
+  FINANCIAL_INSTITUTION  = "FINANCIAL_INSTITUTION",
+  GOVERNMENT             = "GOVERNMENT",
+  SMB                    = "SMB",
+  CREATOR                = "CREATOR",
+  PLATFORM_MERCHANT      = "PLATFORM_MERCHANT",
+  AI_COMPANY             = "AI_COMPANY",
+  OTHER                  = "OTHER",
+  UNKNOWN                = "UNKNOWN",
+}
+
+export enum MonetizationModel {
+  SUBSCRIPTION        = "SUBSCRIPTION",
+  USAGE_BASED         = "USAGE_BASED",
+  ADVERTISING         = "ADVERTISING",
+  TRANSACTION_FEE     = "TRANSACTION_FEE",
+  HARDWARE_SALES      = "HARDWARE_SALES",
+  LICENSING           = "LICENSING",
+  FREEMIUM            = "FREEMIUM",
+  DATA_SALES          = "DATA_SALES",
+  PARTNERSHIP_REVENUE = "PARTNERSHIP_REVENUE",
+  OTHER               = "OTHER",
+  UNKNOWN             = "UNKNOWN",
+}
