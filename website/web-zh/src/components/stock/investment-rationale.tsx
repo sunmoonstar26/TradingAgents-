@@ -141,7 +141,7 @@ export function InvestmentRationale({ ticker }: Props) {
         ) : isRationaleError ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <AlertTriangle className="w-6 h-6 text-[var(--red)]/60 mb-3" />
-            <p className="text-[12px] text-[var(--text-secondary)]">
+            <p className="text-[11px] text-[var(--text-secondary)]">
               {"加载失败，暂时无法确认是否已有投资理由"}
             </p>
             <button
@@ -173,7 +173,7 @@ export function InvestmentRationale({ ticker }: Props) {
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <NotebookPen className="w-6 h-6 text-[var(--text-secondary)]/40 mb-3" />
-            <p className="text-[12px] text-[var(--text-secondary)]">{"暂无投资理由"}</p>
+            <p className="text-[11px] text-[var(--text-secondary)]">{"暂无投资理由"}</p>
             <button
               onClick={startEditing}
               className="mt-3 rounded-lg px-3 py-1.5 text-[11px] font-semibold bg-[var(--blue)]/10 text-[var(--blue)] hover:bg-[var(--blue)]/20 transition-colors"

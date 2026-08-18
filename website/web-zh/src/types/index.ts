@@ -202,14 +202,17 @@ export interface PositionAllocation {
   exitTrigger: string;
 }
 
-// ── 系统学习记忆（替代旧 Reflection） ──
+// ── 系统学习记忆：TradingMemoryLog 反思日志条目（trading_memory.md）──
 
-export interface LearningMemory {
+export interface LearningMemoryEntry {
   date: string;
-  whatHappened: string;
-  whatAgentsMissed: string;
-  systemAdjustment: string;
-  pnl: string;
+  rating: string;
+  pending: boolean;
+  rawReturn: string | null;
+  alphaReturn: string | null;
+  holdingDays: string | null;
+  decision: string;
+  reflection: string;
 }
 
 // ── Stock Detail 完整数据 ──
@@ -228,7 +231,6 @@ export interface StockDetail {
   agentAnalyses: AgentAnalysis[];
   riskExposures: RiskExposure[];
   positionAllocation: PositionAllocation;
-  learningMemory: LearningMemory[];
   liveRail: LiveFeedEntry[];
   updatedAt: string;
 }
@@ -270,6 +272,7 @@ export interface AnalysisStartRequest {
 export interface AnalysisStartResponse {
   success: boolean;
   session_id: string;
+  error?: string;
 }
 
 export interface AnalysisSession {
@@ -363,18 +366,6 @@ export interface RiskInsight {
   error?: string;
 }
 
-export interface MemoryLearning {
-  what_happened: string;
-  what_missed: string;
-  system_adjustment: string;
-  future_impact: string;
-}
-
-export interface MemoryInsight {
-  learnings: MemoryLearning[];
-  error?: string;
-}
-
 export interface ThesisInsight {
   final_signal: string;
   investment_thesis: string;    // 核心投资论点（1-2句）
@@ -395,7 +386,6 @@ export interface StockInsights {
   debate: Record<string, DebateInsight>;
   trading: TradingInsight;
   risk: RiskInsight;
-  memory: MemoryInsight;
   thesis: ThesisInsight;
 }
 
@@ -409,6 +399,7 @@ export interface TimelineEvent {
   title: string;
   description: string | null;
   source: string | null;
+  source_url: string | null;
   occurred_at: string;
 }
 
@@ -423,6 +414,12 @@ export interface Thesis {
 }
 
 export interface InvestmentRationale {
+  id: string;
+  content: string;
+  created_at: string;
+}
+
+export interface ProphetIndicator {
   id: string;
   content: string;
   created_at: string;

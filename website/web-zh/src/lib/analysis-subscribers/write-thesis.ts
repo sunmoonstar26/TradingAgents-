@@ -3,6 +3,9 @@ import { getDb } from "../db";
 import type { AnalysisCompletedEvent } from "@/types/events";
 
 on<AnalysisCompletedEvent>("analysis.completed", async (event) => {
+  const content = event.raw.financial_statement_analysis;
+  if (!content) return;
+
   const sql = getDb();
 
   const [lastThesis] = await sql<{ version: number }[]>`
@@ -18,7 +21,7 @@ on<AnalysisCompletedEvent>("analysis.completed", async (event) => {
     values (
       ${event.companyId},
       ${(previousVersion ?? 0) + 1},
-      ${event.detail.committeeDecision.rationale},
+      ${content},
       ${previousVersion}
     )
   `;

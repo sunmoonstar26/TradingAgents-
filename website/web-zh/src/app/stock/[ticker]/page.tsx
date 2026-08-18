@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/header";
 import { StockHeader } from "@/components/stock/stock-header";
 import { FinalDecision } from "@/components/stock/final-decision";
 import { InvestmentRationale } from "@/components/stock/investment-rationale";
+import { ProphetIndicator } from "@/components/stock/prophet-indicator";
 import { BullBearDebate } from "@/components/stock/bull-bear-debate";
 import { MultiAgentAnalysis } from "@/components/stock/agent-analysis";
 import { RiskAnalysis } from "@/components/stock/risk-analysis";
@@ -21,7 +22,6 @@ import { CompanyTimeline } from "@/components/stock/company-timeline";
 import { ThesisHistory } from "@/components/stock/thesis-history";
 import { CompanyOverview } from "@/components/stock/company-overview";
 import { ResearchArchive } from "@/components/stock/research-archive";
-import { STOCK_WORKSPACE_TABS } from "@/content/labels";
 import { StockDetail, AnalysisStartResponse, StockInsights } from "@/types";
 import { findStock } from "@/data/stocks";
 import { syncRadarFull, parseConsensus } from "@/lib/radar-store";
@@ -178,7 +178,9 @@ export default function StockDetailPage() {
   const ticker = (params.ticker as string).toUpperCase();
   const [reanalyzeSessionId, setReanalyzeSessionId] = useState<string | null>(null);
   const [isStartingReanalysis, setIsStartingReanalysis] = useState(false);
+  const [reanalyzeError, setReanalyzeError] = useState<string | null>(null);
   const reanalyzeInvalidatedRef = useRef<string | null>(null);
+  const reanalyzeFailedRef = useRef<string | null>(null);
 
   const { data, isLoading, error } = useQuery<{
     success: boolean;
@@ -214,7 +216,10 @@ export default function StockDetailPage() {
 
   const { data: reanalyzeStatus } = useQuery<{
     success: boolean;
-    data?: { status: "pending" | "running" | "completed" | "failed" };
+    data?: {
+      status: "pending" | "running" | "completed" | "failed";
+      error_message?: string | null;
+    };
   }>({
     queryKey: ["analysis-session", reanalyzeSessionId],
     queryFn: () => fetch(`/api/analysis/${reanalyzeSessionId}`).then((r) => r.json()),
@@ -235,6 +240,7 @@ export default function StockDetailPage() {
 
   const handleReanalyze = useCallback(async () => {
     setIsStartingReanalysis(true);
+    setReanalyzeError(null);
     try {
       const stockInfo = findStock(ticker);
       const res = await fetch("/api/analysis/start", {
@@ -250,8 +256,13 @@ export default function StockDetailPage() {
       const result: AnalysisStartResponse = await res.json();
       if (result.success) {
         reanalyzeInvalidatedRef.current = null;
+        reanalyzeFailedRef.current = null;
         setReanalyzeSessionId(result.session_id);
+      } else {
+        setReanalyzeError(result.error ?? "启动分析失败，请重试");
       }
+    } catch {
+      setReanalyzeError("启动分析失败，请检查网络后重试");
     } finally {
       setIsStartingReanalysis(false);
     }
@@ -268,7 +279,16 @@ export default function StockDetailPage() {
     qc.invalidateQueries({ queryKey: ["stock-theses", ticker] });
     qc.invalidateQueries({ queryKey: ["stock-research-history", ticker] });
     qc.invalidateQueries({ queryKey: ["stock-overview", ticker] });
+    qc.invalidateQueries({ queryKey: ["stock-memory", ticker] });
   }, [reanalyzeSessionStatus, reanalyzeSessionId, qc, ticker]);
+
+  useEffect(() => {
+    if (!reanalyzeSessionId) return;
+    if (reanalyzeSessionStatus !== "failed") return;
+    if (reanalyzeFailedRef.current === reanalyzeSessionId) return;
+    reanalyzeFailedRef.current = reanalyzeSessionId;
+    setReanalyzeError(reanalyzeStatus?.data?.error_message ?? "分析失败，请重试");
+  }, [reanalyzeSessionStatus, reanalyzeSessionId, reanalyzeStatus]);
 
   useEffect(() => {
     const d = data?.data;
@@ -347,6 +367,7 @@ export default function StockDetailPage() {
           ["stock-theses", ticker],
           ["stock-research-history", ticker],
           ["stock-overview", ticker],
+          ["stock-memory", ticker],
         ]}
       />
     );
@@ -376,20 +397,15 @@ export default function StockDetailPage() {
         <StockHeader
           ticker={d.ticker}
           name={d.name}
-          price={d.price}
-          change={d.change}
-          changePercent={d.changePercent}
           marketCap={d.marketCap}
           pe={d.pe}
           sector={d.sector}
         />
 
         <section className="space-y-5">
-          <h2 className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">
-            {STOCK_WORKSPACE_TABS.analysis}
-          </h2>
-
           <InvestmentRationale ticker={ticker} />
+
+          <ProphetIndicator ticker={ticker} />
 
           <FinalDecision
             signal={d.committeeDecision.signal}
@@ -399,9 +415,13 @@ export default function StockDetailPage() {
             timeHorizon={d.committeeDecision.timeHorizon}
             rationale={d.committeeDecision.rationale}
             reportDate={d.updatedAt}
+            price={d.price}
+            change={d.change}
+            changePercent={d.changePercent}
             thesis={insights?.thesis}
             onReanalyze={handleReanalyze}
             isReanalyzing={isStartingReanalysis || isReanalyzing}
+            reanalyzeError={reanalyzeError}
           >
             <BullBearDebate
               bullThesis={d.debate.bullThesis}
@@ -423,13 +443,7 @@ export default function StockDetailPage() {
             </div>
           </FinalDecision>
 
-          <ReflectionMemory data={d.learningMemory} memoryInsight={insights?.memory} />
-
-          <div className="text-center pt-4 pb-8">
-            <span className="text-[10px] font-mono text-[var(--text-secondary)]/60">
-              {new Date(d.updatedAt).toLocaleString("zh-CN")}
-            </span>
-          </div>
+          <ReflectionMemory ticker={ticker} />
         </section>
 
         <CompanyTimeline ticker={ticker} />

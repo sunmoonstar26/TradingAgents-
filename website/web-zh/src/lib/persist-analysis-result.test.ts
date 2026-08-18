@@ -23,6 +23,16 @@ test("persistAnalysisResult 端到端写入 company/analysis_result/timeline/the
     model: "test-model",
     runtime_ms: 1000,
     token_usage: 2000,
+    financial_statement_analysis: "端到端测试财报解读",
+    news_items: [
+      {
+        title: "端到端测试新闻",
+        summary: "测试摘要",
+        source: "Reuters",
+        url: "https://example.com/persist-e2e-news",
+        published_at: "2026-07-20T10:00:00.000Z",
+      },
+    ],
   } as TARawResult;
 
   const detail = {
@@ -92,6 +102,16 @@ test("某个订阅者失败时，persistAnalysisResult 应 reject，但其他订
     model: "test-model",
     runtime_ms: 1000,
     token_usage: 2000,
+    financial_statement_analysis: "订阅者失败测试财报解读",
+    news_items: [
+      {
+        title: "订阅者失败测试新闻",
+        summary: "测试摘要",
+        source: "Reuters",
+        url: "https://example.com/persist-subscriber-fail-news",
+        published_at: "2026-07-20T10:00:00.000Z",
+      },
+    ],
   } as TARawResult;
 
   const detail = {

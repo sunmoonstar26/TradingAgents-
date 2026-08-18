@@ -24,21 +24,23 @@ after(async () => {
   await sql`delete from companies where ticker = ${TEST_TICKER}`;
 });
 
-function buildEvent(rationale: string): AnalysisCompletedEvent {
+function buildEvent(financialStatementAnalysis: string): AnalysisCompletedEvent {
   return {
     companyId: testCompanyId,
     analysisResultId: "00000000-0000-0000-0000-000000000000",
     sessionId: "test-session-write-thesis",
-    raw: { ticker: TEST_TICKER, signal: "BUY" } as AnalysisCompletedEvent["raw"],
-    detail: {
-      committeeDecision: { rationale },
-    } as AnalysisCompletedEvent["detail"],
+    raw: {
+      ticker: TEST_TICKER,
+      signal: "BUY",
+      financial_statement_analysis: financialStatementAnalysis,
+    } as AnalysisCompletedEvent["raw"],
+    detail: {} as AnalysisCompletedEvent["detail"],
   };
 }
 
 test("write-thesis 订阅者第一次触发时插入 version=1，previous_version=null", async () => {
   const sql = getDb();
-  await emit("analysis.completed", buildEvent("第一版理由"));
+  await emit("analysis.completed", buildEvent("第一版财报解读"));
 
   const rows = await sql`
     select version, content, previous_version
@@ -49,13 +51,13 @@ test("write-thesis 订阅者第一次触发时插入 version=1，previous_versio
 
   assert.equal(rows.length, 1);
   assert.equal(rows[0].version, 1);
-  assert.equal(rows[0].content, "第一版理由");
+  assert.equal(rows[0].content, "第一版财报解读");
   assert.equal(rows[0].previous_version, null);
 });
 
 test("write-thesis 订阅者第二次触发时插入 version=2，previous_version=1", async () => {
   const sql = getDb();
-  await emit("analysis.completed", buildEvent("第二版理由"));
+  await emit("analysis.completed", buildEvent("第二版财报解读"));
 
   const rows = await sql`
     select version, content, previous_version
@@ -66,6 +68,17 @@ test("write-thesis 订阅者第二次触发时插入 version=2，previous_versio
 
   assert.equal(rows.length, 2);
   assert.equal(rows[1].version, 2);
-  assert.equal(rows[1].content, "第二版理由");
+  assert.equal(rows[1].content, "第二版财报解读");
   assert.equal(rows[1].previous_version, 1);
+});
+
+test("write-thesis 订阅者在 financial_statement_analysis 为空时不写入", async () => {
+  const sql = getDb();
+  await emit("analysis.completed", buildEvent(""));
+
+  const rows = await sql`
+    select version from theses where company_id = ${testCompanyId}
+  `;
+
+  assert.equal(rows.length, 2, "空财报解读不应新增版本");
 });

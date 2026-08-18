@@ -5,6 +5,7 @@ import type {
   TimelineEvent,
   Thesis,
   InvestmentRationale,
+  ProphetIndicator,
   ResearchHistoryEntry,
   CompanyDashboardSnapshot,
 } from "@/types";
@@ -27,13 +28,60 @@ export async function getTimelineEvents(
 
   const sql = getDb();
   const rows = await sql<TimelineEvent[]>`
-    select id, event_type, title, description, source, occurred_at
+    select id, event_type, title, description, source, source_url, occurred_at
     from timeline_events
-    where company_id = ${companyId}
+    where company_id = ${companyId} and deleted_at is null
     order by occurred_at desc
     limit ${limit}
   `;
   return rows;
+}
+
+export async function createTimelineEvent(
+  ticker: string,
+  input: {
+    title: string;
+    description?: string | null;
+    source_url?: string | null;
+    occurred_at: string;
+  }
+): Promise<TimelineEvent> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) throw new Error(`Company not found: ${ticker}`);
+
+  const sql = getDb();
+  const [row] = await sql<TimelineEvent[]>`
+    insert into timeline_events
+      (company_id, event_type, title, description, source, source_url, occurred_at)
+    values (
+      ${companyId},
+      'manual_event',
+      ${input.title},
+      ${input.description ?? null},
+      '手动记录',
+      ${input.source_url ?? null},
+      ${input.occurred_at}
+    )
+    returning id, event_type, title, description, source, source_url, occurred_at
+  `;
+  return row;
+}
+
+export async function deleteTimelineEvent(
+  ticker: string,
+  eventId: string
+): Promise<boolean> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return false;
+
+  const sql = getDb();
+  const rows = await sql`
+    update timeline_events
+    set deleted_at = now()
+    where id = ${eventId} and company_id = ${companyId} and deleted_at is null
+    returning id
+  `;
+  return rows.length > 0;
 }
 
 export async function getThesisHistory(
@@ -167,6 +215,51 @@ export async function saveInvestmentRationale(
     : await sql<InvestmentRationale[]>`
         insert into knowledge_entries (company_id, category, title, content)
         values (${companyId}, 'investment_rationale', 'Investment Rationale', ${content})
+        returning id, content, created_at
+      `;
+  return row;
+}
+
+export async function getProphetIndicator(
+  ticker: string
+): Promise<ProphetIndicator | null> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return null;
+
+  const sql = getDb();
+  const [row] = await sql<ProphetIndicator[]>`
+    select id, content, created_at
+    from knowledge_entries
+    where company_id = ${companyId} and category = 'prophet_indicator'
+    limit 1
+  `;
+  return row ?? null;
+}
+
+export async function saveProphetIndicator(
+  ticker: string,
+  content: string
+): Promise<ProphetIndicator> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) throw new Error(`Company not found: ${ticker}`);
+
+  const sql = getDb();
+  const [existing] = await sql<{ id: string }[]>`
+    select id from knowledge_entries
+    where company_id = ${companyId} and category = 'prophet_indicator'
+    limit 1
+  `;
+
+  const [row] = existing
+    ? await sql<ProphetIndicator[]>`
+        update knowledge_entries
+        set content = ${content}, created_at = now()
+        where id = ${existing.id}
+        returning id, content, created_at
+      `
+    : await sql<ProphetIndicator[]>`
+        insert into knowledge_entries (company_id, category, title, content)
+        values (${companyId}, 'prophet_indicator', 'Prophet Indicator', ${content})
         returning id, content, created_at
       `;
   return row;

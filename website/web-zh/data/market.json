@@ -1,0 +1,100 @@
+{
+  "updatedAt": "2026-05-30T00:30:12.426677Z",
+  "fetchDate": "2026-05-30",
+  "errors": [
+    "^GSPC: Too Many Requests. Rate limited. Try after a while.",
+    "^HSI: Too Many Requests. Rate limited. Try after a while.",
+    "000300.SS: Too Many Requests. Rate limited. Try after a while.",
+    "^VIX: Too Many Requests. Rate limited. Try after a while.",
+    "SMH: Too Many Requests. Rate limited. Try after a while.",
+    "^IXIC: Too Many Requests. Rate limited. Try after a while."
+  ],
+  "indicators": {
+    "us": {
+      "label": "标普 500",
+      "ticker": "^GSPC",
+      "value": "7,563.63",
+      "change": 0.58,
+      "status": "up",
+      "date": "2026-05-28"
+    },
+    "hk": {
+      "label": "恒生指数",
+      "ticker": "^HSI",
+      "value": "25,328",
+      "change": -1.06,
+      "status": "down",
+      "date": "2026-05-27"
+    },
+    "cn": {
+      "label": "沪深 300",
+      "ticker": "000300.SS",
+      "value": "nan",
+      "change": NaN,
+      "status": "neutral",
+      "date": "2026-05-28"
+    },
+    "vix": {
+      "label": "VIX",
+      "ticker": "^VIX",
+      "value": "15.74",
+      "change": -3.38,
+      "status": "neutral",
+      "date": "2026-05-28"
+    },
+    "ai": {
+      "label": "AI 板块",
+      "ticker": "SMH",
+      "value": "599.83",
+      "change": 0.73,
+      "status": "up",
+      "date": "2026-05-28"
+    },
+    "nasdaq": {
+      "label": "纳斯达克",
+      "ticker": "^IXIC",
+      "value": "26,917",
+      "change": 0.91,
+      "status": "up",
+      "date": "2026-05-28"
+    }
+  },
+  "marketState": {
+    "usMarket": {
+      "label": "美股",
+      "value": "7,563.63",
+      "change": 0.58,
+      "status": "up"
+    },
+    "hkMarket": {
+      "label": "港股",
+      "value": "25,328",
+      "change": -1.06,
+      "status": "down"
+    },
+    "cnMarket": {
+      "label": "A 股",
+      "value": "nan",
+      "change": NaN,
+      "status": "neutral"
+    },
+    "vix": {
+      "label": "VIX",
+      "value": "15.74",
+      "change": -3.38,
+      "status": "neutral"
+    },
+    "aiSectorMomentum": {
+      "label": "AI 板块动量",
+      "value": "平",
+      "change": 0.73,
+      "status": "neutral"
+    },
+    "marketRiskLevel": {
+      "label": "市场风险",
+      "value": "中低",
+      "change": null,
+      "status": "warning"
+    }
+  }
+}
