@@ -456,7 +456,6 @@ export interface CompanyDashboardSnapshot {
   opportunity: string | null;
   summary: string | null;
   updated_at: string;
-  is_manually_edited: boolean;
 }
 
 // ── Business Engine：公司赚钱路数追踪 ──
