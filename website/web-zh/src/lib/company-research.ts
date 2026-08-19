@@ -9,7 +9,17 @@ import type {
   ResearchHistoryEntry,
   CompanyDashboardSnapshot,
   BusinessEngine,
+  BusinessEngineInput,
+  BusinessEngineEvidence,
 } from "@/types";
+import {
+  RevenueRole,
+  LifecycleStage,
+  EngineTrend,
+  EngineConfidence,
+  CustomerSegment,
+  MonetizationModel,
+} from "@/types/enums";
 import { getDb } from "./db";
 
 async function findCompanyId(ticker: string): Promise<string | null> {
@@ -275,7 +285,7 @@ export async function getBusinessEngines(ticker: string): Promise<BusinessEngine
     select
       id, name, description, customer_segment, product_or_service,
       monetization_model, revenue_role, lifecycle_stage, trend, confidence,
-      evidence, last_verified_at, updated_at
+      evidence, last_verified_at, updated_at, is_manually_edited
     from business_engines
     where company_id = ${companyId}
     order by
@@ -290,5 +300,80 @@ export async function getBusinessEngines(ticker: string): Promise<BusinessEngine
       name
   `;
   return rows;
+}
+
+type ValidationResult =
+  | { ok: true; value: BusinessEngineInput }
+  | { ok: false; error: string };
+
+function isEnumValue<T extends string>(enumObj: Record<string, T>, value: unknown): value is T {
+  return typeof value === "string" && (Object.values(enumObj) as string[]).includes(value);
+}
+
+function isValidEvidence(value: unknown): value is BusinessEngineEvidence {
+  if (typeof value !== "object" || value === null) return false;
+  const ev = value as Record<string, unknown>;
+  return (
+    typeof ev.source === "string" &&
+    (ev.source_type === "news" || ev.source_type === "financial_statement") &&
+    typeof ev.date === "string" &&
+    typeof ev.claim === "string" &&
+    (ev.direction === "POSITIVE" || ev.direction === "NEGATIVE" || ev.direction === "NEUTRAL") &&
+    isEnumValue(EngineConfidence, ev.confidence)
+  );
+}
+
+export function validateBusinessEngineInput(body: unknown): ValidationResult {
+  if (typeof body !== "object" || body === null) {
+    return { ok: false, error: "Request body must be an object" };
+  }
+  const b = body as Record<string, unknown>;
+
+  if (typeof b.name !== "string" || b.name.trim() === "") {
+    return { ok: false, error: "name must be a non-empty string" };
+  }
+  if (typeof b.description !== "string" || b.description.trim() === "") {
+    return { ok: false, error: "description must be a non-empty string" };
+  }
+  if (b.product_or_service !== null && typeof b.product_or_service !== "string") {
+    return { ok: false, error: "product_or_service must be a string or null" };
+  }
+  if (!isEnumValue(RevenueRole, b.revenue_role)) {
+    return { ok: false, error: "revenue_role is not a valid RevenueRole" };
+  }
+  if (!isEnumValue(LifecycleStage, b.lifecycle_stage)) {
+    return { ok: false, error: "lifecycle_stage is not a valid LifecycleStage" };
+  }
+  if (!isEnumValue(EngineTrend, b.trend)) {
+    return { ok: false, error: "trend is not a valid EngineTrend" };
+  }
+  if (!isEnumValue(EngineConfidence, b.confidence)) {
+    return { ok: false, error: "confidence is not a valid EngineConfidence" };
+  }
+  if (!Array.isArray(b.customer_segment) || !b.customer_segment.every((s) => isEnumValue(CustomerSegment, s))) {
+    return { ok: false, error: "customer_segment must be an array of valid CustomerSegment values" };
+  }
+  if (!Array.isArray(b.monetization_model) || !b.monetization_model.every((m) => isEnumValue(MonetizationModel, m))) {
+    return { ok: false, error: "monetization_model must be an array of valid MonetizationModel values" };
+  }
+  if (!Array.isArray(b.evidence) || !b.evidence.every(isValidEvidence)) {
+    return { ok: false, error: "evidence must be an array of valid evidence entries" };
+  }
+
+  return {
+    ok: true,
+    value: {
+      name: b.name.trim(),
+      description: b.description.trim(),
+      customer_segment: b.customer_segment as CustomerSegment[],
+      product_or_service: (b.product_or_service as string | null) ?? null,
+      monetization_model: b.monetization_model as MonetizationModel[],
+      revenue_role: b.revenue_role as RevenueRole,
+      lifecycle_stage: b.lifecycle_stage as LifecycleStage,
+      trend: b.trend as EngineTrend,
+      confidence: b.confidence as EngineConfidence,
+      evidence: b.evidence as BusinessEngineEvidence[],
+    },
+  };
 }
 

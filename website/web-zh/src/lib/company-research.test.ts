@@ -7,6 +7,7 @@ import {
   getTimelineEvents,
   createTimelineEvent,
   deleteTimelineEvent,
+  validateBusinessEngineInput,
 } from "./company-research";
 
 const TEST_TICKER = "TESTIR";
@@ -136,4 +137,68 @@ test("deleteTimelineEvent 在 company 不存在时返回 false", async () => {
     "00000000-0000-0000-0000-000000000000"
   );
   assert.equal(deleted, false);
+});
+
+test("validateBusinessEngineInput 对合法输入返回 ok:true", () => {
+  const result = validateBusinessEngineInput({
+    name: "Azure",
+    description: "云服务收入",
+    customer_segment: ["ENTERPRISE"],
+    product_or_service: "Cloud Infrastructure",
+    monetization_model: ["USAGE_BASED"],
+    revenue_role: "CORE",
+    lifecycle_stage: "SCALING",
+    trend: "STABLE",
+    confidence: "HIGH",
+    evidence: [],
+  });
+  assert.equal(result.ok, true);
+});
+
+test("validateBusinessEngineInput 对空 name 返回 ok:false", () => {
+  const result = validateBusinessEngineInput({
+    name: "  ",
+    description: "云服务收入",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE",
+    lifecycle_stage: "SCALING",
+    trend: "STABLE",
+    confidence: "HIGH",
+    evidence: [],
+  });
+  assert.equal(result.ok, false);
+});
+
+test("validateBusinessEngineInput 对非法 revenue_role 枚举值返回 ok:false", () => {
+  const result = validateBusinessEngineInput({
+    name: "Azure",
+    description: "云服务收入",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "NOT_A_REAL_ROLE",
+    lifecycle_stage: "SCALING",
+    trend: "STABLE",
+    confidence: "HIGH",
+    evidence: [],
+  });
+  assert.equal(result.ok, false);
+});
+
+test("validateBusinessEngineInput 对非法 evidence 项返回 ok:false", () => {
+  const result = validateBusinessEngineInput({
+    name: "Azure",
+    description: "云服务收入",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE",
+    lifecycle_stage: "SCALING",
+    trend: "STABLE",
+    confidence: "HIGH",
+    evidence: [{ source: "news.com", source_type: "news", date: "2026-01-01" }],
+  });
+  assert.equal(result.ok, false);
 });
