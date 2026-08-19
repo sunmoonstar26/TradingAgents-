@@ -72,16 +72,17 @@ export enum EngineConfidence {
 }
 
 export enum EngineChangeType {
-  BASELINE  = "BASELINE",
-  NEW       = "NEW",
-  GROWING   = "GROWING",
-  STABLE    = "STABLE",
-  WEAKENING = "WEAKENING",
-  DECLINING = "DECLINING",
-  PROMOTED  = "PROMOTED",
-  DEMOTED   = "DEMOTED",
-  ABANDONED = "ABANDONED",
-  UNCERTAIN = "UNCERTAIN",
+  BASELINE    = "BASELINE",
+  NEW         = "NEW",
+  GROWING     = "GROWING",
+  STABLE      = "STABLE",
+  WEAKENING   = "WEAKENING",
+  DECLINING   = "DECLINING",
+  PROMOTED    = "PROMOTED",
+  DEMOTED     = "DEMOTED",
+  ABANDONED   = "ABANDONED",
+  UNCERTAIN   = "UNCERTAIN",
+  MANUAL_EDIT = "MANUAL_EDIT",
 }
 
 export enum CustomerSegment {

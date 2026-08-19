@@ -456,6 +456,7 @@ export interface CompanyDashboardSnapshot {
   opportunity: string | null;
   summary: string | null;
   updated_at: string;
+  is_manually_edited: boolean;
 }
 
 // ── Business Engine：公司赚钱路数追踪 ──
@@ -483,6 +484,21 @@ export interface BusinessEngine {
   evidence: BusinessEngineEvidence[];
   last_verified_at: string;
   updated_at: string;
+  is_manually_edited: boolean;
+}
+
+/** 人工新增/编辑商业引擎时的请求体，字段与 BusinessEngine 一致但不含 id/时间戳/锁定标记 */
+export interface BusinessEngineInput {
+  name: string;
+  description: string;
+  customer_segment: CustomerSegment[];
+  product_or_service: string | null;
+  monetization_model: MonetizationModel[];
+  revenue_role: RevenueRole;
+  lifecycle_stage: LifecycleStage;
+  trend: EngineTrend;
+  confidence: EngineConfidence;
+  evidence: BusinessEngineEvidence[];
 }
 
 export interface BusinessEngineSnapshot {

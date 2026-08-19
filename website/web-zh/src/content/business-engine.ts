@@ -39,6 +39,7 @@ export const CHANGE_TYPE_LABELS: Record<EngineChangeType, string> = {
   [EngineChangeType.DEMOTED]: "降级",
   [EngineChangeType.ABANDONED]: "已放弃",
   [EngineChangeType.UNCERTAIN]: "状态变化",
+  [EngineChangeType.MANUAL_EDIT]: "人工修改",
 };
 
 export const CUSTOMER_SEGMENT_LABELS: Record<CustomerSegment, string> = {
