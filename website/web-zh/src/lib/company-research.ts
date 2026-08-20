@@ -378,6 +378,15 @@ export function validateBusinessEngineInput(body: unknown): ValidationResult {
   };
 }
 
+// 抛出用于标识"重命名撞上同公司下另一条引擎的现有 name"的唯一约束冲突（23505），
+// 供路由层捕获并转换为 409 + 结构化错误，而不是让原始 Postgres 错误顶到 500。
+export class BusinessEngineNameConflictError extends Error {
+  constructor(name: string) {
+    super(`business engine name already in use: ${name}`);
+    this.name = "BusinessEngineNameConflictError";
+  }
+}
+
 export async function updateBusinessEngine(
   ticker: string,
   engineId: string,
@@ -387,26 +396,34 @@ export async function updateBusinessEngine(
   if (!companyId) return null;
 
   const sql = getDb();
-  const [engine] = await sql<BusinessEngine[]>`
-    update business_engines set
-      name = ${input.name},
-      description = ${input.description},
-      customer_segment = ${input.customer_segment},
-      product_or_service = ${input.product_or_service},
-      monetization_model = ${input.monetization_model},
-      revenue_role = ${input.revenue_role},
-      lifecycle_stage = ${input.lifecycle_stage},
-      trend = ${input.trend},
-      confidence = ${input.confidence},
-      evidence = ${sql.json(input.evidence as unknown as JSONValue)},
-      is_manually_edited = true,
-      last_verified_at = now(),
-      updated_at = now()
-    where id = ${engineId} and company_id = ${companyId}
-    returning id, name, description, customer_segment, product_or_service,
-      monetization_model, revenue_role, lifecycle_stage, trend, confidence,
-      evidence, last_verified_at, updated_at, is_manually_edited
-  `;
+  let engine: BusinessEngine | undefined;
+  try {
+    [engine] = await sql<BusinessEngine[]>`
+      update business_engines set
+        name = ${input.name},
+        description = ${input.description},
+        customer_segment = ${input.customer_segment},
+        product_or_service = ${input.product_or_service},
+        monetization_model = ${input.monetization_model},
+        revenue_role = ${input.revenue_role},
+        lifecycle_stage = ${input.lifecycle_stage},
+        trend = ${input.trend},
+        confidence = ${input.confidence},
+        evidence = ${sql.json(input.evidence as unknown as JSONValue)},
+        is_manually_edited = true,
+        last_verified_at = now(),
+        updated_at = now()
+      where id = ${engineId} and company_id = ${companyId}
+      returning id, name, description, customer_segment, product_or_service,
+        monetization_model, revenue_role, lifecycle_stage, trend, confidence,
+        evidence, last_verified_at, updated_at, is_manually_edited
+    `;
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "23505") {
+      throw new BusinessEngineNameConflictError(input.name);
+    }
+    throw error;
+  }
   if (!engine) return null;
 
   await sql`
@@ -458,6 +475,7 @@ export async function createBusinessEngine(
       monetization_model, revenue_role, lifecycle_stage, trend, confidence,
       evidence, last_verified_at, updated_at, is_manually_edited
   `;
+  if (!engine) return null;
 
   await sql`
     insert into business_engine_snapshots (

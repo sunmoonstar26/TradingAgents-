@@ -139,5 +139,6 @@ export const BUSINESS_ENGINE_TEXT = {
     evidenceInvalidJson: "证据格式不正确，需为合法 JSON 数组",
     saveFailed: "保存失败，请重试",
     deleteFailed: "删除失败，请重试",
+    nameConflict: "该名称已被其他商业引擎占用",
   },
 } as const;

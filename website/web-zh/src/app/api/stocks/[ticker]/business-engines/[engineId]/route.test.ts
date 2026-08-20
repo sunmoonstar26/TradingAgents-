@@ -74,6 +74,24 @@ test("PUT 校验失败时返回 400", async () => {
   assert.equal(res.status, 400);
 });
 
+test("PUT 重命名撞上同公司另一条引擎的现有 name 时返回 409 结构化错误", async () => {
+  await createBusinessEngine(TEST_TICKER, VALID_INPUT as never);
+  const other = await createBusinessEngine(TEST_TICKER, {
+    ...VALID_INPUT,
+    name: "AWS",
+  } as never);
+
+  const res = await PUT(
+    fakeRequest({ ...VALID_INPUT, name: "Azure" }),
+    fakeParams(TEST_TICKER, other!.id)
+  );
+  assert.equal(res.status, 409);
+  const body = await res.json();
+  assert.equal(body.success, false);
+  assert.equal(typeof body.error, "string");
+  assert.ok(body.error.length > 0);
+});
+
 test("DELETE 对存在的引擎返回 200", async () => {
   const created = await createBusinessEngine(TEST_TICKER, VALID_INPUT as never);
 

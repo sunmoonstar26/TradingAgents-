@@ -12,6 +12,7 @@ import {
   updateBusinessEngine,
   createBusinessEngine,
   deleteBusinessEngine,
+  BusinessEngineNameConflictError,
 } from "./company-research";
 
 const TEST_TICKER = "TESTIR";
@@ -322,6 +323,59 @@ test("updateBusinessEngine 编辑已有引擎并追加 MANUAL_EDIT snapshot", as
   assert.equal(updated?.description, "编辑后的描述");
   assert.equal(updated?.revenue_role, "MAJOR");
   assert.equal(updated?.is_manually_edited, true);
+
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
+});
+
+test("updateBusinessEngine 重命名撞上同公司另一条引擎的现有 name 时抛出 BusinessEngineNameConflictError", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "Azure",
+    description: "原始描述",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+  const other = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "AWS",
+    description: "另一条引擎",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+
+  await assert.rejects(
+    () =>
+      updateBusinessEngine(BUSINESS_ENGINE_TICKER, other!.id, {
+        name: "Azure",
+        description: "尝试重命名为已存在的名字",
+        customer_segment: [],
+        product_or_service: null,
+        monetization_model: [],
+        revenue_role: "CORE" as never,
+        lifecycle_stage: "SCALING" as never,
+        trend: "STABLE" as never,
+        confidence: "HIGH" as never,
+        evidence: [],
+      }),
+    BusinessEngineNameConflictError
+  );
 
   await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
 });
