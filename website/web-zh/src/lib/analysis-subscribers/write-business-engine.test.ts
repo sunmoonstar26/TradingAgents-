@@ -220,3 +220,68 @@ test("write-business-engine 订阅者在已有基线的公司出现新业务时�
   assert.equal(azureSnapshot?.change_type, EngineChangeType.STABLE, "已有业务无变化应判定为 STABLE");
   assert.equal(copilotSnapshot?.change_type, EngineChangeType.NEW, "已有基线公司的新业务应判定为 NEW");
 });
+
+test("write-business-engine 订阅者跳过已人工锁定的引擎主表更新，但仍追加 snapshot", async () => {
+  const sql = getDb();
+  const companyId = await createTestCompany("LOCKED");
+  const firstAnalysisId = await createTestAnalysisResult(companyId, "test-session-wbe-locked-1");
+
+  await emit(
+    "analysis.completed",
+    makeEvent(companyId, firstAnalysisId, "test-session-wbe-locked-1", [
+      {
+        name: "Azure",
+        description: "AI 写入的描述",
+        customer_segment: ["ENTERPRISE"],
+        product_or_service: "Cloud Infrastructure",
+        monetization_model: ["USAGE_BASED"],
+        revenue_role: "CORE",
+        lifecycle_stage: "SCALING",
+        trend: "STABLE",
+        confidence: "HIGH",
+        evidence: [],
+      },
+    ])
+  );
+
+  const [engine] = await sql<{ id: string }[]>`
+    select id from business_engines where company_id = ${companyId} and name = 'Azure'
+  `;
+  await sql`
+    update business_engines set description = ${"人工修改后的描述"}, is_manually_edited = true
+    where id = ${engine.id}
+  `;
+
+  const secondAnalysisId = await createTestAnalysisResult(companyId, "test-session-wbe-locked-2");
+  await emit(
+    "analysis.completed",
+    makeEvent(companyId, secondAnalysisId, "test-session-wbe-locked-2", [
+      {
+        name: "Azure",
+        description: "AI 第二次写入的描述",
+        customer_segment: ["ENTERPRISE"],
+        product_or_service: "Cloud Infrastructure",
+        monetization_model: ["USAGE_BASED"],
+        revenue_role: "MAJOR",
+        lifecycle_stage: "SCALING",
+        trend: "DOWN",
+        confidence: "LOW",
+        evidence: [],
+      },
+    ])
+  );
+
+  const [afterSecondRun] = await sql<{ description: string; revenue_role: string; is_manually_edited: boolean }[]>`
+    select description, revenue_role, is_manually_edited from business_engines where id = ${engine.id}
+  `;
+  assert.equal(afterSecondRun.description, "人工修改后的描述", "主表不应被 AI 第二次分析覆盖");
+  assert.equal(afterSecondRun.revenue_role, "CORE", "主表 revenue_role 不应被覆盖");
+  assert.equal(afterSecondRun.is_manually_edited, true);
+
+  const snapshots = await sql<{ change_type: string; analysis_result_id: string | null }[]>`
+    select change_type, analysis_result_id from business_engine_snapshots
+    where business_engine_id = ${engine.id} and analysis_result_id = ${secondAnalysisId}
+  `;
+  assert.equal(snapshots.length, 1, "锁定状态下仍应追加一条 snapshot");
+  assert.equal(snapshots[0].analysis_result_id, secondAnalysisId);
+});

@@ -19,6 +19,22 @@ on<AnalysisCompletedEvent>("analysis.completed", async (event) => {
     const previous = existingByName.get(item.name) ?? null;
     const { changeType, reason } = detectChange(previous, item as ExtractedBusinessEngine, companyHasBaseline);
 
+    if (previous?.is_manually_edited) {
+      // 整行锁定：不覆盖人工修改的主表数据，但仍追加快照，
+      // 保留"AI 本次分析认为该引擎发生了什么变化"这条历史记录。
+      await sql`
+        insert into business_engine_snapshots (
+          business_engine_id, company_id, analysis_result_id, revenue_role,
+          lifecycle_stage, trend, confidence, change_type, change_reason, evidence_summary
+        ) values (
+          ${previous.id}, ${event.companyId}, ${event.analysisResultId}, ${item.revenue_role},
+          ${item.lifecycle_stage}, ${item.trend}, ${item.confidence}, ${changeType},
+          ${`${reason}（已人工锁定，主表未更新）`}, ${sql.json(item.evidence)}
+        )
+      `;
+      continue;
+    }
+
     const [engine] = await sql`
       insert into business_engines (
         company_id, name, description, customer_segment, product_or_service,
