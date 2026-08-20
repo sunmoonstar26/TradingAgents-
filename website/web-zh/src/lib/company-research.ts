@@ -21,6 +21,7 @@ import {
   MonetizationModel,
 } from "@/types/enums";
 import { getDb } from "./db";
+import type { JSONValue } from "postgres";
 
 async function findCompanyId(ticker: string): Promise<string | null> {
   const sql = getDb();
@@ -397,7 +398,7 @@ export async function updateBusinessEngine(
       lifecycle_stage = ${input.lifecycle_stage},
       trend = ${input.trend},
       confidence = ${input.confidence},
-      evidence = ${sql.json(input.evidence)},
+      evidence = ${sql.json(input.evidence as unknown as JSONValue)},
       is_manually_edited = true,
       last_verified_at = now(),
       updated_at = now()
@@ -415,7 +416,7 @@ export async function updateBusinessEngine(
     ) values (
       ${engine.id}, ${companyId}, null, ${input.revenue_role},
       ${input.lifecycle_stage}, ${input.trend}, ${input.confidence},
-      'MANUAL_EDIT', '人工编辑', ${sql.json(input.evidence)}
+      'MANUAL_EDIT', '人工编辑', ${sql.json(input.evidence as unknown as JSONValue)}
     )
   `;
   return engine;
@@ -438,7 +439,7 @@ export async function createBusinessEngine(
       ${companyId}, ${input.name}, ${input.description}, ${input.customer_segment},
       ${input.product_or_service}, ${input.monetization_model}, ${input.revenue_role},
       ${input.lifecycle_stage}, ${input.trend}, ${input.confidence},
-      ${sql.json(input.evidence)}, true, now(), now()
+      ${sql.json(input.evidence as unknown as JSONValue)}, true, now(), now()
     )
     on conflict (company_id, name) do update set
       description = excluded.description,
@@ -465,7 +466,7 @@ export async function createBusinessEngine(
     ) values (
       ${engine.id}, ${companyId}, null, ${input.revenue_role},
       ${input.lifecycle_stage}, ${input.trend}, ${input.confidence},
-      'MANUAL_EDIT', '人工新增', ${sql.json(input.evidence)}
+      'MANUAL_EDIT', '人工新增', ${sql.json(input.evidence as unknown as JSONValue)}
     )
   `;
   return engine;

@@ -220,9 +220,9 @@ test("createBusinessEngine 新增一条引擎，is_manually_edited 为 true", as
   const created = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
     name: "Azure",
     description: "云服务收入",
-    customer_segment: ["ENTERPRISE"],
+    customer_segment: ["ENTERPRISE"] as never,
     product_or_service: "Cloud Infrastructure",
-    monetization_model: ["USAGE_BASED"],
+    monetization_model: ["USAGE_BASED"] as never,
     revenue_role: "CORE" as never,
     lifecycle_stage: "SCALING" as never,
     trend: "STABLE" as never,
@@ -276,11 +276,11 @@ test("createBusinessEngine 同名再次调用时 upsert 覆盖同一条记录，
   assert.equal(first?.id, second?.id, "同名应更新同一条记录");
   assert.equal(second?.description, "第二版描述");
 
-  const snapshots = await sql`
+  const snapshots = await sql<{ change_type: string }[]>`
     select change_type from business_engine_snapshots where business_engine_id = ${second!.id}
   `;
   assert.equal(snapshots.length, 2, "两次 createBusinessEngine 各追加一条 snapshot");
-  assert.ok(snapshots.every((s: { change_type: string }) => s.change_type === "MANUAL_EDIT"));
+  assert.ok(snapshots.every((s) => s.change_type === "MANUAL_EDIT"));
 
   await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
 });
@@ -309,9 +309,9 @@ test("updateBusinessEngine 编辑已有引擎并追加 MANUAL_EDIT snapshot", as
   const updated = await updateBusinessEngine(BUSINESS_ENGINE_TICKER, created!.id, {
     name: "Azure",
     description: "编辑后的描述",
-    customer_segment: ["ENTERPRISE"],
+    customer_segment: ["ENTERPRISE"] as never,
     product_or_service: "Cloud Infrastructure",
-    monetization_model: ["USAGE_BASED"],
+    monetization_model: ["USAGE_BASED"] as never,
     revenue_role: "MAJOR" as never,
     lifecycle_stage: "SCALING" as never,
     trend: "UP" as never,
