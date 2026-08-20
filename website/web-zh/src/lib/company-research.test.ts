@@ -8,6 +8,10 @@ import {
   createTimelineEvent,
   deleteTimelineEvent,
   validateBusinessEngineInput,
+  getBusinessEngines,
+  updateBusinessEngine,
+  createBusinessEngine,
+  deleteBusinessEngine,
 } from "./company-research";
 
 const TEST_TICKER = "TESTIR";
@@ -201,4 +205,204 @@ test("validateBusinessEngineInput 对非法 evidence 项返回 ok:false", () => 
     evidence: [{ source: "news.com", source_type: "news", date: "2026-01-01" }],
   });
   assert.equal(result.ok, false);
+});
+
+const BUSINESS_ENGINE_TICKER = "TESTBEEDIT";
+
+test("createBusinessEngine 新增一条引擎，is_manually_edited 为 true", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  const created = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "Azure",
+    description: "云服务收入",
+    customer_segment: ["ENTERPRISE"],
+    product_or_service: "Cloud Infrastructure",
+    monetization_model: ["USAGE_BASED"],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+
+  assert.ok(created);
+  assert.equal(created?.name, "Azure");
+  assert.equal(created?.is_manually_edited, true);
+
+  const engines = await getBusinessEngines(BUSINESS_ENGINE_TICKER);
+  assert.equal(engines.length, 1);
+
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
+});
+
+test("createBusinessEngine 同名再次调用时 upsert 覆盖同一条记录，追加一条 MANUAL_EDIT snapshot", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  const first = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "Azure",
+    description: "第一版描述",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+  const second = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "Azure",
+    description: "第二版描述",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+
+  assert.equal(first?.id, second?.id, "同名应更新同一条记录");
+  assert.equal(second?.description, "第二版描述");
+
+  const snapshots = await sql`
+    select change_type from business_engine_snapshots where business_engine_id = ${second!.id}
+  `;
+  assert.equal(snapshots.length, 2, "两次 createBusinessEngine 各追加一条 snapshot");
+  assert.ok(snapshots.every((s: { change_type: string }) => s.change_type === "MANUAL_EDIT"));
+
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
+});
+
+test("updateBusinessEngine 编辑已有引擎并追加 MANUAL_EDIT snapshot", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  const created = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "Azure",
+    description: "原始描述",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+
+  const updated = await updateBusinessEngine(BUSINESS_ENGINE_TICKER, created!.id, {
+    name: "Azure",
+    description: "编辑后的描述",
+    customer_segment: ["ENTERPRISE"],
+    product_or_service: "Cloud Infrastructure",
+    monetization_model: ["USAGE_BASED"],
+    revenue_role: "MAJOR" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "UP" as never,
+    confidence: "MEDIUM" as never,
+    evidence: [],
+  });
+
+  assert.equal(updated?.description, "编辑后的描述");
+  assert.equal(updated?.revenue_role, "MAJOR");
+  assert.equal(updated?.is_manually_edited, true);
+
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
+});
+
+test("updateBusinessEngine 对不存在的 engineId 返回 null", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  const result = await updateBusinessEngine(
+    BUSINESS_ENGINE_TICKER,
+    "00000000-0000-0000-0000-000000000000",
+    {
+      name: "Azure",
+      description: "描述",
+      customer_segment: [],
+      product_or_service: null,
+      monetization_model: [],
+      revenue_role: "CORE" as never,
+      lifecycle_stage: "SCALING" as never,
+      trend: "STABLE" as never,
+      confidence: "HIGH" as never,
+      evidence: [],
+    }
+  );
+
+  assert.equal(result, null);
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
+});
+
+test("deleteBusinessEngine 删除已有引擎返回 true，且级联清除 snapshot", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  const created = await createBusinessEngine(BUSINESS_ENGINE_TICKER, {
+    name: "Azure",
+    description: "待删除",
+    customer_segment: [],
+    product_or_service: null,
+    monetization_model: [],
+    revenue_role: "CORE" as never,
+    lifecycle_stage: "SCALING" as never,
+    trend: "STABLE" as never,
+    confidence: "HIGH" as never,
+    evidence: [],
+  });
+
+  const deleted = await deleteBusinessEngine(BUSINESS_ENGINE_TICKER, created!.id);
+  assert.equal(deleted, true);
+
+  const engines = await getBusinessEngines(BUSINESS_ENGINE_TICKER);
+  assert.equal(engines.length, 0);
+
+  const snapshots = await sql`
+    select id from business_engine_snapshots where business_engine_id = ${created!.id}
+  `;
+  assert.equal(snapshots.length, 0, "级联删除应清空该引擎的历史快照");
+
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
+});
+
+test("deleteBusinessEngine 对不存在的 engineId 返回 false", async () => {
+  const sql = getDb();
+  await sql`
+    insert into companies (ticker, name, market)
+    values (${BUSINESS_ENGINE_TICKER}, ${"测试公司-BusinessEngineEdit"}, 'US')
+    on conflict (ticker) do update set name = excluded.name
+  `;
+
+  const deleted = await deleteBusinessEngine(
+    BUSINESS_ENGINE_TICKER,
+    "00000000-0000-0000-0000-000000000000"
+  );
+  assert.equal(deleted, false);
+
+  await sql`delete from companies where ticker = ${BUSINESS_ENGINE_TICKER}`;
 });

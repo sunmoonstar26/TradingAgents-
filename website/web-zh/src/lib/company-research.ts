@@ -377,3 +377,113 @@ export function validateBusinessEngineInput(body: unknown): ValidationResult {
   };
 }
 
+export async function updateBusinessEngine(
+  ticker: string,
+  engineId: string,
+  input: BusinessEngineInput
+): Promise<BusinessEngine | null> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return null;
+
+  const sql = getDb();
+  const [engine] = await sql<BusinessEngine[]>`
+    update business_engines set
+      name = ${input.name},
+      description = ${input.description},
+      customer_segment = ${input.customer_segment},
+      product_or_service = ${input.product_or_service},
+      monetization_model = ${input.monetization_model},
+      revenue_role = ${input.revenue_role},
+      lifecycle_stage = ${input.lifecycle_stage},
+      trend = ${input.trend},
+      confidence = ${input.confidence},
+      evidence = ${sql.json(input.evidence)},
+      is_manually_edited = true,
+      last_verified_at = now(),
+      updated_at = now()
+    where id = ${engineId} and company_id = ${companyId}
+    returning id, name, description, customer_segment, product_or_service,
+      monetization_model, revenue_role, lifecycle_stage, trend, confidence,
+      evidence, last_verified_at, updated_at, is_manually_edited
+  `;
+  if (!engine) return null;
+
+  await sql`
+    insert into business_engine_snapshots (
+      business_engine_id, company_id, analysis_result_id, revenue_role,
+      lifecycle_stage, trend, confidence, change_type, change_reason, evidence_summary
+    ) values (
+      ${engine.id}, ${companyId}, null, ${input.revenue_role},
+      ${input.lifecycle_stage}, ${input.trend}, ${input.confidence},
+      'MANUAL_EDIT', '人工编辑', ${sql.json(input.evidence)}
+    )
+  `;
+  return engine;
+}
+
+export async function createBusinessEngine(
+  ticker: string,
+  input: BusinessEngineInput
+): Promise<BusinessEngine | null> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return null;
+
+  const sql = getDb();
+  const [engine] = await sql<BusinessEngine[]>`
+    insert into business_engines (
+      company_id, name, description, customer_segment, product_or_service,
+      monetization_model, revenue_role, lifecycle_stage, trend, confidence,
+      evidence, is_manually_edited, last_verified_at, updated_at
+    ) values (
+      ${companyId}, ${input.name}, ${input.description}, ${input.customer_segment},
+      ${input.product_or_service}, ${input.monetization_model}, ${input.revenue_role},
+      ${input.lifecycle_stage}, ${input.trend}, ${input.confidence},
+      ${sql.json(input.evidence)}, true, now(), now()
+    )
+    on conflict (company_id, name) do update set
+      description = excluded.description,
+      customer_segment = excluded.customer_segment,
+      product_or_service = excluded.product_or_service,
+      monetization_model = excluded.monetization_model,
+      revenue_role = excluded.revenue_role,
+      lifecycle_stage = excluded.lifecycle_stage,
+      trend = excluded.trend,
+      confidence = excluded.confidence,
+      evidence = excluded.evidence,
+      is_manually_edited = true,
+      last_verified_at = now(),
+      updated_at = now()
+    returning id, name, description, customer_segment, product_or_service,
+      monetization_model, revenue_role, lifecycle_stage, trend, confidence,
+      evidence, last_verified_at, updated_at, is_manually_edited
+  `;
+
+  await sql`
+    insert into business_engine_snapshots (
+      business_engine_id, company_id, analysis_result_id, revenue_role,
+      lifecycle_stage, trend, confidence, change_type, change_reason, evidence_summary
+    ) values (
+      ${engine.id}, ${companyId}, null, ${input.revenue_role},
+      ${input.lifecycle_stage}, ${input.trend}, ${input.confidence},
+      'MANUAL_EDIT', '人工新增', ${sql.json(input.evidence)}
+    )
+  `;
+  return engine;
+}
+
+export async function deleteBusinessEngine(
+  ticker: string,
+  engineId: string
+): Promise<boolean> {
+  const companyId = await findCompanyId(ticker);
+  if (!companyId) return false;
+
+  const sql = getDb();
+  const rows = await sql`
+    delete from business_engines
+    where id = ${engineId} and company_id = ${companyId}
+    returning id
+  `;
+  return rows.length > 0;
+}
+
