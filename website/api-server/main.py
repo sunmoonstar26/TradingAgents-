@@ -82,6 +82,7 @@ class StartRequest(BaseModel):
     market: str
     session_id: str
     output_path: str
+    language: str = "en"
 
 class StartResponse(BaseModel):
     session_id: str
@@ -108,7 +109,7 @@ def start_analysis(req: StartRequest):
 
     t = threading.Thread(
         target=_run_analysis_thread,
-        args=(session_id, req.ticker, req.date, req.market, req.output_path),
+        args=(session_id, req.ticker, req.date, req.market, req.output_path, req.language),
         daemon=True,
     )
     t.start()
@@ -200,6 +201,7 @@ def _run_analysis_thread(
     analysis_date: str,
     market: str,
     output_path: str,
+    language: str = "en",
 ) -> None:
     try:
         _update_session(session_id, current_step="Initializing analysis engine")
@@ -211,6 +213,7 @@ def _run_analysis_thread(
         config = DEFAULT_CONFIG.copy()
         config["results_dir"] = str(TA_ROOT / "logs")
         config["data_cache_dir"] = str(TA_ROOT / "cache")
+        config["output_language"] = "Chinese" if language.strip().lower() in ("zh", "chinese", "中文") else "English"
 
         _update_session(session_id, current_step=f"Launching multi-agent analysis for {ticker}")
         ta_graph = TradingAgentsGraph(debug=False, config=config)

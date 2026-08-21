@@ -1,0 +1,294 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { Signal, ReasonCapsule } from "../../types";
+import { Signal as SignalEnum } from "../../types/enums";
+import { SIGNAL_LABELS } from "../../content/labels";
+import { Shield, TrendingUp, AlertTriangle, Zap, ChevronDown, Cpu, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { stripAllMarkdown } from "../../components/ui/MarkdownContent";
+import { useState } from "react";
+
+const signalConfig: Record<SignalEnum, { bg: string; text: string; icon: typeof TrendingUp; glow: string }> = {
+  [SignalEnum.STRONG_BUY]:  { bg: "bg-[var(--green)]/12", text: "text-[var(--green)]", icon: TrendingUp, glow: "0 0 40px rgba(34,197,94,0.3)" },
+  [SignalEnum.BUY]:         { bg: "bg-[var(--blue)]/12",  text: "text-[var(--blue)]",  icon: TrendingUp, glow: "0 0 30px rgba(59,130,246,0.25)" },
+  [SignalEnum.HOLD]:        { bg: "bg-[var(--amber)]/12", text: "text-[var(--amber)]", icon: Shield, glow: "0 0 20px rgba(245,158,11,0.15)" },
+  [SignalEnum.SELL]:        { bg: "bg-[var(--red)]/10", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 30px rgba(239,68,68,0.2)" },
+  [SignalEnum.STRONG_SELL]: { bg: "bg-[var(--red)]/12", text: "text-[var(--red)]", icon: AlertTriangle, glow: "0 0 40px rgba(239,68,68,0.3)" },
+};
+
+const impactColors: Record<string, string> = {
+  "high":   "text-[var(--red)]",
+  "medium": "text-[var(--amber)]",
+  "low":    "text-[var(--text-secondary)]",
+};
+
+interface Props {
+  signal: Signal;
+  conviction: number;
+  consensus: string;
+  recommendedExposure: string;
+  timeHorizon: string;
+  rationale: string;
+  reportDate?: string;
+  price?: number;
+  change?: number;
+  changePercent?: number;
+  thesis?: {
+    investment_thesis?: string;
+    decision_summary?: string;
+    conviction?: number;
+    key_reasons?: ReasonCapsule[];
+    time_horizon?: string;
+    primary_risk_summary?: string;
+  };
+  onReanalyze?: () => void;
+  isReanalyzing?: boolean;
+  reanalyzeError?: string | null;
+  children?: React.ReactNode;
+}
+
+export function FinalDecision({
+  signal,
+  conviction,
+  consensus,
+  recommendedExposure,
+  timeHorizon,
+  rationale,
+  reportDate,
+  price,
+  change,
+  changePercent,
+  thesis,
+  onReanalyze,
+  isReanalyzing,
+  reanalyzeError,
+  children,
+}: Props) {
+  const cfg = signalConfig[signal as SignalEnum] || signalConfig[SignalEnum.HOLD];
+  const Icon = cfg.icon;
+  const [expanded, setExpanded] = useState(false);
+
+  // 使用真实萃取数据或回退到原始 rationale
+  const thesisText = thesis?.investment_thesis || stripAllMarkdown(rationale).slice(0, 150);
+  const reasons = thesis?.key_reasons || [];
+  const thesisConviction = thesis?.conviction || conviction;
+  const thesisHorizon = thesis?.time_horizon || timeHorizon;
+  const riskSummary = thesis?.primary_risk_summary || "";
+
+  // 格式化报告日期
+  const formattedDate = reportDate
+    ? new Date(reportDate).toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
+      <h2 className="mb-4 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest flex items-center justify-between">
+        <span>{"投资委员会决策"}</span>
+        <div className="flex items-center gap-3 normal-case tracking-normal">
+          {formattedDate && (
+            <span className="text-[10px] font-mono text-[var(--text-secondary)]/50">
+              {formattedDate}
+            </span>
+          )}
+          {onReanalyze && (
+            <button
+              onClick={onReanalyze}
+              disabled={isReanalyzing}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-semibold tracking-wide transition-colors ${
+                isReanalyzing
+                  ? "bg-[var(--blue)]/10 text-[var(--blue)] cursor-not-allowed"
+                  : "bg-[var(--blue)]/10 text-[var(--blue)] hover:bg-[var(--blue)]/20"
+              }`}
+            >
+              {isReanalyzing ? (
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                  className="inline-flex"
+                >
+                  <Cpu className="w-3 h-3" />
+                </motion.span>
+              ) : (
+                <Zap className="w-3 h-3" />
+              )}
+              {isReanalyzing ? "AI 分析中..." : "AI 分析"}
+            </button>
+          )}
+        </div>
+      </h2>
+
+      {reanalyzeError && (
+        <p className="mb-3 text-[10px] text-[var(--red)]/80 text-right normal-case tracking-normal">
+          {reanalyzeError}
+        </p>
+      )}
+
+      {/* ── Hero: Investment Thesis ── */}
+      <div
+        className="card-hero p-6 md:p-8 space-y-6 relative overflow-hidden"
+        style={{ boxShadow: cfg.glow }}
+      >
+        {/* 右上角：当前股价 */}
+        {price != null && (
+          <div className="absolute top-4 right-4 md:top-5 md:right-6 flex items-baseline gap-2">
+            <span className="font-mono text-xl md:text-2xl font-bold text-[var(--text-primary)]">
+              ${price.toLocaleString()}
+            </span>
+            {change != null && changePercent != null && (
+              <span
+                className={`flex items-center gap-0.5 font-mono text-xs md:text-sm font-semibold ${
+                  changePercent > 0
+                    ? "text-[var(--green)]"
+                    : changePercent < 0
+                      ? "text-[var(--red)]"
+                      : "text-[var(--text-secondary)]"
+                }`}
+              >
+                {changePercent > 0 ? (
+                  <ArrowUp className="w-3 h-3" />
+                ) : changePercent < 0 ? (
+                  <ArrowDown className="w-3 h-3" />
+                ) : (
+                  <Minus className="w-3 h-3" />
+                )}
+                {Math.abs(change).toFixed(2)} ({changePercent > 0 ? "+" : ""}
+                {changePercent.toFixed(2)}%)
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* 顶部信号行 */}
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center ${cfg.bg} shrink-0`}>
+            <Icon className={`w-6 h-6 md:w-7 md:h-7 ${cfg.text}`} />
+          </div>
+          <div className="min-w-0">
+            <div className={`text-xl md:text-2xl font-bold ${cfg.text} tracking-tight`}>
+              {SIGNAL_LABELS[signal as SignalEnum] ?? signal}
+            </div>
+            <div className="text-[13px] md:text-sm text-[var(--text-secondary)] leading-relaxed mt-1 line-clamp-2">
+              {thesisText}
+            </div>
+          </div>
+          <div className="ml-auto shrink-0 flex items-center gap-3">
+            <div className="text-center">
+              <div className="text-[10px] text-[var(--text-secondary)]/60 tracking-wider">{"置信度"}</div>
+              <div className="text-lg font-mono font-bold text-[var(--green)]">{thesisConviction}%</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 决策理由 — Insight Capsules */}
+        {reasons.length > 0 && (
+          <div className="border-t border-[var(--border-custom)] pt-5 space-y-3">
+            <div className="text-[11px] font-semibold text-[var(--text-secondary)]/80 uppercase tracking-wider">
+              {"核心决策依据"}
+            </div>
+            {reasons.map((reason, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + idx * 0.05 }}
+                className="flex items-start gap-3 p-3 rounded-xl bg-[var(--panel2)]/60 border border-[var(--border-custom)] hover:border-[var(--blue)]/20 transition-colors group"
+              >
+                {/* Icon */}
+                <div className="w-7 h-7 rounded-lg bg-[var(--blue)]/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Zap className="w-3.5 h-3.5 text-[var(--blue)]" />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] text-[var(--text-primary)] leading-relaxed font-medium">
+                    {reason.insight}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    {/* Source agents */}
+                    <div className="flex items-center gap-1">
+                      {reason.source_agents?.map((agent) => (
+                        <span key={agent} className="text-[10px] text-[var(--text-secondary)]/60 bg-[var(--panel2)] px-1.5 py-0.5 rounded">
+                          {agent}
+                        </span>
+                      ))}
+                    </div>
+                    {/* Confidence bar */}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-12 h-1 bg-[var(--panel2)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[var(--green)] rounded-full"
+                          style={{ width: `${reason.confidence}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono text-[var(--green)]">{reason.confidence}%</span>
+                    </div>
+                    {/* Impact */}
+                    <span className={`text-[10px] font-medium ${impactColors[reason.impact] || "text-[var(--text-secondary)]/60"}`}>
+                      {reason.impact}{"影响"}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* 无萃取数据时：Hero 已展示投资论点，不重复显示原始 rationale */}
+
+        {/* 底部元数据 */}
+        <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]/60 pt-2 border-t border-[var(--border-custom)]">
+          <span>{"共识"}: {consensus}</span>
+          <span>·</span>
+          <span>{"建议仓位"}: {recommendedExposure}</span>
+          <span>·</span>
+          <span>{"时间框架"}: {thesisHorizon}</span>
+          {riskSummary && (
+            <>
+              <span>·</span>
+              <span className="text-[var(--red)]/70">{"风险"}: {riskSummary}</span>
+            </>
+          )}
+        </div>
+
+        {/* ── 详情展开 ── */}
+        {children && (
+          <div className="border-t border-[var(--border-custom)] pt-4">
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="w-full flex items-center justify-between text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] uppercase tracking-widest transition-colors"
+            >
+              <span>{"详情展开"}</span>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${expanded ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <AnimatePresence initial={false}>
+              {expanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-5 space-y-5">{children}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+    </motion.section>
+  );
+}

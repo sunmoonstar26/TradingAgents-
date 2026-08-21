@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import datetime
+from typing import Optional
 from pathlib import Path
 
 # 将 TradingAgents 项目路径加入 sys.path
@@ -185,7 +186,7 @@ def _fetch_market_data(ticker: str) -> dict:
         return {"price": 0, "change": 0, "changePercent": 0, "marketCap": "待更新", "pe": "待更新"}
 
 
-def _save_report_files(ticker: str, final_state: dict, decision: str) -> Path | None:
+def _save_report_files(ticker: str, final_state: dict, decision: str) -> Optional[Path]:
     """将分析报告保存为 markdown 文件，与 CLI 格式兼容"""
     try:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

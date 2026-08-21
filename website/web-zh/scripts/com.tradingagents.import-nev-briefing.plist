@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.tradingagents.import-nev-briefing</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/donny2026/Downloads/TradingAgents 项目/website/web-zh/node_modules/.bin/tsx</string>
+    <string>--env-file=.env.local</string>
+    <string>/Users/donny2026/Downloads/TradingAgents 项目/website/web-zh/scripts/import-industry-briefing.ts</string>
+  </array>
+
+  <!-- 每天 09:10 运行，晚于 Hermes 9:00 简报生成，避开 9:05 的公众号发布中转 -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>9</integer>
+    <key>Minute</key>
+    <integer>10</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/donny2026/Downloads/TradingAgents 项目/logs/import_nev_briefing.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/donny2026/Downloads/TradingAgents 项目/logs/import_nev_briefing_err.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/donny2026/Downloads/TradingAgents 项目/website/web-zh</string>
+</dict>
+</plist>

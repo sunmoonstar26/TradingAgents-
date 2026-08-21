@@ -1,0 +1,6 @@
+{
+  "ticker": "TSLA",
+  "signal": "错误",
+  "error": "No available vendor for 'get_stock_data'",
+  "status": "failed"
+}

@@ -16,6 +16,7 @@ eggs/
 .eggs/
 lib/
 !website/web/src/lib/
+!website/web-zh/src/lib/
 lib64/
 parts/
 sdist/
@@ -230,3 +231,9 @@ website/.next/
 website/node_modules/
 website/data/analysis_results/
 .vercel
+
+# Local git worktrees (scratch, per-branch isolated workspaces)
+.worktrees/
+
+# Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+.superpowers/

@@ -373,6 +373,50 @@ def get_news_finnhub(
         return f"Error retrieving Finnhub news for {ticker}: {str(e)}"
 
 
+def get_news_structured(
+    ticker: str,
+    start_date: str = None,
+    end_date: str = None,
+    limit: int = 10,
+) -> list[dict]:
+    """返回结构化新闻列表（标题/摘要/来源/链接/发布时间），供时间轴等下游消费；不做 LLM 格式化。"""
+    try:
+        sym = ticker.upper()
+
+        if not start_date:
+            start_date = (pd.Timestamp.today() - pd.DateOffset(days=7)).strftime("%Y-%m-%d")
+        if not end_date:
+            end_date = pd.Timestamp.today().strftime("%Y-%m-%d")
+
+        articles = _finnhub_get("/company-news", {
+            "symbol": sym,
+            "from": start_date,
+            "to": end_date,
+        })
+
+        if not articles:
+            return []
+
+        items = []
+        for article in articles[:limit]:
+            ts = article.get("datetime", 0)
+            headline = (article.get("headline") or "").strip()
+            if not ts or not headline:
+                continue
+            items.append({
+                "title": headline,
+                "summary": (article.get("summary") or "")[:300] or None,
+                "source": article.get("source") or None,
+                "url": article.get("url") or None,
+                "published_at": datetime.fromtimestamp(ts).isoformat(),
+            })
+        return items
+
+    except Exception as e:
+        logger.warning(f"Finnhub structured news fetch failed for {ticker}: {e}")
+        return []
+
+
 def get_global_news_finnhub(
     curr_date: Annotated[str, "current date YYYY-MM-DD"] = None,
     look_back_days: Annotated[int, "lookback days"] = None,
